@@ -1,0 +1,197 @@
+<section class="page" id="p-desktop-tools" data-g="landscape" data-title="Other desktop mind mappers" data-nav="Desktop tools">
+  <h1>Other desktop mind mappers</h1>
+  <p class="lead">Besides MindNode, a handful of established applications define what mind-mapping software does in late 2026. Xmind is the best-evidenced and the most relevant to Radiant, Ayoa is the only mainstream product built around an organic Buzan look, and the rest are either value options, open-source tools or different paradigms. This page profiles each one as far as the research verified, then extracts what Radiant should borrow or avoid.</p>
+
+  <div class="callout wide"><span class="tag">Implication for Radiant</span><p>Xmind's per-branch structure switching is the closest shipping analogue to Radiant's per-subtree picture and SVG representations, and its command-line tool for coding agents shows how an app can expose a native file to Codex. Ayoa shows that the organic look has a market but its rendering is undocumented. The shared weakness of the incumbents is large-map responsiveness, which is where Radiant aims to differ. Pricing evidence from aggregator sites is unreliable and conflicts throughout.</p></div>
+
+  <h2>At a glance</h2>
+  <p>The table summarises each tool. Prices are quoted only as the notes give them. Where the figure comes from an aggregator or review site rather than the vendor, it is marked as such and should not be relied on.</p>
+  <div class="table-wrap"><table class="dense">
+    <caption>Desktop and desktop-adjacent mind-mapping tools, November 2026</caption>
+    <thead><tr><th>Tool</th><th>Platforms</th><th>Pricing (as verified)</th><th>Standout strength</th><th>Weakness</th><th>Organic or hand-drawn look</th><th>Images in nodes</th><th>AI</th><th>Status in 2026</th></tr></thead>
+    <tbody>
+      <tr><th>Xmind</th><td>Windows, macOS, Linux, iOS, Android</td><td>Vendor page: Free; Pro $4.92 per month; Premium $8.25 per month (billing period not stated, probably yearly)</td><td>Nine structures mixable per branch, Pitch mode</td><td>Old large-map lag reports</td><td>One-click hand-drawn style</td><td>Stickers, illustrations, AI images (Premium)</td><td>Text-to-map, image-to-map, on Premium</td><td>Active</td></tr>
+      <tr><th>Ayoa (ex iMindMap)</th><td>Web, iPhone, iPad, Android; no desktop app mentioned</td><td>Free plan with 10 maps; Ultimate price not listed on vendor page; a competitor blog says $13 per user per month annual (unverified)</td><td>Organic tapered branches, freehand drawing (vendor claim)</td><td>Cloud only</td><td>Yes (vendor claim)</td><td>Upload, web search, AI images on mobile</td><td>Prompt to map, idea generation (Ultimate)</td><td>Active</td></tr>
+      <tr><th>iThoughts</th><td>Apple platforms (MindNode imports its files)</td><td>Not applicable</td><td>Not documented in the notes</td><td>No updates</td><td>Not documented</td><td>Not documented</td><td>None</td><td>Developer ceased trading, January 2024</td></tr>
+      <tr><th>MindManager</th><td>Windows, Mac</td><td>Aggregators: about $349 one-time, or $99 to $169 per year (unreliable)</td><td>Feature-rich incumbent</td><td>Slow on very large maps (user reports)</td><td>No</td><td>Not documented</td><td>None confirmed</td><td>Active, Mac app reportedly mostly maintenance</td></tr>
+      <tr><th>SimpleMind</th><td>Mac and Windows (a mobile shortcut list also exists)</td><td>Aggregator: about $29.99 per platform, about $54.99 for both</td><td>Free-form layout, low price</td><td>No performance data</td><td>No</td><td>Images, video, voice notes</td><td>Not documented</td><td>Active</td></tr>
+      <tr><th>Freeplane</th><td>Java, cross-platform</td><td>Open source</td><td>Free, FreeMind-compatible</td><td>Performance claims unverified</td><td>No</td><td>Not documented</td><td>AI features need Java 17</td><td>Release 1.13.3 mid-July 2026 per trackers</td></tr>
+      <tr><th>Scapple</th><td>Mac, Windows</td><td>Licences sold per platform; no prices in the notes</td><td>Free-form notes with connections</td><td>Not a tree mapper</td><td>No</td><td>Not documented</td><td>None</td><td>Mac 1.5.4, Windows 1.4.2</td></tr>
+      <tr><th>TheBrain</th><td>Desktop</td><td>Conflicting: free desktop app from 23 June 2026 (one site), or $219 one-time, $299 per year, $15+ per month (other sources)</td><td>Network of linked thoughts</td><td>No performance data</td><td>No</td><td>Not documented</td><td>Cerebro agentic AI (TheBrain 15)</td><td>Active</td></tr>
+      <tr><th>Coggle</th><td>Web only</td><td>Free (3 private diagrams), Awesome $5 per month, Organisation $8 per member per month</td><td>Auto-arranged colourful branches, floating images</td><td>Limited font and branch styling</td><td>Not confirmed as curved</td><td>Drag-and-drop, floating</td><td>None found</td><td>Active</td></tr>
+      <tr><th>Mindomo</th><td>Web and desktop</td><td>Aggregators: Premium about EUR 6 to 7 per month</td><td>Not documented in the notes</td><td>Little verified</td><td>Not documented</td><td>Not documented</td><td>Text-to-map</td><td>Active</td></tr>
+      <tr><th>EdrawMind</th><td>Desktop</td><td>Aggregators: about $4.9 to $6.6 per user per month (unreliable)</td><td>Edraw AI one-click maps since 10.6.0</td><td>Little verified</td><td>Not documented</td><td>Not documented</td><td>Yes</td><td>Active</td></tr>
+      <tr><th>Minder</th><td>GTK desktop (Linux)</td><td>Open source, GPL-3.0</td><td>Keyboard-driven, wide import</td><td>Niche platform</td><td>No</td><td>Not documented</td><td>None</td><td>Version 2.0 moved to Gtk4</td></tr>
+      <tr><th>VYM</th><td>Cross-platform (C++/Qt)</td><td>Open source, GPL</td><td>Scripting, Jira and Confluence integration</td><td>Strict tree only</td><td>No</td><td>Not documented</td><td>None</td><td>Not stated in the notes</td></tr>
+    </tbody>
+  </table></div>
+  <p>Sources for this table are given in the profiles below.</p>
+
+  <h2>Xmind</h2>
+  <p>Xmind is a cross-platform mapper for Windows, macOS, Linux, iOS and Android, with a native <code>.xmind</code> file and an agent-facing command-line tool. It is the most relevant competitor to study for Radiant.</p>
+
+  <h3>Structures and per-branch mixing</h3>
+  <p>Xmind and its App Store listing name nine structures: Mind Map, Logic Chart, Brace Map, Org Chart, Fishbone, Timeline, Tree Chart, Tree Table and Matrix. Switching is one click, and several structures can be combined on the same map. <a class="src" href="https://xmind.com/blog/the-ultimate-guide-to-mind-mapping-with-xmind" title="Xmind blog: The ultimate guide to mind mapping with Xmind (via search summary)">Xmind guide</a> <a class="src" href="https://apps.apple.com/in/app/id1286983622" title="Apple App Store: Xmind listing">App Store</a> Tree Table is the newest, with topics in nested rectangles for comparison and multidimensional lists. <a class="src" href="https://xmind.com/blog/introducing-tree-table-new-structure-in-xmind" title="Xmind blog: Introducing Tree Table, a new structure in Xmind">Tree Table</a></p>
+  <p>Mixing happens per branch: "each branch can be a unique structure". The user selects a subtopic, opens the Format panel and chooses Structure. The main topic keeps its own structure and only that branch changes. The example mixes an org chart, a matrix and a logic chart in one map. The article is dated 27 July 2020, so the mechanism is long-standing. <a class="src" href="https://xmind.com/blog/how-to-combine-different-structures-in-xmind-and-why" title="Xmind blog: How to combine different structures in Xmind and why">Combining structures</a></p>
+  <div class="callout idea"><span class="tag">Idea for Radiant</span><p>Borrow Xmind's interaction pattern for the signature feature: select a branch, open a Format panel, choose a representation (normal, picture, SVG), and apply it to that branch only. The mapping from Xmind's structures to Radiant's representations is an inference.</p></div>
+
+  <h3>Look and modes</h3>
+  <p>The Xmind 2022 release brought a hand-drawn style, a Pitch panel with real-time preview, a Smart Color Theme, 30 templates, over 400 stickers and 40 illustrations. Hand-drawn is a one-click switch of the whole map's look. <a class="src" href="https://xmind.com/academy/xmind-2022-release" title="Xmind Academy: Xmind 2022 release">Xmind 2022</a> <a class="src" href="https://xmind.com/blog/xmind2022-release" title="Xmind blog: Xmind 2022 release">Xmind blog</a> The notes infer that this is a filter applied to boxes and lines, not Tony Buzan's tapered curves, but the rendering was not seen. How Smart Color Theme works is not verified.</p>
+  <p>Pitch mode turns a map into a slide show with smooth transitions and generated layouts. Later additions include fishbone and timeline layouts, a "Thank You" page and rich-text notes in Pitch, none of them dated. ZEN mode is a full-screen view with the panels hidden, and a later release added Light, Dark, Ultra Light and Ultra Dark appearances in it. <a class="src" href="https://apps.apple.com/dk/app/id1286983622" title="Apple App Store (Denmark): Xmind listing">App Store</a> The May 2026 newsletter lists AI image-to-editable-map and a "pitch video" with theme, duration and music. <a class="src" href="https://xmind.app/newsletter/may-2026-xmind-blog-sharing-a-pro" title="Xmind newsletter: May 2026">May 2026 newsletter</a> The features page lists LaTeX equations, markers, labels, notes, attachments, custom colour themes and PDF and PNG export. <a class="src" href="https://xmind.com/features" title="Xmind: features page">Xmind features</a></p>
+
+  <h3>Pricing</h3>
+  <p>The vendor's own pricing page, fetched on 17 November 2026, lists the following. <a class="src" href="https://xmind.com/pricing" title="Xmind: pricing page">Xmind pricing</a></p>
+  <div class="table-wrap"><table>
+    <caption>Xmind plans from the vendor page, 17 November 2026</caption>
+    <thead><tr><th>Plan</th><th>Price</th><th>What it includes</th></tr></thead>
+    <tbody>
+      <tr><th>Free</th><td>$0</td><td>10 online maps, 3 sheets per map, 50 AI credits at sign-up, PNG export only.</td></tr>
+      <tr><th>Pro</th><td>$4.92 per month</td><td>50 maps, unlimited pitch slides, PNG, SVG, PDF, Markdown and Office export.</td></tr>
+      <tr><th>Premium</th><td>$8.25 per month</td><td>Unlimited maps, real-time collaboration, 30-day history, 500 AI credits per month, text-to-map, summarise, refine, task breakdown, pitch video and image generation.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The page shows one price per plan with a yearly-purchase link, so these are probably yearly-billed rates, but the page does not say so explicitly. A Black Friday offer runs from 11 November to 2 December 2026 (buy one year, get six months). One licence covers 5 desktop and 5 mobile devices, and yearly plans have a 7-day trial.</p>
+  <div class="callout gap"><span class="tag">Not verified</span><p>An earlier research pass quoted Pro at $10 per month or $59.04 per year, taken from a competitor's blog. The vendor's own page shows $4.92 and $8.25. The vendor page is the better source, but the conflict is unresolved because the billing period is not stated.</p></div>
+
+  <h3>Agents: the command-line tool and skill</h3>
+  <p>The Xmind Skill and CLI, installed with <code>npm install -g @xmindltd/xmind-cli</code> followed by <code>xmind setup skills</code> and <code>xmind auth login</code>, lets Codex, Claude Code, Cursor and OpenCode create, read, edit and validate native local <code>.xmind</code> files. It requires signing in to an Xmind account. It cannot generate new images but can attach existing ones, and some options use credits. A separate Xmind MCP server works with cloud maps. <a class="src" href="https://xmind.com/user-guide/xmind-cli" title="Xmind: CLI user guide">Xmind CLI</a> The pattern of an agent editing a native local file and validating it, with unrelated branches preserved, is the relevant lesson. The Premium tier gating of AI and credits is the model the Codex subscription design avoids (inferred).</p>
+
+  <h3>Performance complaints and their age</h3>
+  <p>All complaints found are old. A 920 MB Xmind 2020 or 2021 map with embedded images and documents took about 1 minute 40 seconds to open on macOS Big Sur. Xmind 8 Pro lagged on sheets with many branches, and saving was slow with many attachments. <a class="src" href="https://support.xmind.net/hc/en-us/community/posts/900002371446/comments/4404758445977" title="Xmind support forum: large file slow to open">Xmind forum</a> <a class="src" href="https://support.xmind.net/hc/de/community/posts/900001127466-Xmind-pro-8-Startup-time-and-delay" title="Xmind support forum: Xmind Pro 8 startup time and delay">Xmind forum 2</a> A further anecdote in the notes mentions Xmind search lag of up to a minute on very large files, without a specific source. No 2025 or 2026 complaints were found, so the current state is unknown. An Xmind "2027" release appears in only one vendor-style listing and no independent source was found.</p>
+  <span class="badge reported">Third-party</span>
+
+  <h3>Not verified for Xmind</h3>
+  <p>The internal <code>.xmind</code> format is unverified here. The notes recall from background knowledge that new files are zip archives holding JSON, but that is unsourced. Also unverified are whether a free-position toggle exists in the current app, the default for floating topics (a snippet says that double-clicking a blank canvas creates one), relationship and summary behaviour, and the 2026 desktop release notes.</p>
+
+  <h2>Ayoa and the iMindMap lineage</h2>
+  <p>Ayoa is the only mainstream product positioned on an organic Buzan look. Most of the evidence is vendor marketing and should be read that way.</p>
+  <ul>
+    <li><b>Lineage.</b> iMindMap was developed by Chris Griffiths with Tony Buzan from 2005 to 2019. OpenGenius launched Ayoa in 2019 as its cloud successor, and Ayoa says iMindMap is replaced by Ayoa. <a class="src" href="https://www.ayoa.com/?p=2955" title="Ayoa (vendor): iMindMap and Ayoa">Ayoa</a> Whether an iMindMap desktop product is still available was not verified.</li>
+    <li><b>Organic branches.</b> The vendor describes curved branches that taper from a thick centre to fine tips, can be bent by hand, and can be drawn freehand. It characterises MindMeister as "clean, tidy". This is a vendor claim. <a class="src" href="https://www.ayoa.com/?p=15228" title="Ayoa (vendor): comparison page (via search)">Ayoa comparison</a></li>
+    <li><b>Contradiction.</b> A GetApp listing says the thickness of branches cannot be adjusted. <a class="src" href="https://www.getapp.co.uk/software/114189/Ayoa" title="GetApp: Ayoa">GetApp</a> The vendor says branches taper and bend, and the listing says thickness cannot be adjusted. These may refer to different things, such as automatic taper versus user control, but the notes do not resolve it.</li>
+    <li><b>Freehand.</b> TechRadar says freehand drawing is retained from iMindMap and works on mobile or with a stylus. The article body could not be retrieved, so this is a search summary. <a class="src" href="https://www.techradar.com/pro/ayoa-review" title="TechRadar: Ayoa review (search summary only)">TechRadar</a></li>
+    <li><b>Platforms and tiers.</b> The vendor pricing page lists a free plan of 10 maps, a 7-day Ultimate trial, a web app and iPhone, iPad and Android apps, and no desktop app. Ultimate is billed per user monthly, annually or every three years, and no prices are listed. AI mind mapping, idea generation, analysis and summaries are Ultimate-only. <a class="src" href="https://ayoa.com/pricing/" title="Ayoa: pricing page">Ayoa pricing</a> A competitor blog cites $13 per user per month billed annually, which is unverified, and an earlier pass found about $10. <a class="src" href="https://mindmapai.app/blog/35/mindmap-ai-vs-ayoa" title="MindMap AI blog: MindMap AI vs Ayoa">MindMap AI blog</a></li>
+    <li><b>AI and images.</b> "AI Prompt to Mind Map" and "Generate Ideas" exist. AI image generation is documented for the mobile app. A node image can be added by upload or by a royalty-free web search. <a class="src" href="https://support.ayoa.com/ai-prompt-to-mind-map" title="Ayoa support: AI prompt to mind map">Ayoa AI prompt</a> <a class="src" href="https://support.ayoa.com/ai-images-in-ayoa-mobile" title="Ayoa support: AI images in Ayoa mobile">Ayoa AI images</a></li>
+    <li><b>Modes.</b> The vendor site names organic, radial and "Smartsway" views, and the pricing page lists "multiple modes" without naming them. <a class="src" href="https://www.ayoa.com/smartsway" title="Ayoa: Smartsway (title only)">Smartsway</a></li>
+  </ul>
+  <div class="callout gap"><span class="tag">Not verified</span><p>No source describes how Ayoa or iMindMap renders organic branches, and no source confirms that text follows the branch curve. The notes infer a plausible method: each branch is a cubic Bezier curve with a width profile, drawn as one filled outline, similar to the taper output of the perfect-freehand library. That is an inference about how one could build it, not a description of Ayoa. Speed-map mode, image-as-node, how an image attaches to a branch and performance with images were not found either.</p></div>
+
+  <h2>The rest</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>iThoughts</h3>
+      <p class="meta">End of trading</p>
+      <p>toketaWare announced on 30 January 2024 that it had ceased trading. There are no more updates. Existing installs run until an operating system change breaks them. Setapp installs ended after 2 February 2024. The status of the non-X iThoughts was not stated. <a class="src" href="https://talk.macpowerusers.com/t/toketaware-is-out-of-business-and-along-with-it-ithoughtsx/36169" title="MacPowerUsers forum: toketaWare is out of business and along with it iThoughtsX">MPU forum</a> MindNode can still import iThoughts files.</p>
+    </div>
+    <div class="card">
+      <h3>MindManager</h3>
+      <p class="meta">Windows and Mac</p>
+      <p>Aggregators give about $349 one-time or $99 to $169 per year, which is unreliable. No AI features are confirmed, and the Mac app reportedly gets mostly maintenance. Users report slow large maps: a 26 MB file was unusable in MindManager 2023, with about 29,000 topics and a 50-second load, and embedded images are suspected. The vendor says problems occur in under 1 percent of cases, and others report working with 30,000-topic maps. <a class="src" href="https://www.capterra.com/p/31776/MindManager/pricing/" title="Capterra: MindManager pricing">Capterra</a> <a class="src" href="https://community.mindmanager.com/comments/4826/vote/toggle" title="MindManager community: large file performance thread">MindManager forum</a> <a class="src" href="https://blog.mindmanager.com/?p=2217" title="MindManager blog: performance (vendor)">Vendor blog</a></p>
+    </div>
+    <div class="card">
+      <h3>SimpleMind</h3>
+      <p class="meta">One-time purchase per platform</p>
+      <p>About $29.99 for Mac or Windows and about $54.99 for both, from an aggregator. It offers a free-form layout, images, video and voice notes, and cloud sync. <a class="src" href="https://simplemind.eu/?p=535" title="SimpleMind: product page">SimpleMind</a> <a class="src" href="https://us.fitgap.com/products/simplemind" title="FitGap: SimpleMind (aggregator)">FitGap</a></p>
+    </div>
+    <div class="card">
+      <h3>Freeplane and FreeMind</h3>
+      <p class="meta">Open source</p>
+      <p>Freeplane is a Java application that uses the FreeMind XML <code>.mm</code> format with extensions. Version 1.13.3 appeared in mid-July 2026 according to trackers, and AI features need Java 17 (per the 1.13.2 note). Performance claims are unverified. <a class="src" href="https://en.wikipedia.org/wiki/Freeplane" title="Wikipedia: Freeplane">Wikipedia</a> <a class="src" href="https://www.pcwelt.de/article/1141281/freeplane-mindmapping.html" title="PCWelt: Freeplane mind mapping">PCWelt</a> The FreeMind file format is documented on its wiki. <a class="src" href="https://freemind.sourceforge.io/wiki/index.php/Fmt" title="FreeMind wiki: file format">FreeMind format</a></p>
+    </div>
+    <div class="card">
+      <h3>Scapple</h3>
+      <p class="meta">Free-form notes</p>
+      <p>Notes placed anywhere with connections between them, rather than a tree. Mac 1.5.4 and Windows 1.4.2, with licences sold per platform. <a class="src" href="https://www.literatureandlatte.com/scapple/overview" title="Literature &amp; Latte: Scapple overview">Scapple</a></p>
+    </div>
+    <div class="card">
+      <h3>TheBrain</h3>
+      <p class="meta">Network of thoughts</p>
+      <p>TheBrain 15 adds Cerebro, an agentic AI. One site reports the desktop app became free on 23 June 2026, while other sources give $219 one-time, $299 per year or $15 and up per month. These conflict and none is from the vendor. No performance data was found. <a class="src" href="https://elephas.app/blog/thebrain-review.md" title="Elephas: TheBrain review">Elephas</a> <a class="src" href="https://yespress.io/thebrain" title="Yespress: TheBrain">Yespress</a> <a class="src" href="https://www.capterra.com/p/10017820/TheBrain/pricing/" title="Capterra: TheBrain pricing">Capterra</a></p>
+    </div>
+    <div class="card">
+      <h3>Coggle</h3>
+      <p class="meta">Web only</p>
+      <p>Free with 3 private diagrams, Awesome at $5 per month, Organisation at $8 per member per month, and an Enterprise tier. Branches are auto-arranged, and text and images can float outside the tree. Images upload by drag and drop. It exports PDF, image, <code>.mm</code>, text and Visio, and has line style controls on the paid plan and over 1,600 icons (from a listing). No AI is mentioned, and reviewers say font and branch styling are limited. Whether branches are curved is not confirmed. <a class="src" href="https://coggle.it/" title="Coggle: home page">Coggle</a> <a class="src" href="https://www.capterra.com/p/162678/Coggle/" title="Capterra: Coggle (search summary)">Capterra</a></p>
+    </div>
+    <div class="card">
+      <h3>Mindomo and EdrawMind</h3>
+      <p class="meta">Aggregator evidence only</p>
+      <p>Mindomo has web and desktop versions, Premium at about EUR 6 to 7 per month, and AI text-to-map. <a class="src" href="https://frontdeskreview.com/software/mind-mapping/mindomo/" title="FrontDesk review: Mindomo">FrontDesk</a> EdrawMind has had Edraw AI one-click maps since version 10.6.0, at about $4.9 to $6.6 per user per month, which is unreliable. <a class="src" href="https://www.softwaresuggest.com/wondershare-edrawmind" title="SoftwareSuggest: Wondershare EdrawMind">SoftwareSuggest</a></p>
+    </div>
+    <div class="card">
+      <h3>Minder</h3>
+      <p class="meta">GPL-3.0, GTK</p>
+      <p>A keyboard-driven mapper with automatic layout and Markdown support. Version 2.0 moved to Gtk4 and changed its save format. It imports OPML, FreeMind, Freeplane, Markdown, Mermaid and XMind. <a class="src" href="https://github.com/phase1geo/Minder" title="GitHub: phase1geo/Minder">Minder</a> <a class="src" href="https://newreleases.io/project/github/phase1geo/Minder/release/2.0.0" title="newreleases.io: Minder 2.0.0">Minder 2.0.0</a></p>
+    </div>
+    <div class="card">
+      <h3>VYM</h3>
+      <p class="meta">GPL, C++/Qt</p>
+      <p>Cross-platform with scripting and Jira and Confluence integration. It uses a strict tree and exports XHTML, ASCII, CSV and LaTeX. <a class="src" href="https://www.ghacks.net/?p=23489" title="gHacks: VYM">gHacks</a> <a class="src" href="https://Www.wikipedia.org/wiki/Vym_(software)" title="Wikipedia: VYM (software)">Wikipedia</a></p>
+    </div>
+  </div>
+  <p>Card and canvas tools such as Heptabase, Kinopio, Markmap, Obsidian plugins, Excalidraw and tldraw are covered on <a href="#ai-tools">the AI and canvas tools page</a> and are not repeated here, apart from ideas credited in the borrowing table below. Heptabase's work on drag and loading in large whiteboards (version 1.112.8, 22 October 2026) is one example of a vendor addressing scale. <a class="src" href="https://wiki.heptabase.com/changelog" title="Heptabase wiki: changelog">Heptabase changelog</a></p>
+
+  <h2>Keyboard conventions</h2>
+  <p>Tab for a child and Enter or Return for a sibling is the de facto standard across MindNode, Xmind, SimpleMind, Whimsical, Visio and MindMup (the last depending on orientation). Freeplane differs, and Miro reportedly reverses Enter and Tab. Taskade uses Tab for indenting, and a feature request asks for Tab as child. <a class="src" href="https://forum.taskade.com/feature-requests/p/key-tab-for-add-child-and-enter-for-sibling-when-mind-mapping-mode" title="Taskade forum: Tab for add child and Enter for sibling in mind-mapping mode">Taskade forum</a> "Not listed" in the table means the retrieved page omitted the action, not that the tool lacks it.</p>
+  <div class="table-wrap"><table class="dense">
+    <caption>Keyboard shortcuts across tools</caption>
+    <thead><tr><th>Action</th><th>MindNode</th><th>Xmind (Mac)</th><th>Whimsical</th><th>SimpleMind</th><th>MindMup</th><th>Freeplane</th><th>Miro</th><th>De facto standard</th></tr></thead>
+    <tbody>
+      <tr><th>Child</th><td>Tab</td><td>Tab</td><td>Tab</td><td>Tab</td><td>Enter or Tab by layout</td><td>Insert</td><td>Tab (reported, adds below)</td><td>Tab</td></tr>
+      <tr><th>Sibling after</th><td>Return</td><td>Return</td><td>Enter</td><td>Enter</td><td>Tab or Enter by layout</td><td>Enter</td><td>Enter (reported)</td><td>Return or Enter</td></tr>
+      <tr><th>Sibling before</th><td>Option+Return</td><td>Shift+Return</td><td>Cmd+Enter</td><td>Not listed</td><td>Shift+Enter</td><td>Shift+Enter</td><td>Not found</td><td>Shift+Enter (Xmind, MindMup, Freeplane)</td></tr>
+      <tr><th>Parent</th><td>Option+Tab</td><td>Cmd+Return</td><td>Option+Enter</td><td>Not listed</td><td>Shift+Tab</td><td>Not found</td><td>Not found</td><td>No standard</td></tr>
+      <tr><th>Edit</th><td>Cmd+Return</td><td>Not listed</td><td>Not listed</td><td>Ctrl+E</td><td>Space</td><td>F2</td><td>Enter</td><td>F2 or Space (split)</td></tr>
+      <tr><th>Fold</th><td>Option+.</td><td>Cmd+/</td><td>Not listed</td><td>Shift+Left or Right</td><td>/ or F</td><td>Space</td><td>Not found</td><td>No standard</td></tr>
+      <tr><th>Navigate</th><td>Arrows</td><td>Not listed</td><td>Not listed</td><td>Arrows</td><td>Arrows</td><td>Arrows</td><td>Arrows</td><td>Arrows</td></tr>
+      <tr><th>Move node</th><td>Cmd+arrow</td><td>Not listed</td><td>Not listed</td><td>Not listed</td><td>Ctrl+Up or Down</td><td>Not found</td><td>Not found</td><td>Cmd or Ctrl+arrows</td></tr>
+      <tr><th>Delete</th><td>Delete</td><td>Not listed</td><td>Not listed</td><td>Del</td><td>Backspace or Delete</td><td>Not found</td><td>Not found</td><td>Delete</td></tr>
+      <tr><th>Note</th><td>Shift+Cmd+K</td><td>Shift+Cmd+N</td><td>Not listed</td><td>Ctrl+N</td><td>N</td><td>Not found</td><td>Not found</td><td>No standard</td></tr>
+      <tr><th>Link or relationship</th><td>Cmd+L</td><td>Shift+Cmd+L (relationship), Shift+Cmd+K (link)</td><td>Not listed</td><td>Ctrl+L</td><td>Not found</td><td>Not found</td><td>Not found</td><td>No standard</td></tr>
+    </tbody>
+  </table></div>
+  <p>Sources: <a class="src" href="https://xmind.com/blog/shortcuts-in-xmind-that-improve-mapping-efficiency" title="Xmind blog: Shortcuts in Xmind that improve mapping efficiency">Xmind shortcuts</a> <a class="src" href="https://whimsical.com/learn/shortcuts/mac" title="Whimsical: shortcuts on Mac (via search)">Whimsical</a> <a class="src" href="https://blog.mindmup.com/tutorials/keyboard.html" title="MindMup blog: keyboard tutorial">MindMup</a> <a class="src" href="https://simplemind.eu/?p=6094" title="SimpleMind: Android shortcut list">SimpleMind</a> <a class="src" href="https://docs.freeplane.org/user-documentation/hot-keys-and-beyond.html" title="Freeplane docs: hot keys and beyond">Freeplane docs</a> <a class="src" href="https://community.miro.com/ask-the-community-45/mindmap-keyboard-navigation-8610" title="Miro community: mind map keyboard navigation (2023 report)">Miro community</a> <a class="src" href="https://www.mindnode.com/support/guides/keyboard-shortcuts" title="MindNode support: Keyboard shortcuts">MindNode shortcuts</a>. The Xmind sources disagree on Windows keys for sibling before and parent, and on summary and boundary defaults. Xmind says shortcuts are customisable. Freeplane's Insert and F2 come from a third-party page, and Space for fold is official. The shortcut tables for iThoughts, MindManager and FigJam were not retrieved.</p>
+
+  <h2>File formats worth supporting</h2>
+  <p>The widely supported interchange formats are OPML, FreeMind <code>.mm</code>, Markdown and Xmind. MindNode imports FreeMind, iThoughts, OPML, XMind and Markdown, and exports FreeMind, OPML, Markdown, SVG, PDF and PNG. <a class="src" href="https://www.mindnode.com/support/guides/import-and-export" title="MindNode support: Import and export">MindNode import and export</a> Minder imports OPML, FreeMind, Freeplane, Markdown, Mermaid and XMind. <a class="src" href="https://github.com/phase1geo/Minder" title="GitHub: phase1geo/Minder">Minder</a> Coggle exports <code>.mm</code>, and Xmind Pro exports Markdown, SVG, PDF and Office formats.</p>
+  <p>The notes' suggested priority, which is an inference, is: Radiant's own format first, then OPML, FreeMind <code>.mm</code>, a Markdown outline, SVG, PNG and PDF export, and Xmind import last. Open plain-text or JSON formats (the notes cite JSON Canvas, Markdown outlines and the <code>.excalidraw</code> format) are what make agent integration easy, so a documented JSON map file would itself be Radiant's agent interface. The notes also recommend storing images as external assets with thumbnails and mip levels rather than embedded blobs. Both are inferences.</p>
+
+  <h2>Ideas to borrow</h2>
+  <div class="table-wrap"><table>
+    <caption>Ideas to borrow or avoid, with their origin</caption>
+    <thead><tr><th>Idea</th><th>Tool it comes from</th><th>Why it matters for Radiant</th></tr></thead>
+    <tbody>
+      <tr><th>Per-branch structure switching through a Format panel</th><td>Xmind</td><td>Closest shipping analogue of per-subtree picture or SVG representation. The interface pattern transfers directly.</td></tr>
+      <tr><th>Hand-drawn look as a global one-click toggle</th><td>Xmind</td><td>A cheap on-ramp to the organic look. It does not provide Buzan-style tapered curves, which is inferred.</td></tr>
+      <tr><th>Slides generated from branches</th><td>Xmind Pitch</td><td>A way to present a map. Lower priority than the core.</td></tr>
+      <tr><th>Agent edits a native local file and validates it</th><td>Xmind CLI and skill</td><td>Model for how Codex should read and change Radiant files while keeping unrelated branches intact.</td></tr>
+      <tr><th>Tapered organic branches with freehand drawing</th><td>Ayoa</td><td>Supports the memorability goal. Rendering is undocumented, so Radiant must design its own.</td></tr>
+      <tr><th>Royalty-free web image search for a node</th><td>Ayoa</td><td>Quick way to fill picture nodes.</td></tr>
+      <tr><th>Variable-width stroke polygon with taper</th><td>perfect-freehand library</td><td>A ready reference for tapered branch outlines. It is a stroke library, not a branch renderer.</td></tr>
+      <tr><th>Seeded wobble for sketchy strokes</th><td>rough.js</td><td>Hand-drawn look with a fixed seed keeps lines stable across redraws. Seed stability is inferred, not verified.</td></tr>
+      <tr><th>Section titles stay legible when zoomed out</th><td>Heptabase</td><td>The only shipping semantic-zoom precedent found. Maps to showing a collapsed subtree's title or summary.</td></tr>
+      <tr><th>Agent that edits the open app's mind maps</th><td>Heptabase MCP (6 November 2026)</td><td>Shows demand for live agent control of an open map.</td></tr>
+      <tr><th>Breadth of import formats</th><td>Freeplane, Minder</td><td>Lowers switching cost for users with existing maps.</td></tr>
+      <tr><th>Floating labels and images outside the tree</th><td>Coggle, Scapple</td><td>Free-form annotation without breaking the tree.</td></tr>
+      <tr><th>Alternative layouts per subtree</th><td>Xmind Tree Table, Markmap themes</td><td>Variety supports distinctive, memorable maps.</td></tr>
+      <tr><th>Markdown outline in, map out</th><td>Markmap</td><td>Fits the AI pipeline: the model emits an outline and the app renders it.</td></tr>
+      <tr><th>Flashcards from nodes</th><td>Traverse, RemNote</td><td>A route to memorability beyond the visual look. Later phase.</td></tr>
+      <tr><th>Avoid: credit-gated AI</th><td>Xmind Premium, Ayoa Ultimate</td><td>Radiant uses the user's Codex login and has no credits to meter.</td></tr>
+      <tr><th>Avoid: embedded media in the file</th><td>Xmind, MindManager</td><td>Both have reports of slow opening of large files with embedded media. Radiant should keep external assets.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>What this means for Radiant</h2>
+  <ul>
+    <li><b>Design the representation switch like Xmind's structure switch.</b> A Format panel action that applies to the selected branch only is a familiar pattern, and it already shipped in Xmind years ago.</li>
+    <li><b>Do not rely on a global hand-drawn filter for the organic look.</b> Tapered curved branches need their own geometry. Treat perfect-freehand and rough.js as references, not as drop-in solutions.</li>
+    <li><b>Make large-map responsiveness a visible advantage.</b> MindManager and Xmind have reports of slowness on large files with embedded media, though the Xmind reports are old. The notes infer that a GPU-accelerated design with level of detail and rasterised subtrees fits this gap.</li>
+    <li><b>Use an open, documented file.</b> It supports both interchange and agent access. Offer OPML, FreeMind and Markdown first.</li>
+    <li><b>Follow the keyboard convention.</b> Tab for child and Return for sibling, plus Shift+Return for sibling before, are the safest defaults. Leave parent, fold, note and link configurable because no standard exists.</li>
+    <li><b>Expect no price anchor from this page.</b> Vendor prices found are Xmind at $4.92 and $8.25 per month and Ayoa unlisted. All other figures are aggregator quotes with conflicts.</li>
+  </ul>
+
+  <h2>Limits of this research</h2>
+  <div class="callout gap wide"><span class="tag">Not verified</span><p>Pricing from aggregators conflicts or is unreliable for MindManager, SimpleMind, TheBrain, Mindomo and EdrawMind. Xmind's official page does not state the billing period, and Ayoa's page lists no prices. Many pages returned only partial content, so several items are at search-summary level.</p></div>
+  <div class="callout gap wide"><span class="tag">Not verified</span><p>Not covered: OmniOutliner, OmniGraffle, Zenmind, DrawExpress, Curio, GitMind, MindMup (beyond shortcuts), Bubbl.us, Mindly, Lighten and several others. No source was found for how any tool draws text along a curved branch, or how picture nodes attach to branches in any tool. No shortcut tables were retrieved for iThoughts, MindManager or FigJam. No 2025 or 2026 native Mac newcomer was identified. Freeplane and SimpleMind performance numbers do not exist in the notes.</p></div>
+</section>

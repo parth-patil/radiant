@@ -1,0 +1,494 @@
+{
+ "builds": {
+  "A": {
+   "key": "341a7c8de52f474e",
+   "files": 357,
+   "path": "/Users/parth/projects/general/mind_maps/radiant",
+   "commit": "5450267",
+   "dirty_files": 6,
+   "cached": true
+  },
+  "B": {
+   "key": "341a7c8de52f474e",
+   "files": 357,
+   "path": "/private/tmp/claude-501/-Users-parth-projects-general-mind-maps/58425155-0c4a-49c7-bc98-b2e0f4d9fe14/scratchpad/ar/harness/aa-tree/radiant",
+   "commit": "5450267",
+   "dirty_files": 5,
+   "cached": true
+  }
+ },
+ "engine": "chrome",
+ "threshold": 8,
+ "sample_nodes": 59,
+ "scenes": [
+  {
+   "name": "map60-clean-light-fit",
+   "map": "sample",
+   "theme": "clean",
+   "dark": false,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 169.5,
+     "cy": 3.7720588235294112,
+     "zoom": 0.8526645768025078
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 169.5,
+     "cy": 3.7720588235294112,
+     "zoom": 0.8526645768025078
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-clean-light-zoom2",
+   "map": "sample",
+   "theme": "clean",
+   "dark": false,
+   "view": "zoom2",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": -231.5,
+     "cy": -352.5,
+     "zoom": 2
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": -231.5,
+     "cy": -352.5,
+     "zoom": 2
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-soft-clay-light-fit",
+   "map": "sample",
+   "theme": "soft-clay",
+   "dark": false,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 211.5,
+     "cy": 4.0588235294117645,
+     "zoom": 0.7727272727272727
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 211.5,
+     "cy": 4.0588235294117645,
+     "zoom": 0.7727272727272727
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-soft-clay-light-zoom2",
+   "map": "sample",
+   "theme": "soft-clay",
+   "dark": false,
+   "view": "zoom2",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": -246,
+     "cy": -375,
+     "zoom": 2
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": -246,
+     "cy": -375,
+     "zoom": 2
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-lifted-arcs-light-fit",
+   "map": "sample",
+   "theme": "lifted-arcs",
+   "dark": false,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 267.5,
+     "cy": 3.3431372549019613,
+     "zoom": 0.6822742474916388
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 267.5,
+     "cy": 3.3431372549019613,
+     "zoom": 0.6822742474916388
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-lifted-arcs-light-zoom2",
+   "map": "sample",
+   "theme": "lifted-arcs",
+   "dark": false,
+   "view": "zoom2",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": -274,
+     "cy": -390,
+     "zoom": 2
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": -274,
+     "cy": -390,
+     "zoom": 2
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-rope-light-fit",
+   "map": "sample",
+   "theme": "rope",
+   "dark": false,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 207.5,
+     "cy": 3.3774509803921564,
+     "zoom": 0.7922330097087379
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 207.5,
+     "cy": 3.3774509803921564,
+     "zoom": 0.7922330097087379
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-rope-light-zoom2",
+   "map": "sample",
+   "theme": "rope",
+   "dark": false,
+   "view": "zoom2",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": -237,
+     "cy": -360,
+     "zoom": 2
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": -237,
+     "cy": -360,
+     "zoom": 2
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-paper-quilling-light-fit",
+   "map": "sample",
+   "theme": "paper-quilling",
+   "dark": false,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 255.5,
+     "cy": 1.2009803921568611,
+     "zoom": 0.7246891651865008
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 255.5,
+     "cy": 1.2009803921568611,
+     "zoom": 0.7246891651865008
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-paper-quilling-light-zoom2",
+   "map": "sample",
+   "theme": "paper-quilling",
+   "dark": false,
+   "view": "zoom2",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": -237,
+     "cy": -345,
+     "zoom": 2
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": -237,
+     "cy": -345,
+     "zoom": 2
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-clean-dark-fit",
+   "map": "sample",
+   "theme": "clean",
+   "dark": true,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 169.5,
+     "cy": 3.7720588235294112,
+     "zoom": 0.8526645768025078
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 169.5,
+     "cy": 3.7720588235294112,
+     "zoom": 0.8526645768025078
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-clean-dark-zoom2",
+   "map": "sample",
+   "theme": "clean",
+   "dark": true,
+   "view": "zoom2",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": -231.5,
+     "cy": -352.5,
+     "zoom": 2
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": -231.5,
+     "cy": -352.5,
+     "zoom": 2
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-rope-dark-fit",
+   "map": "sample",
+   "theme": "rope",
+   "dark": true,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 207.5,
+     "cy": 3.3774509803921564,
+     "zoom": 0.7922330097087379
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 207.5,
+     "cy": 3.3774509803921564,
+     "zoom": 0.7922330097087379
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "map60-rope-dark-zoom2",
+   "map": "sample",
+   "theme": "rope",
+   "dark": true,
+   "view": "zoom2",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": -237,
+     "cy": -360,
+     "zoom": 2
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": -237,
+     "cy": -360,
+     "zoom": 2
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "big5k-clean-fit",
+   "map": 5000,
+   "theme": "clean",
+   "dark": false,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 0,
+     "cy": 893.7973886532343,
+     "zoom": 0.012341639618888074
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 0,
+     "cy": 893.7973886532343,
+     "zoom": 0.012341639618888074
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "big5k-clean-z035",
+   "map": 5000,
+   "theme": "clean",
+   "dark": false,
+   "view": "z035",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 282.5,
+     "cy": 1243.3125,
+     "zoom": 0.35
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 282.5,
+     "cy": 1243.3125,
+     "zoom": 0.35
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "big5k-rope-fit",
+   "map": 5000,
+   "theme": "rope",
+   "dark": false,
+   "view": "fit",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 0,
+     "cy": 940.8337751855779,
+     "zoom": 0.011724480915081437
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 0,
+     "cy": 940.8337751855779,
+     "zoom": 0.011724480915081437
+    },
+    "errors": []
+   }
+  },
+  {
+   "name": "big5k-rope-z035",
+   "map": 5000,
+   "theme": "rope",
+   "dark": false,
+   "view": "z035",
+   "share": 0.0,
+   "max": 0,
+   "any_share": 0.0,
+   "A": {
+    "camera": {
+     "cx": 301,
+     "cy": 1308.75,
+     "zoom": 0.35
+    },
+    "errors": []
+   },
+   "B": {
+    "camera": {
+     "cx": 301,
+     "cy": 1308.75,
+     "zoom": 0.35
+    },
+    "errors": []
+   }
+  }
+ ],
+ "seconds": 39.5
+}

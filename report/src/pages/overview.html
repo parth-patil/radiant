@@ -1,0 +1,84 @@
+<section class="page" id="p-overview" data-g="start" data-title="Overview" data-nav="Overview">
+  <h1>A blueprint for a mind map app that helps you remember</h1>
+  <p class="lead">This report covers what Tony Buzan taught, what the evidence supports, what existing products do, what people ask for, and what to build: a fast desktop app in which an AI drafts the map from a topic and any branch can become pictures or SVG artwork. It ends with a stack recommendation backed by measurements taken on your own Mac.</p>
+
+  <figure class="mapfig">
+    <div class="frame" id="report-map"></div>
+    <figcaption>This report as a mind map, drawn the way Radiant would draw one: one colour per main branch, branches thick at the centre and thin at the tips. Every twig is a page; select one to open it.</figcaption>
+  </figure>
+
+  <h2 data-short="Short version">The short version</h2>
+  <div class="grid two">
+    <div class="card"><h3>Nobody has built this</h3><p>Every AI mind-map tool found produces a text outline map. The closest thing to your idea is a feature in Xmind that generates one sticker for one topic. No product was found that turns a whole subtree into generated pictures or SVG artwork while keeping it connected and collapsible. <a href="#ai-tools">AI and canvas tools</a></p></div>
+    <div class="card"><h3>The building blocks work today</h3><p>On your installed Codex CLI, with your existing login, a map streamed in at about one node every 0.3 seconds, a picture came back in about 12 seconds, a transparent background worked, and a generated SVG passed every check of the proposed contract. Each was a single test. <a href="#codex">Codex CLI</a></p></div>
+    <div class="card"><h3>A WebView is fast enough</h3><p>A test on your M4 Pro held 120 frames per second with 100,000 tapered branches in WebGL2. The catch is that a default system WebView is capped at 60; reaching 120 needs one private setting. <a href="#stack">Stack decision</a></p></div>
+    <div class="card"><h3>Recommended stack</h3><p>Tauri with a Rust host, a TypeScript front end and a small custom WebGL2 renderer. The library you asked about, nanoui, cannot draw curved tapered branches today. Elixir is not needed in version 1. Zig fits later as small WebAssembly kernels. <a href="#stack">Stack decision</a></p></div>
+    <div class="card"><h3>Making beats viewing</h3><p>The strongest evidence is that building or reworking a map helps memory more than studying a finished one, and that self-testing and spaced review help most of all. So the AI should produce a draft to rework, and the app should include recall and review. <a href="#science">The evidence</a></p></div>
+    <div class="card"><h3>Pictures must carry meaning</h3><p>Pictures help when they represent the idea and can hurt when they are decoration. Distinctiveness only works by contrast. That is why artwork is something you choose for particular subtrees, and why it can be switched off. <a href="#art-subtrees">Picture and SVG subtrees</a></p></div>
+    <div class="card"><h3>Buzan, checked against his own books</h3><p>His ten laws were read in his 2018 text, with his reason for each. Two famous lines attributed to him do not appear in either book that was read, and his one-word-per-branch rule has no research behind it. His laws become defaults in Radiant, not rules. <a href="#buzan">Buzan's laws</a></p></div>
+    <div class="card"><h3>What users want fixed</h3><p>Layouts that reshuffle on their own, weak keyboard flow, proprietary files, subscriptions, and maps that are trees when thought is a graph. Reddit could not be read, so its communities are missing from the picture. <a href="#community">Community voice</a></p></div>
+  </div>
+
+  <h2 data-short="Your request">What you asked for, and where it is answered</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>You asked</th><th>Answer in brief</th><th>Pages</th></tr></thead>
+    <tbody>
+      <tr><th>Use my existing ChatGPT Codex CLI subscription</th><td>Feasible and tested. Drive <code>codex app-server</code> as a child process; never touch the credential file. The terms for sharing such an app are unclear.</td><td><a href="#codex">Codex CLI</a>, <a href="#ai-engine">AI generation</a></td></tr>
+      <tr><th>Give it a topic and a style, get a mind map</th><td>Nodes stream onto the canvas as they are generated; a style request becomes a style sheet; the result is a draft to rework.</td><td><a href="#ai-engine">AI generation</a></td></tr>
+      <tr><th>Infinite canvas</th><td>Specified with layout, level of detail and frame budgets.</td><td><a href="#engine">Canvas engine</a>, <a href="#features">Features</a></td></tr>
+      <tr><th>Which MindNode features to bring in</th><td>A feature-by-feature inventory with an adopt, adapt or skip verdict for each.</td><td><a href="#mindnode">MindNode</a></td></tr>
+      <tr><th>Subtrees as raster pictures, still connected and collapsible</th><td>One picture per node from a shared style sheet; the app draws branches and labels; attachment points make the join clean.</td><td><a href="#art-subtrees">Picture and SVG subtrees</a></td></tr>
+      <tr><th>Subtrees drawn in SVG</th><td>Layout first, artwork second, under a contract of one group per node that the app validates and can collapse.</td><td><a href="#art-subtrees">Picture and SVG subtrees</a></td></tr>
+      <tr><th>Buzan's original ideas and advice</th><td>His laws in his own words with his reasons, what he said about software and AI, and how each law becomes behaviour in the app.</td><td><a href="#history">History</a>, <a href="#buzan">Buzan's laws</a></td></tr>
+      <tr><th>Other mind mapping tools for inspiration</th><td>Profiles of desktop, AI-first and canvas tools, and a list of ideas worth borrowing.</td><td><a href="#desktop-tools">Desktop tools</a>, <a href="#ai-tools">AI and canvas tools</a></td></tr>
+      <tr><th>What people say and the best way to use mind maps</th><td>What users, practitioners and sceptics say, then a practical guide tied to the evidence.</td><td><a href="#community">Community voice</a>, <a href="#practice">Using maps well</a>, <a href="#science">The evidence</a></td></tr>
+      <tr><th>A detailed requirements document</th><td>334 numbered requirements across vision, features, AI, artwork, engine and quality, each with a priority and an acceptance check.</td><td><a href="#vision">Vision and scope</a> onwards</td></tr>
+      <tr><th>Very high performance, and help choosing the stack</th><td>Measured on your Mac; budgets and a regression test defined; a recommendation with the conditions that would change it.</td><td><a href="#stack">Stack decision</a>, <a href="#quality">Performance and quality</a></td></tr>
+      <tr><th>Is Nano UI for Zig a good fit? A WebView in a Zig container?</th><td>No to nanoui as the foundation today. A Zig WebView shell works but adds little over Tauri. A Zig core behind a Swift shell is the credible Zig route.</td><td><a href="#zig">Zig and nanoui</a></td></tr>
+      <tr><th>Elixir with LiveView and Burrito? Rust?</th><td>Elixir is not needed in version 1 and suits a later sync server. Rust is worth it in a small amount, as the Tauri host.</td><td><a href="#other-stacks">Rust, Elixir, native</a></td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 data-short="Tested on your Mac">What was tested on your Mac</h2>
+  <p>Two sets of hands-on tests replaced guesswork with numbers. Both ran on your Apple M4 Pro with macOS 26.5.1, and the files to run them again are in the <code>spikes</code> folder of this project.</p>
+  <div class="stats">
+    <div class="stat"><b>120 fps</b><span>WebView canvas with 100,000 tapered branches in WebGL2, private setting switched off</span><small>60 fps cap by default</small></div>
+    <div class="stat"><b>3.5 ms</b><span>Script time per frame for 5,000 branches, 2,000 labels and 300 pictures in Canvas2D</span><small>Budget at 120 Hz is 8.3 ms</small></div>
+    <div class="stat"><b>0.3 s</b><span>Per streamed map node from <code>codex app-server</code>, after about 3 seconds to the first output</span><small>Codex CLI 0.167.0</small></div>
+    <div class="stat"><b>12 s</b><span>For one generated picture; a second, with a reference image and a transparent background, took about 29 seconds</span><small>Two calls</small></div>
+    <div class="stat"><b>29 s</b><span>For one five-node SVG that passed every check of the node-group contract</span><small>One call, 17 paths</small></div>
+    <div class="stat"><b>1%</b><span>Reading on the weekly usage meter after all eight test calls of the second pass</span><small>Per-picture cost could not be measured</small></div>
+  </div>
+  <p>Every one of these is a small sample: one run per configuration for the frame-rate test, and one or two calls per Codex capability. They show that the design is feasible and give a first estimate of speed. The first milestone on <a href="#roadmap">the roadmap</a> repeats them at scale.</p>
+
+  <h2 data-short="Decisions">Decisions at a glance</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Area</th><th>Decision</th><th>Main reason</th></tr></thead>
+    <tbody>
+      <tr><th>Shell</th><td>Tauri 2, with the front end kept independent of it so Electron can replace it in days.</td><td>Small, fast, and reaches Windows later; measured headroom is large.</td></tr>
+      <tr><th>Frame rate</th><td>120 on high-refresh displays through one private WebKit setting, with automatic fallback to 60.</td><td>Acceptable for a personal app distributed directly; Electron to be measured before any public release.</td></tr>
+      <tr><th>Canvas</th><td>A small custom WebGL2 renderer; WebGPU later.</td><td>A handful of batched draw calls held 100,000 branches at 120 frames per second.</td></tr>
+      <tr><th>Engine core</th><td>Pure TypeScript modules for model, layout and geometry, portable to WebAssembly.</td><td>Fastest to build; hot spots can move to Rust or Zig if profiling demands.</td></tr>
+      <tr><th>AI engine</th><td>One long-lived <code>codex app-server</code> process behind a provider interface.</td><td>It streams, cancels and reports limits; the interface allows other engines later.</td></tr>
+      <tr><th>Map generation</th><td>The model writes one node per line; the app validates each line and does all layout.</td><td>Lines can be applied as they arrive, so the map grows while it generates.</td></tr>
+      <tr><th>Representations</th><td>The tree is the truth; vector, picture and SVG are views of it that can be switched back at any time.</td><td>Search, outline, export and accessibility keep working, and nothing is lost by trying artwork.</td></tr>
+      <tr><th>Pictures</th><td>One image per node from a shared style sheet; the app draws all labels and branches.</td><td>Image models still make errors in text, and consistency needs a shared style.</td></tr>
+      <tr><th>SVG</th><td>Layout first, then SVG generated into the computed boxes under a contract, rendered by the browser engine.</td><td>The app can validate, collapse and attach branches; the browser is the most complete SVG renderer.</td></tr>
+      <tr><th>Files</th><td>One SQLite document per map, with open formats for import and export.</td><td>Crash-safe autosave and an undo log, without locking the content in.</td></tr>
+      <tr><th>Learning</th><td>AI output is a draft; recall and spaced review are built in.</td><td>Building and retrieving beat viewing in the evidence.</td></tr>
+      <tr><th>Zig and Elixir</th><td>Neither in the first version's shell or host.</td><td>nanoui cannot draw the branches; Elixir would add a runtime for a small job.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 data-short="How it was made">How this report was made</h2>
+  <p>Seventeen research passes ran in two rounds. The first round covered Buzan and history, the learning science, MindNode and desktop products, AI and canvas tools, community discussion, the Codex CLI, Zig, other stacks, and canvas engine design. The second round closed the gaps the first left: Buzan's rules were checked against the text of two of his books, the remaining learning research was collected, the nanoui source was read file by file, native stacks were surveyed, and the two hands-on tests were run. Twelve writers then turned the notes into these pages, working from a shared set of decisions.</p>
+  <div class="callout gap"><span class="tag">Not verified</span><p>Several things could not be reached and are missing or thin as a result. Reddit refused automated access and was not read. Journal publishers blocked full texts, so most effect sizes come from abstracts and should be checked before being quoted. <em>The Mind Map Book</em> could not be read directly, so its laws are reported from secondary summaries. Competitor prices come partly from aggregators that disagree. Each research page ends with its own list of limits.</p></div>
+  <p>The full research notes, with a source link for every claim, are in the <code>research_notes</code> folder of this project. Every external source cited in the report is listed on <a href="#sources">the sources page</a>.</p>
+
+  <h2 data-short="Where to start">Where to start</h2>
+  <ol>
+    <li>Read <a href="#stack">the stack decision</a> and <a href="#art-subtrees">picture and SVG subtrees</a>. They carry the two judgements most worth challenging.</li>
+    <li>Answer the open questions at the end of <a href="#roadmap">the roadmap</a>. They change priorities.</li>
+    <li>Run the first-week plan on the roadmap. It turns every single-sample test in this report into a measured rate.</li>
+  </ol>
+</section>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 80">
+  <g id="node-root" data-anchor-in="12,40" data-anchor-out="68,40"><circle cx="40" cy="40" r="28" fill="#353950"/></g>
+  <g id="node-leaf" data-anchor-in="154,40"><rect x="154" y="20" width="52" height="40" rx="6" fill="#353950"/></g>
+  <g id="connectors"><path d="M68 40 L154 40" stroke="#353950" fill="none"/></g>
+</svg>

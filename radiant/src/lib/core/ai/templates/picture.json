@@ -1,0 +1,25 @@
+{
+  "version": "picture/1",
+  "role": "You illustrate mind-map concepts.",
+  "output": "Use your image generation tool exactly once. Reply with one short sentence.",
+  "rules": "Use no text, letters, digits, labels, logos or watermarks. Centre one subject in about 80 percent of a square canvas with even padding and no cropped edges.",
+  "style": "Style:\n{{description}}",
+  "transparent": "Background: fully transparent (a real alpha channel). No ground shadow plate, backdrop or scenery.",
+  "plain": "Background: one plain flat colour, no scenery or gradient.",
+  "reference": {
+    "task": "Create one picture that will serve as the style reference for a whole series of mind-map pictures.\nSubject: {{subject}}.\nIt must show the medium, line quality, palette and level of detail of the series.",
+    "defaultSubject": "one simple, friendly everyday object",
+    "example": "For example, a lamp or cup can demonstrate the style with one recognisable silhouette."
+  },
+  "node": {
+    "task": "Create one picture for the mind-map node {{node}}.",
+    "path": "Context (path from the top of the map): {{path}}.",
+    "note": "What the node means: {{note}}",
+    "hint": "Suggested subject: {{hint}}.",
+    "subject": "Choose one concrete subject that carries the meaning of the node. For an abstract idea, use one concrete stand-in object or a simple visual metaphor.",
+    "example": "For example, a watering can pouring onto a seedling could stand for nurturing. Choose a subject specific to this node.",
+    "silhouette": "Use a clear silhouette with a memorable detail. Keep it simple.",
+    "siblings": "Its siblings are {{siblings}}. Give this picture a distinct object type, silhouette and dominant colour.",
+    "match": "A style reference image is attached. Match its medium, line quality, palette and level of detail, drawing a different subject."
+  }
+}

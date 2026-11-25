@@ -1,0 +1,49 @@
+id	round	track	commit	outcome	title	official_ratio_chrome	official_ratio_webkit	official_mode	evidence
+S1	0	study	-	study	Profile of the rebuild path				Every edit redid work for the whole map; moving data cost about as much as computing it. One-node edit: 71–84 ms at 5k, 290–340 ms at 20k, 0.9–1.8 s at 50k.
+S2	0	study	-	study	Profile of the frame path and GPU				Panning cheap except whole-map view at 50k (2.4–4.4 ms script). GPU cost dominated by blended overdraw and 4x multisampling. WebKit ~40x slower per label raster.
+S3	0	study	-	study	Rust/WebAssembly and workers, measured in isolation				Flat tessellation kernel 2x faster in wasm (50k: 91→33 ms Chrome, 67→32 ms WebKit), bit-identical; copy-out costs 12–40 ms. Layout: typed-array TypeScript gets most of the wasm gain. JS worker pool slower in WebKit; wasm pool 2.5x at 8 workers. SharedArrayBuffer not practical in Tauri on macOS.
+S4	0	study	-	study (closed: owner chose web-only)	Native rendering spike: GPUI and wgpu				GPUI 0.2.2 cannot draw the 50k map (no custom shaders or retained buffers; 36 ms/frame at 5k). wgpu matches WebGL once WebGL stops re-uploading indices each frame. Screen was locked, so real 120 Hz presentation was not measured.
+F1	1	frame	270ddf3	kept	Draw visible branch runs from the resident index buffer; skip culling when the whole map is in view	0.84	0.911	full	Script per frame, 50k whole map: clean 3.47→0.94 ms, rope 4.10→0.92 (Chrome); 1.92→0.75 (WebKit).
+F2	1	frame	b3ab144	kept	Blending off for fully opaque branch meshes	0.989	1.014	full	GPU per frame at 50k zoom 1 (Chrome): clean 3.51→1.24 ms, rope 3.44→1.98. Within noise on the overall score.
+F3	1	frame	9e9b2a6	kept	Rect and shadow instances stay on the GPU at whole-map view	1	0.97	full	Script per frame at whole map: 50k soft-clay 1.96→1.44 (Chrome), 2.14→1.35 (WebKit). GPU buffers +6% for soft-clay.
+F5	1	frame	a1823d8	kept	No multisampling while the camera moves; full 4x frame 120 ms after it stops	0.968	1.03	full	Probe (Chrome GPU, moving frames, 50k): soft-clay whole map 6.16→2.17 ms, rope zoom 1 2.20→1.07. Resting frames bit-identical in both engines. Edges stair-step while moving.
+F4	1	frame	4440c91	kept (visual trade-off)	Coarse index buffer for the branch mesh below zoom 0.02	0.996	0.993	full	Probe (Chrome GPU, 50k whole map): clean ~1.1→~0.45 ms; triangles 3.0M→0.57M. 0.005–0.05% of pixels change at that zoom.
+F6	1	frame	726e12e	discarded	Quarter-resolution shadow layer while the camera moves				At most 0.1–0.25 ms GPU, rounds overlap; visibly softer shadows. Reverted in 74f9878.
+L1a	1	labels	a8a3a00	kept	Text-layout cache sized to the map				Screening: rebuild at 50k clean 1123→995 ms (Chrome), 1338→1068 (WebKit). The official run for this commit is not usable (taken while the machine was busiest; rounds disagree).
+L1b	1	labels	-	dropped (not built)	Cheap per-node size lookup				Measured ceiling 20–25 ms of an ~800 ms edit at 50k; below the noise floor.
+L2	1	labels	c64371a	kept	Rasterise a frame’s labels on one staging strip and upload as a batch	1.027	0.984	quick	WebKit script per frame, 50k zoom 0.35: clean 1.43→0.82 ms. Text in a newly reached view fills in within 6 frames instead of 52 (WebKit). Byte-identical glyphs.
+L3	1	labels	3ca6847	kept	Skip the label loop when no label is large enough to draw; truthful pending-label count	1.009	0.971	quick	Whole-map frames: 0.25–0.38 ms saved per frame at 50k in both engines.
+L4	1	labels	6f308f2	kept (visual trade-off)	While zooming, draw a label raster one size step off instead of re-rasterising				Probe (20k): Chrome zoom-sweep p95 3.5→1.8 ms; WebKit mean −24%. Labels are slightly soft or thin during a zoom gesture, exact one frame after it stops.
+T1	1	transport	d7e2342	kept	Stop cloning the CPU branch mesh to the main thread				Chrome heap −33% at 5k, −37% at 50k. Latency within noise.
+T2	1	transport	8497d47	kept	Layout result as typed boxes plus JSON record lists	0.961	0.956	quick	Screening score 0.966 / 0.948; edit at 50k 0.91 / 0.82. JSON was 2–6x cheaper than structured clone.
+T3	1	transport	f21b243	kept	Document replica in the worker; edits sent as ops				Screening score 0.929 / 0.928; edit at 5k 0.83 / 0.72. One message per edit instead of 218.
+T4	1	transport	687e539	kept	Autosave and journal serialisation after the next frame				Screening score 0.957 / 0.951. Journal-path probe: add at 50k 629→583 ms (Chrome), 531→475 (WebKit).
+T5	1	transport	661bf03	discarded	Result in one message instead of pulled chunks				Latency within noise; longest main-thread task at 50k 75→84 ms. Reverted in 0b03056.
+T6	1	transport	a677ae6	kept	Decode branch specs on the main thread only when read				Main-thread result handling at 50k: 74–93→37–49 ms (Chrome), 50–69→32–34 ms (WebKit).
+T7	1	transport	77fd707	discarded	Decode adopted placements only when read				No gain; Chrome longest task 76→99 ms. Reverted in 4825198.
+M1	1	mesh	ebf490a	kept	Flat vertex packing: one 32-bit colour write per run	1.01	1.017	quick	Packer alone at 50k: 27→17.5 ms (Chrome), 21–23→13.4–14.6 ms (WebKit). Byte-identical.
+M2	1	mesh	ca40639	kept	Copy reused branch meshes in runs	0.997	0.978	quick	Worker mesh step per edit at 50k: 35–47→24–32 ms (Chrome), 58–66→28–39 ms (WebKit).
+M3	1	mesh	310dfc6	discarded	Rust→WebAssembly flat tessellation and packing inside the layout worker	1.033	1.024	quick	In-app, 50k theme switch: 999→964 ms (Chrome), 1089→1081 ms (WebKit). Holds 217 MB of wasm memory that is never released. Bit-identical output. Reverted in 17a8fb1.
+M4	1	mesh	-	skipped (not built)	Worker pool for tessellation	0.997	1.018	no-code control	Best case about 25 ms of a 1,000–1,500 ms rebuild; JS-only variant loses in WebKit (sending specs costs 78–113 ms).
+M5	1	mesh	7566c1f	kept	Typed-array tidy-tree layout kernel (plain TypeScript)	0.967	0.979	quick	Warm layout 1.25x faster in both engines; Chrome first 50k call 71→34 ms. Bit-identical in 48 cases.
+G1	2	gpu	3d0f7f4	kept	GPU-expanded branches: one record per branch, ribbon built in the vertex shader (flat tapered, rounded, line)	0.923	0.923	quick	Screening: rebuild at 50k 0.90 / 0.82, edit 0.93 / 0.73; WebGL buffers at 50k 98→1.6 MB plus a 6.4 MB record texture; heap 167→75 MB. Whole-map GPU +0.35 ms.
+G3	2	gpu	5f1eaec	kept	Each GPU branch as one continuous strip				Whole-map GPU at 50k (Chrome): 2.17→1.22 ms (CPU-mesh parent: 1.07). Pixels identical to G1.
+G4	2	gpu	516a64d	kept	Organic and angular branch styles on the GPU				Chrome probe: worker mesh −62 to −72%; edit at 20k 298→231 ms. GPU +11 to +35% at whole map.
+G5	2	gpu	4e6a0a1	kept (prototype)	Soft clay and Rope materials on the GPU				Rope, Chrome, 2 rounds: load at 50k 1,498→943 ms; worker mesh 617→71 ms; buffers 189→2.2 MB plus 12.2 MB texture. Whole-map GPU +0.3 to +1.0 ms.
+D1	2	materials	0ea9548	study	Profile of the four dimensional materials	1.01	1.031	no-code control	Their rebuild cost is cold compiled code (a theme switch builds the mesh exactly once), not arithmetic or garbage collection.
+D2	2	materials	e6a0aae	kept	Dimensional meshes built through small functions over one output object				Cold build at 50k in WebKit: rope 534–569→156–163 ms, lifted-arcs 194–198→84–92, paper-quilling 152–157→72–76. Bit-identical.
+D3	2	materials	-	dropped (not built)	Narrower dimensional vertex format				No pixel-identical gain left; packing is bound by allocation, not the loop.
+D4	2	materials	dd0639f	discarded	Reuse the shadow layer on resting frames				No gain; slower in 7 of 8 cases. Reverted in 272ad6a.
+D5	2	materials	-	dropped (covered by F4)	Far-zoom level of detail for dimensional meshes				The coarse index buffer already applies to every material.
+IN1	2	incremental	ca304ac	kept	Incremental node sizes				computeSizes per edit at 50k: 23–26→9–13 ms. Found and fixed a pre-existing bug (the worker replica kept a removed document field).
+IN2	2	incremental	62651b6	kept	Incremental layout bookkeeping: untouched main branches keep their boxes and placements				settleLayout at 50k: 79–89→40–48 ms (Chrome), 59–64→35–37 ms (WebKit). Screening edit at 50k −9% / −20%.
+IN3	2	incremental	aa88cd3	kept	Incremental branch specs				Screening: interaction −11% in both engines; edit at 5k −20%. Worker relayout at 50k −25 to −33%.
+IN4	2	incremental	9d636f3	kept	Incremental scene; skip empty badge and sketch scans				Screening: fold at 50k −12% / −14%. Worker compute for a one-node edit at 50k: ~260–300→~110–160 ms across IN1–IN4.
+IN5	2	incremental	8b15820	discarded	Cache each record’s JSON when packing the result				Edits at 50k −7 to −23%, but Chrome loads and theme switches +3 to +11% and +90 MB in the worker. Reverted in 64f2d3c.
+U1	2	upload	a982d12	measured, not merged	Persistent, patchable branch-mesh buffers				Edit probe: Chrome −7 to −24% (50k clean 523→452 ms), WebKit −4 to −14%. Pixel-identical. Conflicts with the GPU-expanded design, which was chosen.
+U2	2	upload	28a9fd6	measured, not merged	Ship the mesh ahead of its result and upload in slices				Dev probe: the frame showing a 50k theme switch draws in 14–20 ms instead of 61–66 ms.
+U3	2	upload	1800d80	discarded	Decode large results in 8 ms slices				No visible change; the longest task is the autosave after the frame (85–120 ms at 50k). Reverted in 48b4e01.
+U4	2	upload	c935dfc	measured, not merged	Packed vertices kept only on the GPU				Dev heap after loading 50k: clean 187→119 MB, rope 274→132 MB.
+R1-merged	1	all	b30896c	merged	All kept round-1 experiments	0.657	0.616	full	vs baseline
+FINAL	2	all	132bfd2	merged	All kept experiments	0.546	0.484	full	vs baseline
+NATIVE	2	all	132bfd2	measured	Final vs baseline inside the desktop app WebView (release builds, 50k, 60 Hz display)			native, 2 rounds	Edit 805→300 ms (flat), 949→317 (rope); fold 1,705→602; theme switch flat 1,169→408, rope 1,810→611; load 1,005→751. Baseline misses frames at whole-map view, final holds 60 Hz. Captures match.

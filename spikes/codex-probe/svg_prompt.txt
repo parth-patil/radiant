@@ -1,0 +1,16 @@
+Create ONE self-contained SVG illustration of a small mind-map subtree about "Coffee". Reply with ONLY the SVG markup (no code fence, no commentary).
+
+CONTRACT (hard requirements):
+- Root element: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"> (no width/height needed).
+- Exactly one <g> per node, with id="node-<id>" and attributes data-anchor-in="x,y" and data-anchor-out="x,y" (absolute viewBox coordinates; the point where a connector enters / leaves the node artwork). All artwork for a node must be drawn inside its own group and stay inside that node's target box.
+- Nodes (id, title, target box x,y,w,h):
+  n1 "Coffee"   box 300,240,200,120  (root, centre)
+  n2 "Origins"  box 40,40,220,140    (top-left)
+  n3 "Brewing"  box 540,40,220,140   (top-right)
+  n4 "Beans"    box 40,420,220,140   (bottom-left)
+  n5 "Roasting" box 540,420,220,140  (bottom-right)
+  The artwork of each node should depict what its title means (e.g. a cup for Coffee, a globe/mountain for Origins, a dripper/kettle for Brewing, beans for Beans, a flame/drum for Roasting).
+- Connectors from n1 to n2..n5 may be drawn in an extra <g id="connectors"> outside the node groups.
+- Forbidden: <script>, <text>, <image>, <foreignObject>, external references (href/xlink:href to anything other than "#id"), url() other than local gradients, CSS @import. No <text> at all: the app draws labels.
+- At most 60 <path> elements in total. Other primitives (rect, circle, ellipse, polygon, line) allowed.
+- Use only this 5-colour palette (hex): #3B2417, #8B5A2B, #D9A066, #F2E3C6, #E4572E. No other colours.

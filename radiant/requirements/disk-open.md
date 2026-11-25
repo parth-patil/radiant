@@ -1,0 +1,17 @@
+# Saved large-map open benchmark
+
+Run `python3 tools/check-disk-open.py` from `radiant` on macOS after installing the locked dependencies. The command builds an optimized Tauri host and a production frontend in an isolated, uniquely identified scratch workspace. Each sample starts a fresh host, waits for its launcher, then opens only its own benchmark document window through the native window route. The benchmark does not time process startup or reset the operating system's page cache.
+
+The fixture has 5,000 nodes and 300 distinct PNGs. It includes a multiline Unicode note, a style override, a manual offset and explicit vector/picture representation choices. The check compares a canonical SHA-256 of the entire document before saving and after opening it in the controller. The first reopen uses an empty asset cache and verifies every extracted picture byte for byte against the embedded SQLite blob and its content hash. Later opens reuse the profile's populated asset cache. The 300 pictures are synthetic 480×320 PNGs. In structure-only runs of at least three samples, the final open starts with one deliberately damaged cached file and verifies all 300 assets again.
+
+A native timestamp starts immediately before opening the document window. A scratch-only renderer hook records the first submitted frame for the complete worker-laid-out scene and the following animation callback in the visible WebView. A native WebKit snapshot captures the rendered window immediately afterward. The timing gate uses the animation callback as a bound for the first frame, with the snapshot as a separate capture witness. It does not timestamp physical display scanout. The report includes the initial native open, disk IPC duration, frame callback and capture runtime, plus the host and launcher/document WebContent PIDs. The JSON and snapshots are written to the printed artifact directory.
+
+A timed run requires an unlocked display. When macOS reports a locked screen, use `python3 tools/check-disk-open.py --structure-only` to verify the native save/reopen and measure the disk IPC. The structure-only result does not measure presentation.
+
+## Initial diagnosis
+
+On the Mac16,7 reference machine running macOS 26.5.1, the original portable reopen matched the structurally saved reference document and all 300 embedded assets. The cold-cache disk IPC took 2,788 ms, and the IPC began 125.62 ms after the native open. The original implementation flushed each extracted picture and its directory individually. Extracted files are now atomically replaced as a derived cache, with content checks on later opens and restoration from the verified embedded bytes when needed. Authoritative files still use the durable writer.
+
+The optimized host repeated the round trip five times. Its disk IPC took 64 ms with an empty picture cache, 27–39 ms across three warm opens and 28 ms while repairing the deliberately damaged cache file. The cold native window-to-IPC completion was about 195 ms. All five structural hashes matched the original save, and the empty-cache and repair cases matched all 300 restored images byte for byte. The isolated release build used native revision `9be697ef` with the cache change from `32f13c7` applied.
+
+The display was locked during these checks. The document WebView reported `hidden`, and no normal frame callback was observed. These results establish the lossless reopen and the measured native load improvement. The full open-to-presented-frame threshold remains unverified.

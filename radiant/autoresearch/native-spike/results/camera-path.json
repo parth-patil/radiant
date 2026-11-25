@@ -1,0 +1,46 @@
+{
+ "window": {
+  "width": 1440,
+  "height": 900,
+  "dpr": 2,
+  "note": "logical points; 2880x1800 physical pixels"
+ },
+ "durationS": 5,
+ "formula": "t in seconds since the scenario start; T=5; zoom(t) = z0 * 2^(0.5*sin(2*pi*t/T)); cx(t) = cx0 + (400/z0)*sin(2*pi*t/T); cy(t) = cy0 + (250/z0)*sin(4*pi*t/T). Same base camera for clean and rope at a given size.",
+ "bases": {
+  "5000": {
+   "fit": {
+    "cx": 0,
+    "cy": 1710.5625,
+    "zoom": 0.011768551814318405
+   },
+   "z035": {
+    "cx": -394,
+    "cy": 12936.446716,
+    "zoom": 0.35
+   },
+   "z1": {
+    "cx": -395.5,
+    "cy": 21486.446716,
+    "zoom": 1
+   }
+  },
+  "50000": {
+   "fit": {
+    "cx": -77,
+    "cy": -2652.75,
+    "zoom": 0.0022497258146663376
+   },
+   "z035": {
+    "cx": 301,
+    "cy": 153181.73895,
+    "zoom": 0.35
+   },
+   "z1": {
+    "cx": 592,
+    "cy": -44301.90625,
+    "zoom": 1
+   }
+  }
+ }
+}

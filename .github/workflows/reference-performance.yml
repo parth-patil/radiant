@@ -1,0 +1,85 @@
+name: Reference map performance
+# Runs only when started by hand: it needs self-hosted macOS runners with a 60 Hz and a 120 Hz display.
+on:
+  workflow_dispatch:
+    inputs:
+      replace_baseline:
+        description: 'Establish a new reference after a runner or display change'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  measure:
+    if: github.event_name != 'schedule'
+    strategy:
+      fail-fast: false
+      matrix:
+        hz: [60, 120]
+    runs-on: [self-hosted, macOS, ARM64, "radiant-display-${{ matrix.hz }}hz"]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install frontend dependencies
+        run: cd radiant && bun install --frozen-lockfile
+      - name: Find the last passing baseline for this display mode
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RESET_BASELINE: ${{ inputs.replace_baseline }}
+          DISPLAY_HZ: ${{ matrix.hz }}
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          if [[ "$RESET_BASELINE" == true ]]; then exit 0; fi
+          artifact=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=radiant-baseline-${DISPLAY_HZ}hz&per_page=50" --jq '[.artifacts[] | select(.expired == false)] | first | .id // empty')
+          if [[ -n "$artifact" ]]; then
+            gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact/zip" > "$RUNNER_TEMP/radiant-baseline-$DISPLAY_HZ.zip"
+            unzip -p "$RUNNER_TEMP/radiant-baseline-$DISPLAY_HZ.zip" baseline.json > reports/baseline.json
+          fi
+      - name: Measure all three saved maps
+        env:
+          DISPLAY_HZ: ${{ matrix.hz }}
+        run: |
+          set -euo pipefail
+          set --
+          if [[ -f reports/baseline.json ]]; then set -- --baseline reports/baseline.json; fi
+          python3 radiant/tools/check-reference-performance.py --hz "$DISPLAY_HZ" --report reports/reference.json "$@"
+          if [[ ! -f reports/baseline.json ]]; then cp reports/reference.json reports/baseline.json; fi
+      - name: Display timing table
+        if: always() && hashFiles('reports/reference.json') != ''
+        run: python3 radiant/tools/check-reference-performance.py --table reports/reference.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: success() && github.ref_name == github.event.repository.default_branch
+        with:
+          name: radiant-baseline-${{ matrix.hz }}hz
+          path: reports/baseline.json
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: radiant-measurement-${{ matrix.hz }}hz
+          path: reports/reference.json
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: radiant-failed-${{ matrix.hz }}hz
+          path: reports/
+
+
+  nightly-memory:
+    if: github.event_name == 'schedule'
+    runs-on: [self-hosted, macOS, ARM64, radiant-display-60hz]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install frontend dependencies
+        run: cd radiant && bun install --frozen-lockfile
+      - name: Exercise native open, edit and close cycles
+        run: TMPDIR="$RUNNER_TEMP" python3 radiant/tools/check-memory.py --visible --report reports/memory.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: radiant-nightly-memory
+          path: reports/memory.json

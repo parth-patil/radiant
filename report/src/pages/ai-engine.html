@@ -1,0 +1,324 @@
+<section class="page" id="p-ai-engine" data-g="product" data-title="AI generation: requirements" data-nav="AI generation">
+  <h1>AI generation: requirements</h1>
+  <p class="lead">This page sets out the requirements for everything the AI does except the picture and SVG artwork itself, which is on <a href="#art-subtrees">the picture and SVG subtrees page</a>: turning a topic into a map in a requested style, streaming it onto the canvas, refining it, grounding it in source material, and running the Codex engine safely. The engine is the user's own Codex CLI, driven through a long-lived app-server process (decision D-07). How that engine was verified is on <a href="#codex">the Codex CLI page</a>, and the requirement priorities follow the decisions brief: Must for the first usable version, Should for version 1, Could after version 1, Later when deliberately deferred.</p>
+
+  <p>Timing figures used below were measured once each on your Mac with Codex CLI 0.167.0, so they are single samples. The app server delivered the first streamed text 2.8 to 3.7 s after a turn started, and complete node lines arrived about 290 ms apart. Targets that go beyond those measurements are marked as proposed.</p>
+
+  <h2>The generation experience and inputs</h2>
+  <p>The core flow is short: the user types a topic, optionally adjusts the style, and watches the map grow. The generated map is a draft to edit and not a finished artefact. That principle follows decision D-18 and the evidence on <a href="#science">the science page</a>: making or reworking a map helps memory more than viewing one (the cited contrast is an effect size of 0.72 for creating against 0.43 for studying), so the app presents AI output as a skeleton for the user to reshape.</p>
+
+  <ol class="flow">
+    <li><b>Ask.</b> The user enters a topic, with optional style, size, audience and source material.</li>
+    <li><b>Stream.</b> The app starts a job; the first node appears within seconds and the map grows line by line.</li>
+    <li><b>Watch or stop.</b> The user can cancel at any moment and keep what has arrived.</li>
+    <li><b>Edit.</b> The map is marked as a draft. The user renames, moves, deletes and reorders nodes.</li>
+    <li><b>Refine.</b> Individual branches are expanded, regenerated or summarised, each as one undoable change.</li>
+  </ol>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-01">
+      <div class="req-head"><code class="req-id">FR-AI-01</code><span class="badge must">Must</span><h4>Generate a map from a topic in one action</h4></div>
+      <p>The user must be able to type a topic and start generation with one command (a button or the Enter key) from an empty document or from the welcome screen, with no other input required.</p>
+      <p class="req-meta"><b>Accept when:</b> from a fresh launch, entering "Coffee" and pressing Enter produces a map of at least 10 nodes without any further prompt or setting. <b>Why:</b> this is the headline feature; the verified call chain supports it (<a href="#codex">Codex CLI</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-02">
+      <div class="req-head"><code class="req-id">FR-AI-02</code><span class="badge must">Must</span><h4>Nodes appear on the canvas as they stream</h4></div>
+      <p>Each valid node line must be added to the document and drawn as soon as it is received and validated, with the engine laying it out and animating it into place. The first node should be visible within 6 s of the user starting the job (proposed budget), and node lines must not be held back to the end of the job.</p>
+      <p class="req-meta"><b>Accept when:</b> in a run on the reference machine, a screen recording shows the first node within 6 s and further nodes appearing continuously, and a recorded replay of the 8-line JSON Lines log (lines at +309 to +2,309 ms) renders its lines at those times, each within 100 ms of arrival. <b>Why:</b> measured first delta 2.8 to 3.7 s and about 290 ms per node line; streaming is a reason for choosing the app-server route.</p>
+    </div>
+    <div class="req" id="FR-AI-03">
+      <div class="req-head"><code class="req-id">FR-AI-03</code><span class="badge should">Should</span><h4>Mark generated maps as drafts</h4></div>
+      <p>A newly generated map must carry a visible "draft" state that clears when the user edits it, or confirms it, and the interface must offer editing actions (rename, reorder, delete, add) as the primary next step instead of a read-only view.</p>
+      <p class="req-meta"><b>Accept when:</b> after generation the draft state is shown, the first edit (or an explicit "Keep") clears it, and no generation path produces a locked or read-only map. <b>Why:</b> decision D-18; creating beats studying in the evidence on <a href="#science">the science page</a>.</p>
+    </div>
+    <div class="req" id="FR-AI-04">
+      <div class="req-head"><code class="req-id">FR-AI-04</code><span class="badge must">Must</span><h4>Generation inputs</h4></div>
+      <p>The generation dialog must offer a required topic and these optional inputs: a style (free text or preset), depth (levels below the root), breadth (children per node), the audience or purpose (for example study, brainstorm or presentation), and source material. Omitted inputs must take documented defaults.</p>
+      <p class="req-meta"><b>Accept when:</b> each input changes the job as described (the style appears in the style sheet, depth and breadth appear in the prompt and in the validator, audience appears in the prompt) and an empty optional field never blocks the job. <b>Why:</b> these are the controls needed to ask for a map "in a requested style".</p>
+    </div>
+    <div class="req" id="FR-AI-05">
+      <div class="req-head"><code class="req-id">FR-AI-05</code><span class="badge must">Must</span><h4>Default and enforced size limits</h4></div>
+      <p>The defaults must be about 3 to 5 main branches and 3 to 5 children per node, with a default depth of 3 levels below the root, and the validator must reject node lines that exceed the requested depth or the requested children per node, so that a model that ignores the prompt cannot flood the canvas. Labels should default to terse phrases of about 2 to 5 words.</p>
+      <p class="req-meta"><b>Accept when:</b> a test stream containing a node at depth 5 and a parent with 12 children, with a limit of 3 levels and 5 children, applies only the nodes within limits and reports the rest as rejected. <b>Why:</b> working-memory reasoning on <a href="#science">the science page</a> (weak, inferred); the numbers are defaults, not proven optima.</p>
+    </div>
+    <div class="req" id="FR-AI-06">
+      <div class="req-head"><code class="req-id">FR-AI-06</code><span class="badge should">Should</span><h4>Source material</h4></div>
+      <p>The user should be able to paste text or add a text or Markdown file as source material, and the generated map must then be built from that material. The app must tell the user when a source is truncated to fit the model's context window (258,400 tokens was reported for the tested model) and must show which source each generated branch drew on where the model reports it.</p>
+      <p class="req-meta"><b>Accept when:</b> a pasted 2,000-word article yields a map whose branches reflect the article's headings, and a source larger than the context limit shows a visible truncation notice instead of failing silently. <b>Why:</b> grounding is one of the stated jobs; PDF and web page import are not required in this item.</p>
+    </div>
+    <div class="req" id="FR-AI-07">
+      <div class="req-head"><code class="req-id">FR-AI-07</code><span class="badge could">Could</span><h4>Optional web research</h4></div>
+      <p>The dialog could offer a "research the web" option that sets Codex's web search setting to <code>live</code> for that job only. The default must be <code>disabled</code>, and when search is used the job must label itself as using the web.</p>
+      <p class="req-meta"><b>Accept when:</b> by default a job's configuration contains <code>web_search=disabled</code>; with the option on, the job log records the changed setting. <b>Why:</b> the configuration key and its values (<code>disabled</code>, <code>cached</code>, <code>indexed</code>, <code>live</code>) were verified, but enabling live search was never run, so this must first be spiked (see <a href="#codex">Codex CLI</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-08">
+      <div class="req-head"><code class="req-id">FR-AI-08</code><span class="badge must">Must</span><h4>Cancel at any time</h4></div>
+      <p>The user must be able to cancel a running generation with one action. The app must send <code>turn/interrupt</code>, stop applying new lines, keep every node already applied, and show the job as stopped.</p>
+      <p class="req-meta"><b>Accept when:</b> cancelling mid-stream leaves the document with the nodes applied so far, no partial or corrupt line, and the interface reports the stop within 500 ms (the interrupt itself completed in about 2 ms in the single measured run). <b>Why:</b> verified interrupt behaviour on the app server.</p>
+    </div>
+  </div>
+
+  <h2>Style requests</h2>
+  <p>A style request is a plain-language sentence such as "playful, warm colours, hand-drawn feel". It becomes a <b>style sheet</b>: a structured record that the app stores with the document and applies deterministically. The style sheet holds the palette, branch style (for example curved, tapered or straight), layout variant, typography and, for later artwork, the illustration medium. The style sheet applies to the map now and is reused for picture and SVG subtrees later (decisions D-10 and D-11), so a map keeps one look from text to artwork.</p>
+  <p>The model proposes the style sheet; the engine owns what it means. Every field takes values from a list the engine defines, unknown values fall back to defaults, and layout is never computed by the model (decision D-08).</p>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-09">
+      <div class="req-head"><code class="req-id">FR-AI-09</code><span class="badge must">Must</span><h4>Turn a style request into a style sheet</h4></div>
+      <p>A natural-language style request must be converted into a style sheet with palette, branch style, layout variant, typography and illustration medium. The style sheet must be validated against the engine's allowed values before it is applied, and invalid fields must fall back to the defaults with a visible note.</p>
+      <p class="req-meta"><b>Accept when:</b> the requests "dark and neon", "calm watercolour" and "plain black and white" each produce a valid style sheet that changes at least the palette, and an injected unknown value (for example a branch style "zigzag") is replaced by the default and reported. <b>Why:</b> the style request is a headline input; the validator keeps the model from controlling rendering.</p>
+    </div>
+    <div class="req" id="FR-AI-10">
+      <div class="req-head"><code class="req-id">FR-AI-10</code><span class="badge must">Must</span><h4>Show, edit and store the style sheet</h4></div>
+      <p>The style sheet must be shown to the user in an editable form after generation, saved in the document, and changeable later without regenerating the nodes. Changing the style sheet must restyle the existing map.</p>
+      <p class="req-meta"><b>Accept when:</b> changing the palette in the style panel recolours all branches of a generated map with no model call, and reopening the saved document keeps the style sheet. <b>Why:</b> decision D-14 stores styles in the document; users must be able to correct a poor model interpretation cheaply.</p>
+    </div>
+    <div class="req" id="FR-AI-11">
+      <div class="req-head"><code class="req-id">FR-AI-11</code><span class="badge should">Should</span><h4>Presets, including a Buzan preset, and reuse for artwork</h4></div>
+      <p>The app should ship style presets, including a Buzan preset built from the rules on <a href="#buzan">the Buzan page</a> (for example a distinct colour per main branch, curved branches, a central image slot and short labels). Any preset or custom style sheet must be the same record that picture and SVG subtrees later read, so artwork inherits the map's style.</p>
+      <p class="req-meta"><b>Accept when:</b> at least four presets are selectable, the Buzan preset yields a map with a different colour on each main branch, and the style sheet object referenced by a picture subtree is the one created at generation. <b>Why:</b> decisions D-10 and D-11. Curved organic branches are offered as a preference and never claimed as a memory aid (<a href="#science">science</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-12">
+      <div class="req-head"><code class="req-id">FR-AI-12</code><span class="badge must">Must</span><h4>The engine computes layout, never the model</h4></div>
+      <p>The generation contract must not allow node positions, sizes or coordinates. Any such field in model output must be ignored and logged, and layout must always be produced by the layout engine.</p>
+      <p class="req-meta"><b>Accept when:</b> a replayed stream containing <code>x</code> and <code>y</code> fields produces the same layout as the same stream without them. <b>Why:</b> decision D-08; review of existing AI map tools found layout owned by the engine as the safer pattern (<a href="#ai-tools">AI tools</a>, thin evidence).</p>
+    </div>
+  </div>
+
+  <h2>Streaming protocol</h2>
+  <p>The model is asked to emit one JSON object per line, in the order a reader would build the map, with parents always before children (decision D-08). The lines carry <code>id</code>, <code>parent</code>, <code>title</code> and, optionally, <code>note</code> and <code>image_hint</code>. The format was chosen because it was observed to work on the real server: the model produced one complete line about every 290 ms, obeyed "no code fence, no other text, parents before children", and the client could split on newlines and parse each line without an incremental JSON parser. The cost is that nothing enforces validity, so each line is validated locally. Schema-validated JSON through <code>outputSchema</code> also streams (as partial JSON text), but it needs a streaming JSON parser, so it is the non-streaming fallback.</p>
+  <p>A proposed example stream, with a first line carrying the style sheet (the style line is a proposed extension, not part of the tested format):</p>
+  <pre class="code"><code>{"type":"style","palette":"warm","branch":"curved","layout":"two-sided"}
+{"id":"n1","parent":null,"title":"Coffee"}
+{"id":"n2","parent":"n1","title":"Origins","note":"Where coffee is grown."}
+{"id":"n3","parent":"n2","title":"Ethiopia","image_hint":"hillside coffee plants"}
+{"id":"n4","parent":"n2","title":"Colombia"}
+{"id":"n5","parent":"n1","title":"Brewing"}</code></pre>
+  <p>The two verified lines the format derives from were <code>{"id":"n1","parent":null,"title":"Coffee"}</code> and <code>{"id":"n3","parent":"n2","title":"Ethiopia"}</code>. The 40-node prompt was interrupted at 6 s, so the log shows eight complete lines, not 40. Extrapolating the observed pace, a 40-node map would finish about 15 s after the job starts (3.7 s to the first delta plus 40 lines at about 0.29 s), which is an inference and not a measurement.</p>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-13">
+      <div class="req-head"><code class="req-id">FR-AI-13</code><span class="badge must">Must</span><h4>Line-oriented node format</h4></div>
+      <p>Map generation must use one JSON object per line with the fields <code>id</code>, <code>parent</code> (null for the root), <code>title</code> and optional <code>note</code> and <code>image_hint</code>, with parents before children, as specified in decision D-08. The format must be defined once, in a versioned specification file shared by the prompt, the validator and the tests.</p>
+      <p class="req-meta"><b>Accept when:</b> the specification file is the single source for the prompt text and the validator, and a stream built from the example above is accepted in full. <b>Why:</b> decision D-08; format observed to work on the real server.</p>
+    </div>
+    <div class="req" id="FR-AI-14">
+      <div class="req-head"><code class="req-id">FR-AI-14</code><span class="badge must">Must</span><h4>Buffer deltas and apply complete lines</h4></div>
+      <p>The client must accumulate <code>item/agentMessage/delta</code> text in a buffer, split it on newline characters, parse each complete line, and apply it. Deltas arrive in bursts of one to twelve characters every 110 to 150 ms, so a line routinely spans several messages. A trailing incomplete line must be discarded when the stream ends or is interrupted.</p>
+      <p class="req-meta"><b>Accept when:</b> a replay of a recorded delta log (for example <code>as3.jsonl</code> from the probe) produces exactly the lines in the final message, and a replay cut off mid-line applies no partial node. <b>Why:</b> verified delta cadence.</p>
+    </div>
+    <div class="req" id="FR-AI-15">
+      <div class="req-head"><code class="req-id">FR-AI-15</code><span class="badge must">Must</span><h4>Validate every line</h4></div>
+      <p>Each line must be checked before it changes the document: it is valid JSON, it has the required fields with the right types, its <code>id</code> is unique, its <code>parent</code> already exists (or is null for the single root), its title is non-empty and within a length limit, and it respects depth and breadth limits (FR-AI-05). An invalid line must be dropped, counted and logged without stopping the job.</p>
+      <p class="req-meta"><b>Accept when:</b> a stream with a duplicate id, an unknown parent, a non-JSON line and an over-long title applies only the valid lines, reports four rejections, and finishes the job. <b>Why:</b> the line format has no schema enforcement (<a href="#codex">Codex CLI</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-16">
+      <div class="req-head"><code class="req-id">FR-AI-16</code><span class="badge should">Should</span><h4>Repair malformed output</h4></div>
+      <p>When lines were rejected, the app should send the rejected lines and the parser errors back to the model on the same thread in a follow-up turn, at most twice, and apply the corrected lines. If repair fails, the job must finish with a message naming the number of unrepaired lines and keep the valid part.</p>
+      <p class="req-meta"><b>Accept when:</b> a simulated stream with three malformed lines is repaired by a replayed correction turn, and a simulated failing repair stops after two attempts. <b>Why:</b> a parse, check and repair loop is reported in one project only (a Mermaid study moving from about 70% to near 100% valid), so the benefit is unproven for this format (<a href="#ai-tools">AI tools</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-17">
+      <div class="req-head"><code class="req-id">FR-AI-17</code><span class="badge must">Must</span><h4>Stable identifiers</h4></div>
+      <p>The model's ids (<code>n1</code>, <code>n2</code>, and so on) must be local to one job. The app must map each to a permanent internal node id when applying it, and every later AI operation (expand, regenerate, chat) must refer to existing nodes by their permanent ids, supplied in the prompt as a compact outline.</p>
+      <p class="req-meta"><b>Accept when:</b> two jobs that both emit <code>n1</code> never collide, and an expand job on node X attaches children only under X. <b>Why:</b> refinement must never touch unrelated nodes.</p>
+    </div>
+    <div class="req" id="FR-AI-18">
+      <div class="req-head"><code class="req-id">FR-AI-18</code><span class="badge must">Must</span><h4>Keep partial output on interrupt</h4></div>
+      <p>The client must keep its own copy of every delta and every applied line for the whole job, because the server returns an empty item list for an interrupted turn. An interrupted or failed job must leave the applied nodes in the document and let the user continue, retry or undo the whole job.</p>
+      <p class="req-meta"><b>Accept when:</b> after an interrupt the document still contains all nodes applied before it, even though the <code>turn/completed</code> message carries no items. <b>Why:</b> verified: after interrupt, <code>turn.items</code> was empty.</p>
+    </div>
+    <div class="req" id="FR-AI-19">
+      <div class="req-head"><code class="req-id">FR-AI-19</code><span class="badge must">Must</span><h4>Schema-validated JSON fallback</h4></div>
+      <p>When streaming is unavailable (the app server cannot start, or the installed version is unsupported), generation must fall back to a single non-streaming call through <code>codex exec</code> with <code>--output-schema</code>, using a flat node list with <code>parent_id</code>, and the whole result must be validated against the schema before any node is applied.</p>
+      <p class="req-meta"><b>Accept when:</b> with the app-server route disabled, the same topic yields a valid map in one step, and a result that fails the schema is rejected as a whole. <b>Why:</b> verified: a 5-node map returned as valid JSON in 7 s; flat array with <code>parent_id</code> is the safe schema design.</p>
+    </div>
+  </div>
+
+  <h2>Refining and learning-aware generation</h2>
+  <h3>Refining a map</h3>
+  <p>After generation the user shapes the map. The commands below act on a selected branch, never on the whole map unless asked, and every result is an operation in the document's operation log (decision D-14) so it can be undone. Existing AI tools mostly implement refinement the same way, as commands scoped to a node or branch; the evidence is vendor material and single reviews, so it is thin <span class="badge reported">Third-party</span> (<a href="#ai-tools">AI tools</a>).</p>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-20">
+      <div class="req-head"><code class="req-id">FR-AI-20</code><span class="badge must">Must</span><h4>Expand a node</h4></div>
+      <p>The user must be able to select a node and ask the AI to add children to it. The new nodes must appear under that node only, in the map's style, within the depth and breadth limits.</p>
+      <p class="req-meta"><b>Accept when:</b> expanding a leaf adds between 1 and the breadth limit new children under it and leaves every other node unchanged (a comparison of the before and after documents shows no other differences). <b>Why:</b> the minimum refinement in milestone M2.</p>
+    </div>
+    <div class="req" id="FR-AI-21">
+      <div class="req-head"><code class="req-id">FR-AI-21</code><span class="badge should">Should</span><h4>Regenerate a branch</h4></div>
+      <p>The user should be able to ask for a new version of a branch with an optional instruction, see the proposal alongside or over the existing one, and accept or discard it. Accepting replaces the branch as one operation.</p>
+      <p class="req-meta"><b>Accept when:</b> discarding a proposal leaves the document byte-identical to before, and accepting then undoing restores the original branch exactly. <b>Why:</b> regenerating a whole map discards the user's edits; branch scope avoids that.</p>
+    </div>
+    <div class="req" id="FR-AI-22">
+      <div class="req-head"><code class="req-id">FR-AI-22</code><span class="badge should">Should</span><h4>Rephrase to keywords and summarise a branch</h4></div>
+      <p>The user should be able to ask the AI to rewrite the labels of a branch as terse keyword phrases (about 2 to 5 words) and to condense a branch into fewer nodes. Both must preserve the node ids of surviving nodes.</p>
+      <p class="req-meta"><b>Accept when:</b> after rephrasing, no label in the branch exceeds the word limit and node ids and structure are unchanged; after summarising, the branch has fewer nodes and the removed nodes can be restored with one undo. <b>Why:</b> Buzan-derived terseness without enforcing a one-word rule, which is folklore (<a href="#science">science</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-23">
+      <div class="req-head"><code class="req-id">FR-AI-23</code><span class="badge could">Could</span><h4>Explain a node into its note</h4></div>
+      <p>The user could ask for an explanation of a node and have it stored in the node's note. The explanation must never overwrite an existing note without confirmation.</p>
+      <p class="req-meta"><b>Accept when:</b> the note appears on the node, a node with an existing note asks for confirmation first, and the operation is undoable. <b>Why:</b> keeps map labels terse while holding detail in notes.</p>
+    </div>
+    <div class="req" id="FR-AI-24">
+      <div class="req-head"><code class="req-id">FR-AI-24</code><span class="badge could">Could</span><h4>Find gaps and propose cross-links</h4></div>
+      <p>Given a source, the AI could list topics in the source that the map does not cover, and could propose cross-links between existing nodes. Suggestions must be shown as a list the user accepts one by one; nothing is applied automatically.</p>
+      <p class="req-meta"><b>Accept when:</b> each suggestion can be accepted or dismissed individually, and dismissing all leaves the document unchanged. <b>Why:</b> concept-map evidence favours labelled links and the learner doing the effortful step (<a href="#science">science</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-25">
+      <div class="req-head"><code class="req-id">FR-AI-25</code><span class="badge could">Could</span><h4>Chat bound to the selected subtree</h4></div>
+      <p>The user could open a chat panel whose context is the selected node, its subtree or the whole map (a visible scope control), ask questions, and have suggested changes offered as proposals that follow FR-AI-26. Answers about a source should cite it where a source exists.</p>
+      <p class="req-meta"><b>Accept when:</b> changing the scope control changes the outline sent to the model (visible in the job log), and a chat suggestion never changes the map until accepted. <b>Why:</b> a documented pattern in competing tools such as Heptabase (<a href="#ai-tools">AI tools</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-26">
+      <div class="req-head"><code class="req-id">FR-AI-26</code><span class="badge must">Must</span><h4>Every AI change is undoable and visible</h4></div>
+      <p>Each AI job (initial generation, expand, regenerate, rephrase, summarise, accepted suggestion) must be recorded as one operation in the operation log, undone with a single undo, and followed by a visible change summary (new nodes highlighted, removed or edited nodes listed) that the user can dismiss.</p>
+      <p class="req-meta"><b>Accept when:</b> one undo after any AI job restores the document to its exact earlier state, and the change summary lists the number of nodes added, edited and removed. <b>Why:</b> decisions D-14 and D-18; the user stays the author of the map.</p>
+    </div>
+    <div class="req" id="FR-AI-27">
+      <div class="req-head"><code class="req-id">FR-AI-27</code><span class="badge must">Must</span><h4>Refinement acts only on the selected scope</h4></div>
+      <p>Every refinement command must send the model only the selected scope (and a short outline of the rest for context) and must reject any returned line that would change a node outside the allowed scope.</p>
+      <p class="req-meta"><b>Accept when:</b> a replay in which the model returns a line that edits a node outside the selected branch leaves that node unchanged and logs the rejection. <b>Why:</b> refinement commands that regenerate the whole map were the main complaint pattern in the tool review (<a href="#ai-tools">AI tools</a>, thin evidence).</p>
+    </div>
+  </div>
+
+  <h3>Learning-aware generation</h3>
+  <p>These requirements follow from the evidence on <a href="#science">the science page</a> and from decision D-18: the learner benefits from doing the effortful step, so AI features should hand the work back. The evidence for blanking about 30 to 40 percent of nodes is weak to moderate (Chang 2002), the effect of AI help on learning depends on the learner doing the effortful step (indirect evidence), and no controlled study of AI-generated images exists, so these are Should and Could priorities and the app must not claim a measured memory benefit.</p>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-28">
+      <div class="req-head"><code class="req-id">FR-AI-28</code><span class="badge should">Should</span><h4>Generate a skeleton with blanks</h4></div>
+      <p>The user should be able to ask for a map in which a chosen share of nodes (default 30 to 40 percent, adjustable) have empty labels to fill in, with the answers held in the document so they can be revealed and checked.</p>
+      <p class="req-meta"><b>Accept when:</b> a generated skeleton of 20 nodes has between 6 and 8 blank nodes by default, each blank has a stored answer, and revealing a blank does not alter the map structure. <b>Why:</b> weak to moderate evidence for completion-style maps (<a href="#science">science</a>); links to the recall features in <a href="#features">the features list</a>.</p>
+    </div>
+    <div class="req" id="FR-AI-29">
+      <div class="req-head"><code class="req-id">FR-AI-29</code><span class="badge could">Could</span><h4>Generate questions from a map</h4></div>
+      <p>The AI could generate recall questions from a branch, each linked to the node it tests, for use in review. The app must not present the questions as a replacement for free recall from the map.</p>
+      <p class="req-meta"><b>Accept when:</b> each question names its source node, and a branch of 10 nodes yields at least one question per leaf. <b>Why:</b> retrieval practice is strongly supported; question quality is not evidenced here (<a href="#science">science</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-30">
+      <div class="req-head"><code class="req-id">FR-AI-30</code><span class="badge could">Could</span><h4>Check the user's own draft against a source</h4></div>
+      <p>The user could build a map from memory with the source closed, and then ask the AI to compare it with a source, listing missing, extra and wrong nodes as suggestions the user decides on. The AI must not rewrite the user's map.</p>
+      <p class="req-meta"><b>Accept when:</b> the comparison returns a list and leaves the document unchanged until a suggestion is accepted. <b>Why:</b> map-from-memory is moderately supported (Blunt and Karpicke 2014); the AI help in the check is a proposed design (<a href="#science">science</a>).</p>
+    </div>
+  </div>
+
+  <h2>Prompt design</h2>
+  <p>The app sends the model a structured set of instructions with every job. The proposed structure has six parts:</p>
+  <ol class="flow">
+    <li><b>Role.</b> A short statement that the model is a map-building component and not a chat assistant.</li>
+    <li><b>Output contract.</b> The line format, field rules, parents before children, no code fence, no other text.</li>
+    <li><b>Style sheet.</b> The values the model must respect in titles and image hints.</li>
+    <li><b>Rules.</b> Buzan-derived defaults (short labels, one idea per node), maximum depth and children per node, no coordinates.</li>
+    <li><b>Example.</b> One short, complete example stream.</li>
+    <li><b>Task.</b> The topic, audience and source, or the selected scope as an outline.</li>
+  </ol>
+  <p>The evidence for these choices is thin. The tool review found that including an example outline reduces malformed trees in one project, a parse, check and repair loop helped in one project, and outline-first generation is common but undocumented as a design choice (<a href="#ai-tools">AI tools</a>). The Buzan-derived rules are defaults, because the one-word-per-branch rule has no support in the evidence (<a href="#science">science</a>). The thread start call accepts <code>baseInstructions</code> and <code>developerInstructions</code>, so the fixed parts can be supplied as instructions and the task as the user turn <span class="badge documented">Documented</span> (generated schema, <a href="#codex">Codex CLI</a>). Where exactly each part goes was not tested.</p>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-31">
+      <div class="req-head"><code class="req-id">FR-AI-31</code><span class="badge must">Must</span><h4>Structured, versioned prompt templates</h4></div>
+      <p>Prompts must be built from versioned template files containing the six parts above (role, output contract, style sheet, rules, example, task), not from strings assembled inline in code. The template version must be recorded with every job. The example must be present in map-generation prompts.</p>
+      <p class="req-meta"><b>Accept when:</b> changing a template file changes the next job's prompt without a code change, the job log shows the template version, and the logged prompt of a generation job contains an example stream. <b>Why:</b> prompts are the main lever on output validity and must be tunable; decision D-19 requires recording the prompt.</p>
+    </div>
+    <div class="req" id="FR-AI-32">
+      <div class="req-head"><code class="req-id">FR-AI-32</code><span class="badge should">Should</span><h4>Prompt regression set</h4></div>
+      <p>The project should keep a fixed set of at least 10 topics and style requests, with recorded model outputs, and a test that reports the share of valid lines and the share of jobs that reach the size limits, so that a template or model change can be judged.</p>
+      <p class="req-meta"><b>Accept when:</b> the test runs from recorded logs without a network call, and a template change shows the valid-line share before and after. <b>Why:</b> the evidence for any prompt choice is thin, so it must be measured on the app's own output.</p>
+    </div>
+  </div>
+
+  <h2>Engine management and providers</h2>
+  <p>The host core (decision D-06, Rust inside the shell) owns the Codex child process. It starts one <code>codex app-server --listen stdio://</code> process, supervises it, creates one thread per job and speaks newline-delimited JSON-RPC to it. A one-shot <code>codex exec</code> path is the fallback. All of this sits behind a provider interface so another engine can be added later.</p>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-33">
+      <div class="req-head"><code class="req-id">FR-AI-33</code><span class="badge must">Must</span><h4>Start and supervise the app-server process</h4></div>
+      <p>The host must start one long-lived <code>codex app-server --listen stdio://</code> process on first use, perform the <code>initialize</code> and <code>initialized</code> handshake, and restart it if it exits unexpectedly. Jobs in flight when it dies must fail with a clear message and keep their partial output (FR-AI-18). The process must be stopped when the app quits and must not outlive it.</p>
+      <p class="req-meta"><b>Accept when:</b> killing the child during a job produces a failed job with partial nodes kept and a restarted process for the next job, and quitting the app leaves no <code>codex app-server</code> process of the app running. <b>Why:</b> decision D-07; verified handshake.</p>
+    </div>
+    <div class="req" id="FR-AI-34">
+      <div class="req-head"><code class="req-id">FR-AI-34</code><span class="badge must">Must</span><h4>Detect Codex, check version, and generate types</h4></div>
+      <p>At start-up the host must check that <code>codex</code> is installed and logged in (<code>codex --version</code> and <code>codex login status</code>), read the version, and compare it with the versions the app was tested against. The protocol types must be generated from the installed binary (<code>generate-json-schema</code> or <code>generate-ts</code>) in the build and checked in a test. On an untested version the app must warn and offer the <code>exec</code> fallback. If Codex is missing or logged out, the app must show how to install it or sign in and must not attempt a login itself.</p>
+      <p class="req-meta"><b>Accept when:</b> with <code>codex</code> removed from the path the app shows an install message; with a faked newer version it warns; with a faked logged-out status it shows the sign-in instruction. <b>Why:</b> the CLI marks the app server as experimental, and the protocol changes between versions (<a href="#codex">Codex CLI</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-35">
+      <div class="req-head"><code class="req-id">FR-AI-35</code><span class="badge must">Must</span><h4>Isolation settings and a working directory per job</h4></div>
+      <p>Every job must run with these settings: read-only sandbox, approval policy <code>never</code>, <code>--disable apps --disable plugins</code>, <code>web_search=disabled</code> (unless FR-AI-07 applies), and each of the user's own MCP servers disabled by name, discovered at run time. Each job must use a fresh empty working directory that is deleted afterwards. For <code>exec</code>, the call must also add <code>--ignore-user-config --ignore-rules --ephemeral --skip-git-repo-check</code> and stdin from <code>/dev/null</code>.</p>
+      <p class="req-meta"><b>Accept when:</b> a start-up self-test on the app server reports zero MCP servers started (as in the verified variant), an <code>exec</code> job given no stdin redirect is refused by a unit test, and no files remain in the per-job directory's parent after a job. <b>Why:</b> verified isolation recipe; sub-agent and exec tools cannot be removed, so the sandbox and approval policy are the real guard (<a href="#codex">Codex CLI</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-36">
+      <div class="req-head"><code class="req-id">FR-AI-36</code><span class="badge should">Should</span><h4>Concurrency limit</h4></div>
+      <p>The host should run at most two AI jobs at once by default (configurable up to four), each on its own thread in the single app-server process, and queue the rest in order, showing queued jobs in the interface.</p>
+      <p class="req-meta"><b>Accept when:</b> starting five jobs shows two running and three queued, and the order of completion matches the queue. <b>Why:</b> limits are per account and opaque; the two-to-four range is an inference, not a measurement (<a href="#codex">Codex CLI</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-37">
+      <div class="req-head"><code class="req-id">FR-AI-37</code><span class="badge should">Should</span><h4>Timeouts and retry</h4></div>
+      <p>A text job should warn the user if no delta arrives within 15 s of the turn starting (about four times the measured 2.8 to 3.7 s; proposed) and be cancelled after a configurable hard limit (default 120 s, proposed). The host should retry a job once on transient server errors (<code>serverOverloaded</code> and response-stream connection errors), and must not retry on <code>usageLimitExceeded</code>, <code>rateLimitExceeded</code> or <code>unauthorized</code>.</p>
+      <p class="req-meta"><b>Accept when:</b> simulated events for each error class produce a retry for the transient ones and a clear stop for the others, and a stalled stream triggers the warning. <b>Why:</b> the error classes are from the generated schema; none was triggered live, so wire examples are unverified (<a href="#codex">Codex CLI</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-38">
+      <div class="req-head"><code class="req-id">FR-AI-38</code><span class="badge must">Must</span><h4>Surface rate limits and plan exhaustion clearly</h4></div>
+      <p>The app must read <code>account/rateLimits/read</code> at start-up and before any batch, show the plan type and the used share of the main window with its reset time, merge <code>account/rateLimits/updated</code> notifications into that display, and translate limit and authentication errors into plain messages that say what happened and what to do (wait until the reset time, use credits, or run <code>codex login</code>). It must never show a raw protocol error alone.</p>
+      <p class="req-meta"><b>Accept when:</b> with replayed rate-limit snapshots the indicator shows usedPercent and reset time; with a replayed <code>usageLimitExceeded</code> or <code>unauthorized</code> error the message names the cause and the next step. <b>Why:</b> verified read and notification; the account tested showed one weekly window of 10,080 minutes at 1 percent used (<a href="#codex">Codex CLI</a>).</p>
+    </div>
+    <div class="req" id="FR-AI-39">
+      <div class="req-head"><code class="req-id">FR-AI-39</code><span class="badge must">Must</span><h4>Never touch credentials</h4></div>
+      <p>The app must never read, copy, log, transmit or modify Codex credential files (<code>~/.codex/auth.json</code>) or keyring entries, and must obtain login state only from the Codex CLI itself. It must not pass tokens to any other process.</p>
+      <p class="req-meta"><b>Accept when:</b> a code search finds no path that opens <code>auth.json</code>, a file-access trace of a full session shows no open of it by the app's own processes, and the app's log files contain no token strings. <b>Why:</b> decision D-07; OpenAI says to treat the file like a password (<a href="#codex">Codex CLI</a>, policy section).</p>
+    </div>
+    <div class="req" id="FR-AI-40">
+      <div class="req-head"><code class="req-id">FR-AI-40</code><span class="badge should">Should</span><h4>Logging and provenance</h4></div>
+      <p>The host should keep a rotating protocol log per job (every JSON-RPC message with timestamps, without credentials) and must record on every generated map element the prompt, the template version, the model and the effort that produced it. Token usage from <code>thread/tokenUsage/updated</code> should be stored per job.</p>
+      <p class="req-meta"><b>Accept when:</b> a job's log can be replayed through the test harness to reproduce the applied nodes, and the document stores model and effort for each job. <b>Why:</b> decision D-19; the replay format matches the probe logs.</p>
+    </div>
+    <div class="req" id="FR-AI-41">
+      <div class="req-head"><code class="req-id">FR-AI-41</code><span class="badge should">Should</span><h4>One-shot <code>exec</code> fallback</h4></div>
+      <p>The provider must include a one-shot path through <code>codex exec</code> with the isolation flags of FR-AI-35, <code>--output-schema</code> and <code>-o</code>, usable when the app server is unavailable. The process must be killed on cancel, and a job must not be reported as complete unless the process exits with code 0 and the output validates.</p>
+      <p class="req-meta"><b>Accept when:</b> the fallback produces a valid map when run against the installed CLI, cancel kills the process within 1 s, and a non-zero exit is reported as a failure. <b>Why:</b> decision D-07; verified at 7 s for the tested map, with no streaming.</p>
+    </div>
+  </div>
+
+  <h3>Provider interface</h3>
+  <p>A provider is the part of the app that talks to one AI engine. The interface lets the map engine ask for work without knowing which engine does it, so an API key, another vendor's command-line tool or a local model can be added later (decision D-07). A provider must implement: start a text job from a prompt and options and emit normalised events; cancel a job; report capabilities (streaming, structured output, image input, image generation); report usage and limits where it can; report health (installed, signed in, version); and shut down. Normalised events are text delta, completed message, usage, limit update and error with a class.</p>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-42">
+      <div class="req-head"><code class="req-id">FR-AI-42</code><span class="badge must">Must</span><h4>Provider interface with a replay provider</h4></div>
+      <p>All AI access must go through one provider interface covering job start, cancel, capabilities, usage and limits, health and shutdown, emitting normalised events. Two providers must exist from the start: the Codex provider (app server with an <code>exec</code> fallback) and a replay provider that plays back recorded logs for tests and demonstrations.</p>
+      <p class="req-meta"><b>Accept when:</b> no code outside the provider module references Codex method names, and the full generation flow (streaming, cancel, repair) runs end to end against the replay provider with no network and no Codex installed. <b>Why:</b> decision D-07; the recorded probe logs make the replay provider cheap.</p>
+    </div>
+    <div class="req" id="FR-AI-43">
+      <div class="req-head"><code class="req-id">FR-AI-43</code><span class="badge later">Later</span><h4>Additional engines</h4></div>
+      <p>Providers for an API key, another vendor's CLI and a local model are deferred. The interface must not assume that a provider supports images, streaming or rate-limit reporting; absent capabilities must hide the matching interface features.</p>
+      <p class="req-meta"><b>Accept when:</b> a test provider that reports no streaming makes the app use the non-streaming path and hides the live-growth behaviour without errors. <b>Why:</b> decision D-07; third-party tools take both the CLI route and a direct OAuth route, so engines differ widely (<a href="#codex">Codex CLI</a>).</p>
+    </div>
+  </div>
+
+  <h2>Cost, limits and open questions</h2>
+  <h3>What is known about cost</h3>
+  <p>The subscription is the only cost to the user, and its limits are opaque. Known: plans differ, a Plus plan has five-hour message limits and Pro plans are documented as having none, weekly limits may apply, credits can be bought, and image generation uses included limits about 3 to 5 times faster than a similar text turn <span class="badge documented">Documented</span> (<a href="#codex">Codex CLI</a>). Measured: a text call used roughly 12,000 to 18,000 input tokens (mostly fixed system and tool prompt, some cached) and 45 to 216 output tokens, and the weekly meter did not visibly move across eight small calls. Unknown: how many map generations a plan allows, and the cost of one image or SVG in plan usage. Because the token cost of each call is dominated by the fixed prompt, many small calls cost more than a few larger ones, which argues for batching a map into one job.</p>
+
+  <div class="req-list">
+    <div class="req" id="FR-AI-44">
+      <div class="req-head"><code class="req-id">FR-AI-44</code><span class="badge should">Should</span><h4>Show usage</h4></div>
+      <p>The app should show, per job, the input and output tokens reported by the server and the elapsed time, and show a running usage indicator for the session. Jobs on which the server reports no usage (an interrupted turn reported none) must be labelled as unmeasured.</p>
+      <p class="req-meta"><b>Accept when:</b> a completed job lists tokens in and out as reported, an interrupted job shows "usage not reported", and the weekly percentage is shown with the reset time (FR-AI-38). <b>Why:</b> verified usage notification; plan-percentage cost per job is too coarse to compute (integer percent).</p>
+    </div>
+    <div class="req" id="FR-AI-45">
+      <div class="req-head"><code class="req-id">FR-AI-45</code><span class="badge must">Must</span><h4>Confirm large batch jobs before they run</h4></div>
+      <p>Before running a job that would make more than five model turns (proposed threshold), or any job that generates images, the app must show the number of turns and the current weekly usage and require the user's confirmation. A stop control must be visible while the batch runs, and the batch must stop on the first limit error.</p>
+      <p class="req-meta"><b>Accept when:</b> a batch of eight turns shows a confirmation with the count and the weekly usage, declining runs nothing, and a replayed limit error halts the remainder. <b>Why:</b> image cost is documented as 3 to 5 times a text turn and was not measurable (<a href="#codex">Codex CLI</a>); the threshold is a proposal.</p>
+    </div>
+  </div>
+
+  <h3>Open questions</h3>
+  <ul>
+    <li>How many generations a plan supports, and the plan cost of one image: not measurable on the account tested, because the usage meter has integer granularity.</li>
+    <li>Whether a model that is told to put the style sheet on the first line does so reliably: proposed, not tested.</li>
+    <li>Whether the repair loop (FR-AI-16) helps with this line format: the supporting evidence is one project with a different format.</li>
+    <li>How the SDKs or a direct OAuth route compare with the app server on streaming: not verified.</li>
+    <li>Whether the app may be distributed with Codex integration: no text was found that permits or forbids it, and the Sign in with ChatGPT programme details come from one secondary source. Resolve before any public release; see <a href="#codex">the Codex CLI page</a>.</li>
+    <li>Live error shapes for rate limits and expired login, and whether the model's built-in sub-agent tools can act inside a locked-down thread: not tested.</li>
+    <li>Whether web research through the search setting works under the isolation flags: not run.</li>
+  </ul>
+</section>

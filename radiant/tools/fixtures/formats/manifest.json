@@ -1,0 +1,26 @@
+[
+  {
+    "file": "v1-initial.radiant",
+    "schema": 1,
+    "source": "b636b3e27673992d553034accf7385568837bcc6",
+    "sha256": "105819416f07f2c7e765662be9754f086dc86a8a8778c74f2e37446232831aa7"
+  },
+  {
+    "file": "v1-journal.radiant",
+    "schema": 1,
+    "source": "74edc12600dd5fa5c5253a6233db953663ce0ac9",
+    "sha256": "d3be06dd4b36e76654d1e507471e494356bfe714bfab4f0e32451fdc49814f07"
+  },
+  {
+    "file": "v2-indexed.radiant",
+    "schema": 2,
+    "source": "5c92d30843204ad8c9d61894fd7b55b2d02faebf",
+    "sha256": "0a67f7abf1c66fa91fbd08225e88241c080844c2bbc7168af41b17df159203d5"
+  },
+  {
+    "file": "v3-fractional.radiant",
+    "schema": 3,
+    "source": "2f4b0b6eef868575d9600a766db0d971d895ef78",
+    "sha256": "1a04e13909710b0f33f924d012c62124e30962495e13d7022591d176f2b3dd16"
+  }
+]

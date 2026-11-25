@@ -1,0 +1,22 @@
+clean 61+30 | soft-clay 94+21 | lifted-arcs 137+17 | rope 376+45 | paper-quilling 96+32 | clean 50+12
+clean 59+26 | soft-clay 97+21 | lifted-arcs 130+18 | rope 379+37 | paper-quilling 99+31 | clean 53+12
+clean 67+28 | soft-clay 99+61 | lifted-arcs 143+20 | rope 385+53 | paper-quilling 97+39 | clean 53+12
+clean 60+26 | soft-clay 98+22 | lifted-arcs 144+19 | rope 410+38 | paper-quilling 105+34 | clean 52+13
+
+rope 259+28 | rope 38+21 | rope 29+24
+rope 249+31 | rope 35+21 | rope 29+20
+clean 62+29 | rope 251+30 | rope 39+24
+clean 65+28 | rope 264+31 | rope 50+26
+soft-clay 100+32 | rope 287+29 | rope 42+24
+soft-clay 103+26 | rope 278+32 | rope 37+23
+lifted-arcs 113+28 | rope 274+29 | rope 39+23
+lifted-arcs 110+27 | rope 271+29 | rope 37+27
+paper-quilling 86+27 | rope 261+30
+paper-quilling 84+33 | rope 260+29
+soft-clay 90+23 | lifted-arcs 132+17 | paper-quilling 83+17 | soft-clay 195+14
+soft-clay 93+22 | lifted-arcs 131+16 | paper-quilling 87+17 | soft-clay 197+14
+
+node (V8) cold:
+clean 135+34 | soft-clay 137+72 | lifted-arcs 139+29 | rope 253+78 | paper-quilling 168+76 | clean 100+20
+clean 114+32 | soft-clay 127+72 | lifted-arcs 128+31 | rope 223+61 | paper-quilling 156+65 | clean 120+21
+clean 115+32 | soft-clay 120+64 | lifted-arcs 126+29 | rope 220+70 | paper-quilling 159+78 | clean 116+20

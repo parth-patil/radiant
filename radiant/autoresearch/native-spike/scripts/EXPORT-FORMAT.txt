@@ -1,0 +1,10 @@
+Export format (from radiant renderer.scene in the dev server, headless Chrome, 1440x900 @2x)
+Directory per dataset: {5000,50000}-{clean,rope}/
+- scene.json: background, raisedRects, mesh header {nv, ni, bytes, stride, ox, oy, wide, spans, relief{material,maxWidth,shadowReach,shadowColor,hasShadow,hasTwist}}, rects[], labels[], cameras, bounds, renderer stats.
+- vtx.bin: Mesh.gpuVertices.buffer exactly as the WebGL renderer uploads it (render/mesh-vertices.ts):
+   flat (clean), wide: stride 20 = f32 x, f32 y (relative to ox,oy), 4 x u8 premultiplied rgba, f32 xLow, f32 yLow
+   rope, wide: stride 32 = f32 x, f32 y, u8x4 rgba, i8x4 (nx, ny, shadowStrength|plies<<4, across), i16x2 shadow offset (1/128 world), f32 twist, f32 xLow, f32 yLow
+- idx.bin: u32 triangle indices.
+- sb.bin: f64 x0,y0,x1,y1 per branch span; se.bin: u32 end index (exclusive, into idx) per span. Spans are in draw order.
+- camera-path.json: the shared 5 s camera path (fit, z035, z1).
+Positions are world units; y down; 1 unit = 1 CSS px at zoom 1. Colours premultiplied.

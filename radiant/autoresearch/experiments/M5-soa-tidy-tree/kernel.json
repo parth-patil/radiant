@@ -1,0 +1,322 @@
+[
+ {
+  "cold": 9.05,
+  "layoutDoc": 1.31,
+  "layoutDocMin": 0.95,
+  "settle": 3.78,
+  "engine": "chrome",
+  "round": 0,
+  "n": "5000",
+  "impl": "old"
+ },
+ {
+  "cold": 6.6,
+  "layoutDoc": 1.09,
+  "layoutDocMin": 0.83,
+  "settle": 2.6,
+  "engine": "chrome",
+  "round": 0,
+  "n": "5000",
+  "impl": "new"
+ },
+ {
+  "cold": 76.15,
+  "layoutDoc": 17.31,
+  "layoutDocMin": 13.16,
+  "settle": 41.35,
+  "engine": "chrome",
+  "round": 0,
+  "n": "50000",
+  "impl": "old"
+ },
+ {
+  "cold": 33.4,
+  "layoutDoc": 14.11,
+  "layoutDocMin": 11.96,
+  "settle": 40.6,
+  "engine": "chrome",
+  "round": 0,
+  "n": "50000",
+  "impl": "new"
+ },
+ {
+  "cold": 6.77,
+  "layoutDoc": 1.03,
+  "layoutDocMin": 0.8,
+  "settle": 3.01,
+  "engine": "chrome",
+  "round": 1,
+  "n": "5000",
+  "impl": "new"
+ },
+ {
+  "cold": 9.22,
+  "layoutDoc": 1.41,
+  "layoutDocMin": 0.94,
+  "settle": 3.75,
+  "engine": "chrome",
+  "round": 1,
+  "n": "5000",
+  "impl": "old"
+ },
+ {
+  "cold": 35.32,
+  "layoutDoc": 13.36,
+  "layoutDocMin": 11.72,
+  "settle": 42.95,
+  "engine": "chrome",
+  "round": 1,
+  "n": "50000",
+  "impl": "new"
+ },
+ {
+  "cold": 66.79,
+  "layoutDoc": 18.02,
+  "layoutDocMin": 13.78,
+  "settle": 41.84,
+  "engine": "chrome",
+  "round": 1,
+  "n": "50000",
+  "impl": "old"
+ },
+ {
+  "cold": 9,
+  "layoutDoc": 1.36,
+  "layoutDocMin": 0.99,
+  "settle": 3.94,
+  "engine": "chrome",
+  "round": 2,
+  "n": "5000",
+  "impl": "old"
+ },
+ {
+  "cold": 6.64,
+  "layoutDoc": 0.99,
+  "layoutDocMin": 0.75,
+  "settle": 2.75,
+  "engine": "chrome",
+  "round": 2,
+  "n": "5000",
+  "impl": "new"
+ },
+ {
+  "cold": 66.66,
+  "layoutDoc": 18.95,
+  "layoutDocMin": 12.97,
+  "settle": 47.32,
+  "engine": "chrome",
+  "round": 2,
+  "n": "50000",
+  "impl": "old"
+ },
+ {
+  "cold": 31.01,
+  "layoutDoc": 14.4,
+  "layoutDocMin": 13.24,
+  "settle": 42.97,
+  "engine": "chrome",
+  "round": 2,
+  "n": "50000",
+  "impl": "new"
+ },
+ {
+  "cold": 6.2,
+  "layoutDoc": 1.02,
+  "layoutDocMin": 0.78,
+  "settle": 2.92,
+  "engine": "chrome",
+  "round": 3,
+  "n": "5000",
+  "impl": "new"
+ },
+ {
+  "cold": 9.45,
+  "layoutDoc": 1.38,
+  "layoutDocMin": 1.04,
+  "settle": 3.89,
+  "engine": "chrome",
+  "round": 3,
+  "n": "5000",
+  "impl": "old"
+ },
+ {
+  "cold": 45.14,
+  "layoutDoc": 15,
+  "layoutDocMin": 13.26,
+  "settle": 47.6,
+  "engine": "chrome",
+  "round": 3,
+  "n": "50000",
+  "impl": "new"
+ },
+ {
+  "cold": 74.79,
+  "layoutDoc": 19.19,
+  "layoutDocMin": 16.53,
+  "settle": 48.19,
+  "engine": "chrome",
+  "round": 3,
+  "n": "50000",
+  "impl": "old"
+ },
+ {
+  "cold": 6.08,
+  "layoutDoc": 1.4,
+  "layoutDocMin": 1.22,
+  "settle": 3.74,
+  "engine": "webkit",
+  "round": 0,
+  "n": "5000",
+  "impl": "old"
+ },
+ {
+  "cold": 5.26,
+  "layoutDoc": 1.74,
+  "layoutDocMin": 1.16,
+  "settle": 3.48,
+  "engine": "webkit",
+  "round": 0,
+  "n": "5000",
+  "impl": "new"
+ },
+ {
+  "cold": 34.14,
+  "layoutDoc": 21.58,
+  "layoutDocMin": 14.7,
+  "settle": 41.44,
+  "engine": "webkit",
+  "round": 0,
+  "n": "50000",
+  "impl": "old"
+ },
+ {
+  "cold": 28.56,
+  "layoutDoc": 14.92,
+  "layoutDocMin": 12.24,
+  "settle": 37.14,
+  "engine": "webkit",
+  "round": 0,
+  "n": "50000",
+  "impl": "new"
+ },
+ {
+  "cold": 4.8,
+  "layoutDoc": 1.38,
+  "layoutDocMin": 1,
+  "settle": 3.14,
+  "engine": "webkit",
+  "round": 1,
+  "n": "5000",
+  "impl": "new"
+ },
+ {
+  "cold": 4.98,
+  "layoutDoc": 1.82,
+  "layoutDocMin": 1.28,
+  "settle": 3.26,
+  "engine": "webkit",
+  "round": 1,
+  "n": "5000",
+  "impl": "old"
+ },
+ {
+  "cold": 28.66,
+  "layoutDoc": 16.62,
+  "layoutDocMin": 13.4,
+  "settle": 37.16,
+  "engine": "webkit",
+  "round": 1,
+  "n": "50000",
+  "impl": "new"
+ },
+ {
+  "cold": 33.06,
+  "layoutDoc": 18.88,
+  "layoutDocMin": 14.5,
+  "settle": 38.68,
+  "engine": "webkit",
+  "round": 1,
+  "n": "50000",
+  "impl": "old"
+ },
+ {
+  "cold": 5.2,
+  "layoutDoc": 1.7,
+  "layoutDocMin": 1.24,
+  "settle": 3.38,
+  "engine": "webkit",
+  "round": 2,
+  "n": "5000",
+  "impl": "old"
+ },
+ {
+  "cold": 4.8,
+  "layoutDoc": 1.42,
+  "layoutDocMin": 0.98,
+  "settle": 3.2,
+  "engine": "webkit",
+  "round": 2,
+  "n": "5000",
+  "impl": "new"
+ },
+ {
+  "cold": 31,
+  "layoutDoc": 19.7,
+  "layoutDocMin": 14.32,
+  "settle": 38.56,
+  "engine": "webkit",
+  "round": 2,
+  "n": "50000",
+  "impl": "old"
+ },
+ {
+  "cold": 27.18,
+  "layoutDoc": 14.56,
+  "layoutDocMin": 12.88,
+  "settle": 35.64,
+  "engine": "webkit",
+  "round": 2,
+  "n": "50000",
+  "impl": "new"
+ },
+ {
+  "cold": 4.88,
+  "layoutDoc": 1.46,
+  "layoutDocMin": 0.92,
+  "settle": 3.26,
+  "engine": "webkit",
+  "round": 3,
+  "n": "5000",
+  "impl": "new"
+ },
+ {
+  "cold": 5.04,
+  "layoutDoc": 1.32,
+  "layoutDocMin": 1.16,
+  "settle": 3.44,
+  "engine": "webkit",
+  "round": 3,
+  "n": "5000",
+  "impl": "old"
+ },
+ {
+  "cold": 26.58,
+  "layoutDoc": 15.42,
+  "layoutDocMin": 12.72,
+  "settle": 36.84,
+  "engine": "webkit",
+  "round": 3,
+  "n": "50000",
+  "impl": "new"
+ },
+ {
+  "cold": 32.76,
+  "layoutDoc": 18.18,
+  "layoutDocMin": 14.38,
+  "settle": 36.24,
+  "engine": "webkit",
+  "round": 3,
+  "n": "50000",
+  "impl": "old"
+ }
+]

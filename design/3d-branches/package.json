@@ -1,0 +1,11 @@
+{
+  "name": "radiant-3d-branch-studies",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun build.ts"
+  },
+  "devDependencies": {
+    "three": "^0.170.0"
+  }
+}

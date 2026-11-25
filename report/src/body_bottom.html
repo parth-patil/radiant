@@ -1,0 +1,214 @@
+  </main>
+</div>
+<script>
+(function(){
+  "use strict";
+  var GROUPS = [
+    {id:"start", title:"Start here"},
+    {id:"roots", title:"History and Buzan"},
+    {id:"evidence", title:"Research"},
+    {id:"landscape", title:"Existing products"},
+    {id:"product", title:"Requirements"},
+    {id:"stack", title:"Tech stack"},
+    {id:"plan", title:"Plan"}
+  ];
+  var all = Array.prototype.slice.call(document.querySelectorAll("section.page"));
+  var byId = {};
+  all.forEach(function(s){ byId[s.id.replace(/^p-/, "")] = s; });
+  var order = all.map(function(s){ return s.id.replace(/^p-/, ""); });
+  var nav = document.getElementById("nav");
+  var rail = document.getElementById("rail");
+  var menuBtn = document.getElementById("menu-btn");
+  var topTitle = document.getElementById("topbar-title");
+
+  // ----- navigation built from the pages that exist -----
+  GROUPS.forEach(function(g){
+    var pages = all.filter(function(s){ return s.dataset.g === g.id; });
+    if (!pages.length) return;
+    var box = document.createElement("div");
+    box.className = "nav-group"; box.dataset.g = g.id;
+    var h = document.createElement("h2"); h.textContent = g.title; box.appendChild(h);
+    pages.forEach(function(s){
+      var a = document.createElement("a");
+      a.href = "#" + s.id.replace(/^p-/, "");
+      a.textContent = s.dataset.nav || s.dataset.title;
+      box.appendChild(a);
+    });
+    nav.appendChild(box);
+  });
+
+  function groupTitle(id){ for (var i=0;i<GROUPS.length;i++) if (GROUPS[i].id===id) return GROUPS[i].title; return ""; }
+
+  // ----- per-page furniture: eyebrow, on-this-page chips, pager -----
+  all.forEach(function(s, i){
+    var h1 = s.querySelector("h1");
+    if (h1 && !s.querySelector(".eyebrow")) {
+      var eb = document.createElement("div"); eb.className = "eyebrow"; eb.textContent = groupTitle(s.dataset.g);
+      s.insertBefore(eb, h1);
+    }
+    var h2s = Array.prototype.slice.call(s.querySelectorAll(":scope > h2"));
+    if (h2s.length > 2) {
+      var toc = document.createElement("div"); toc.className = "toc";
+      var lab = document.createElement("span"); lab.textContent = "On this page"; toc.appendChild(lab);
+      h2s.forEach(function(h){
+        var b = document.createElement("button"); b.type = "button"; b.textContent = h.dataset.short || h.textContent;
+        b.addEventListener("click", function(){ h.scrollIntoView({block:"start"}); });
+        toc.appendChild(b);
+      });
+      var lead = s.querySelector(":scope > .lead");
+      var anchor = lead ? lead.nextSibling : (h1 ? h1.nextSibling : s.firstChild);
+      s.insertBefore(toc, anchor);
+    }
+    var pager = document.createElement("div"); pager.className = "pager";
+    function link(j, cls, label){
+      var t = all[j]; var a = document.createElement("a"); a.className = cls; a.href = "#" + order[j]; a.dataset.g = t.dataset.g;
+      var sm = document.createElement("small"); sm.textContent = label; var b = document.createElement("b"); b.textContent = t.dataset.title;
+      a.appendChild(sm); a.appendChild(b); return a;
+    }
+    if (i > 0) pager.appendChild(link(i-1, "prev", "Previous"));
+    if (i < all.length-1) pager.appendChild(link(i+1, "next", "Next"));
+    s.appendChild(pager);
+  });
+
+  // ----- sources page: collect every external link, grouped by page -----
+  var srcHost = document.getElementById("all-sources");
+  if (srcHost) {
+    all.forEach(function(s){
+      if (s.id === "p-sources") return;
+      var seen = {}, items = [];
+      Array.prototype.forEach.call(s.querySelectorAll('a[href^="http"]'), function(a){
+        var u = a.getAttribute("href"); if (seen[u]) return; seen[u] = 1; items.push(a);
+      });
+      if (!items.length) return;
+      var h = document.createElement("h2"); h.textContent = s.dataset.title + " (" + items.length + ")"; srcHost.parentNode.insertBefore(h, srcHost);
+      var ol = document.createElement("ol"); ol.className = "sources";
+      items.forEach(function(a){
+        var li = document.createElement("li"); var l = document.createElement("a");
+        var u = a.getAttribute("href"); l.href = u; l.target = "_blank"; l.rel = "noopener";
+        var label = (a.getAttribute("title") || "").trim();
+        var host = u.replace(/^https?:\/\/(www\.)?/, "").split("/")[0];
+        l.textContent = label ? label : u.replace(/^https?:\/\/(www\.)?/, "");
+        li.appendChild(l);
+        if (label) { var sm = document.createElement("small"); sm.textContent = " · " + host; li.appendChild(sm); }
+        ol.appendChild(li);
+      });
+      srcHost.parentNode.insertBefore(ol, srcHost);
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('main a[href^="http"]'), function(a){ a.target = "_blank"; a.rel = "noopener"; });
+
+  // ----- router: one page visible, chosen by a plain #name -----
+  function show(id, heading){
+    if (!byId[id]) id = order[0];
+    all.forEach(function(s){ s.hidden = (s !== byId[id]); });
+    Array.prototype.forEach.call(nav.querySelectorAll("a"), function(a){
+      if (a.getAttribute("href") === "#" + id) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    topTitle.textContent = byId[id].dataset.title;
+    rail.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false");
+    if (heading) heading.scrollIntoView({block:"start"}); else window.scrollTo(0, 0);
+  }
+  function fromHash(){ show((location.hash || "").replace(/^#/, "")); }
+  window.addEventListener("hashchange", fromHash);
+  menuBtn.addEventListener("click", function(){
+    var open = rail.classList.toggle("open"); menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  document.addEventListener("click", function(e){
+    if (rail.classList.contains("open") && !rail.contains(e.target) && e.target !== menuBtn) { rail.classList.remove("open"); menuBtn.setAttribute("aria-expanded","false"); }
+  });
+
+  // ----- find across pages -----
+  var index = [];
+  all.forEach(function(s){
+    var pid = s.id.replace(/^p-/, ""), cur = {page:pid, title:s.dataset.title, head:null, label:"Top of page", text:""};
+    Array.prototype.forEach.call(s.children, function(el){
+      if (el.tagName === "H2") { index.push(cur); cur = {page:pid, title:s.dataset.title, head:el, label:el.textContent, text:""}; }
+      if (!el.classList.contains("pager") && !el.classList.contains("toc")) cur.text += " " + el.textContent;
+    });
+    index.push(cur);
+  });
+  index.forEach(function(r){ r.low = r.text.toLowerCase(); });
+  var input = document.getElementById("find-input"), out = document.getElementById("find-results");
+  input.addEventListener("input", function(){
+    var q = input.value.trim().toLowerCase(); out.textContent = "";
+    if (q.length < 2) return;
+    var hits = index.filter(function(r){ return r.low.indexOf(q) !== -1; }).slice(0, 14);
+    if (!hits.length) { var n = document.createElement("small"); n.textContent = "No matches. Try a shorter word."; n.style.padding = "4px 8px"; out.appendChild(n); return; }
+    hits.forEach(function(r){
+      var b = document.createElement("button"); b.type = "button";
+      var i = r.low.indexOf(q), snip = r.text.slice(Math.max(0, i-30), i+60).replace(/\s+/g, " ").trim();
+      b.textContent = r.label; var sm = document.createElement("small"); sm.textContent = r.title + " · …" + snip + "…"; b.appendChild(sm);
+      b.addEventListener("click", function(){
+        if (location.hash.replace(/^#/, "") !== r.page) { history.replaceState(null, "", "#" + r.page); }
+        show(r.page, r.head);
+      });
+      out.appendChild(b);
+    });
+  });
+
+  // ----- theme -----
+  var themeBtn = document.getElementById("theme-btn"), modes = ["auto","light","dark"], mode = "auto";
+  try { mode = localStorage.getItem("radiant-theme") || "auto"; } catch (e) {}
+  function applyTheme(){
+    if (mode === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", mode);
+    themeBtn.textContent = "Theme: " + mode;
+  }
+  if (!document.documentElement.hasAttribute("data-theme") || mode !== "auto") applyTheme(); else themeBtn.textContent = "Theme: " + document.documentElement.getAttribute("data-theme");
+  themeBtn.addEventListener("click", function(){
+    mode = modes[(modes.indexOf(mode) + 1) % modes.length];
+    try { localStorage.setItem("radiant-theme", mode); } catch (e) {}
+    applyTheme();
+  });
+
+  // ----- the overview drawing: this report as an organic mind map -----
+  var host = document.getElementById("report-map");
+  if (host) drawMap(host);
+  function drawMap(host){
+    var NS = "http://www.w3.org/2000/svg", W = 1160, H = 510, cx = W/2, cy = H/2;
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("width", W); svg.setAttribute("height", H);
+    svg.setAttribute("role", "img"); svg.setAttribute("aria-label", "Mind map of this report. Each main branch is a section and each twig links to a page.");
+    function el(name, attrs, parent){ var e = document.createElementNS(NS, name); for (var k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; }
+    // tapered organic branch: sample a cubic, offset by half-width along the normal, close the outline
+    function branch(x0,y0,x1,y1,w0,w1,bend){
+      var dx = x1-x0, c1x = x0 + dx*0.45, c1y = y0 + bend, c2x = x1 - dx*0.45, c2y = y1 - bend*0.25, L = [], R = [], n = 22;
+      for (var i=0;i<=n;i++){
+        var t = i/n, u = 1-t;
+        var x = u*u*u*x0 + 3*u*u*t*c1x + 3*u*t*t*c2x + t*t*t*x1, y = u*u*u*y0 + 3*u*u*t*c1y + 3*u*t*t*c2y + t*t*t*y1;
+        var tx = 3*u*u*(c1x-x0) + 6*u*t*(c2x-c1x) + 3*t*t*(x1-c2x), ty = 3*u*u*(c1y-y0) + 6*u*t*(c2y-c1y) + 3*t*t*(y1-c2y);
+        var len = Math.hypot(tx,ty) || 1, nx = -ty/len, ny = tx/len, w = (w0 + (w1-w0)*Math.pow(t,0.8))/2;
+        L.push((x+nx*w).toFixed(1)+","+(y+ny*w).toFixed(1)); R.unshift((x-nx*w).toFixed(1)+","+(y-ny*w).toFixed(1));
+      }
+      return "M" + L.join("L") + "L" + R.join("L") + "Z";
+    }
+    var sides = { right:["roots","evidence","landscape"], left:["plan","stack","product"] };
+    var gPages = {};
+    all.forEach(function(s){ if (s.dataset.g !== "start") (gPages[s.dataset.g] = gPages[s.dataset.g] || []).push(s); });
+    ["right","left"].forEach(function(side){
+      var dir = side === "right" ? 1 : -1, list = sides[side].filter(function(g){ return gPages[g]; });
+      var total = list.reduce(function(a,g){ return a + gPages[g].length + 1.2; }, 0), y = cy - (total*27)/2;
+      list.forEach(function(g){
+        var pages = gPages[g], span = (pages.length + 1.2) * 27, gy = y + span/2, gx = cx + dir*230;
+        var grp = el("g", {"data-g": g});
+        el("path", {d: branch(cx + dir*58, cy + (gy-cy)*0.16, gx, gy, 26, 9, (gy-cy)*0.5), fill: "var(--g)"}, grp);
+        var gt = el("text", {x: gx - dir*8, y: (gy > cy + 20) ? gy + 31 : gy - 13, "text-anchor": dir>0 ? "end" : "start", "class":"hand", "font-size":"25", fill:"var(--g)"}, grp);
+        gt.textContent = groupTitle(g); gt.setAttribute("style", "fill:color-mix(in srgb,var(--g) 78%,var(--ink))");
+        pages.forEach(function(s, i){
+          var py = y + 27*(i + 1.1), px = gx + dir*120, a = el("a", {href: "#" + s.id.replace(/^p-/, "")}, grp);
+          el("path", {d: branch(gx - dir*4, gy, px, py + 5, 8, 2.2, (py-gy)*0.55), fill: "var(--g)", opacity: ".85"}, a);
+          var t = el("text", {x: px + dir*8, y: py + 10, "text-anchor": dir>0 ? "start" : "end", "font-size":"15.5", "font-weight":"500"}, a);
+          t.textContent = s.dataset.nav || s.dataset.title;
+        });
+        y += span;
+      });
+    });
+    var c = el("a", {href: "#overview"});
+    el("path", {d:"M"+(cx-96)+","+(cy-6)+"c-8,-44 44,-66 98,-60c58,-8 104,22 96,62c10,44 -44,66 -98,60c-56,8 -104,-20 -96,-62z", fill:"var(--surface)", stroke:"var(--ink)", "stroke-width":"3.5", "stroke-linejoin":"round"}, c);
+    var t1 = el("text", {x:cx, y:cy-6, "text-anchor":"middle", "class":"hand", "font-size":"40"}, c); t1.textContent = "Radiant";
+    var t2 = el("text", {x:cx, y:cy+22, "text-anchor":"middle", "font-size":"13.5", fill:"var(--ink-2)"}, c); t2.textContent = "mind map app blueprint"; t2.setAttribute("style","fill:var(--ink-2)");
+    host.appendChild(svg);
+  }
+
+  fromHash();
+})();
+</script>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>Radiant mind map</string>
+      <key>CFBundleTypeRole</key>
+      <string>Editor</string>
+      <key>CFBundleTypeIconFile</key>
+      <string>radiant-document.icns</string>
+      <key>LSHandlerRank</key>
+      <string>Default</string>
+      <key>LSItemContentTypes</key>
+      <array><string>app.radiant.mindmap.document</string></array>
+    </dict>
+  </array>
+  <key>UTExportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>app.radiant.mindmap.document</string>
+      <key>UTTypeDescription</key>
+      <string>Radiant mind map</string>
+      <key>UTTypeConformsTo</key>
+      <array><string>public.database</string><string>public.data</string></array>
+      <key>UTTypeIconFile</key>
+      <string>radiant-document.icns</string>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array><string>radiant</string></array>
+      </dict>
+    </dict>
+  </array>
+  <key>NSRemindersFullAccessUsageDescription</key>
+  <string>Connect a map task to Apple Reminders and keep its completion state in sync. Radiant only accesses reminders it creates for connected tasks.</string>
+  <key>NSRemindersUsageDescription</key>
+  <string>Connect a map task to Apple Reminders and keep its completion state in sync. Radiant only accesses reminders it creates for connected tasks.</string>
+</dict>
+</plist>

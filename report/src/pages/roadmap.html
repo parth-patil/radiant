@@ -1,0 +1,145 @@
+<section class="page" id="p-roadmap" data-g="plan" data-title="Roadmap, risks and open decisions" data-nav="Roadmap and risks">
+  <h1>Roadmap, risks and open decisions</h1>
+  <p class="lead">The plan is eight milestones. The first is a set of short experiments that settle the remaining unknowns before product code is written. The next two produce a usable app that turns a topic into an editable map. The signature features, picture and SVG subtrees, come after the canvas and the AI pipeline are solid, because they depend on both.</p>
+
+  <div class="callout wide"><span class="tag">How to read the sizes</span><p>The durations are the report's own estimates for one developer working with coding agents, counted in focused weeks. Nothing in the research measures them. The only outside reference is the Zig researcher's estimate of two to four months to a first usable version for a WebView design, which milestones 0 to 2 are meant to match. Treat the order and the exit checks as the plan, and the durations as a guess to be corrected after milestone 0.</p></div>
+
+  <h2>Milestones at a glance</h2>
+  <div class="table-wrap"><table>
+    <caption>Eight milestones, in build order</caption>
+    <thead><tr><th>Milestone</th><th>Outcome</th><th>Requirements</th><th class="num">Estimate</th><th>Exit check</th></tr></thead>
+    <tbody>
+      <tr><th>M0 Spikes</th><td>The open technical questions are answered with measurements.</td><td>None; feeds every page</td><td class="num">1 to 2 weeks</td><td>Each spike below has a written result and the budgets on <a href="#quality">the quality page</a> are fixed.</td></tr>
+      <tr><th>M1 Canvas core</th><td>A fast, hand-editable map: model, layout, renderer, keyboard editing, save and load.</td><td><code>ENG</code>, Must items of <code>FR-CAN</code>, <code>FR-EDT</code>, <code>FR-LAY</code>, <code>FR-IO</code></td><td class="num">3 to 5 weeks</td><td>The large reference map (5,000 nodes) pans and zooms within the frame budget; a map survives quit and reopen.</td></tr>
+      <tr><th>M2 AI generation</th><td>Type a topic and a style, watch the map grow, then rework it.</td><td>Must items of <code>FR-AI</code></td><td class="num">2 to 3 weeks</td><td>A first map appears from a topic with nodes streaming in; cancel works; a node can be expanded by the AI and the change undone.</td></tr>
+      <tr><th>M3 Organic style and outline</th><td>Maps look hand-made: tapered branches, text on branches, themes, the Buzan preset; outline panel; import and export.</td><td><code>FR-STY</code>, <code>FR-OUT</code>, rest of <code>FR-LAY</code> and <code>FR-IO</code></td><td class="num">3 to 4 weeks</td><td>A generated map in the Buzan preset passes his nine-question test (see <a href="#buzan">Buzan's laws</a>); Markdown and OPML round-trip.</td></tr>
+      <tr><th>M4 Picture subtrees</th><td>Any subtree can become pictures, connected and collapsible.</td><td>Picture items of <code>FR-ART</code></td><td class="num">3 to 4 weeks</td><td>A 12-node subtree converts in one consistent style, collapses and expands, and reverts to vector with nothing lost.</td></tr>
+      <tr><th>M5 SVG subtrees</th><td>Any subtree can become generated SVG artwork under the contract.</td><td>SVG items of <code>FR-ART</code></td><td class="num">3 to 4 weeks</td><td>Generated SVG passes validation or is repaired automatically; a failed generation leaves the vector form intact.</td></tr>
+      <tr><th>M6 Recall and review</th><td>The app helps you remember: collapse-and-recall, hidden labels, spaced review.</td><td><code>FR-MEM</code></td><td class="num">2 to 3 weeks</td><td>A review session can be run on a map, and the next review date follows the chosen schedule.</td></tr>
+      <tr><th>M7 Packaging and polish</th><td>A signed, self-updating Mac app; agent interface; decision on a second platform.</td><td><code>NFR-PLAT</code>, <code>FR-AGT</code>, remaining Should items</td><td class="num">2 to 4 weeks</td><td>A notarised build installs on a clean Mac and updates itself.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Milestones 0 to 2 give the first version you would use daily. Milestones 3 to 5 make it the app no one else has built. Milestone 6 is what makes the maps worth making, according to <a href="#science">the evidence</a>, and can be pulled earlier if memorising is your main use.</p>
+
+  <h2>Milestone 0: the spikes</h2>
+  <p>A spike is a throwaway experiment that answers one question. Each of these is a day or two of work. The first two reuse the test page already in your project at <code>spikes/webview-120hz/</code>.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Spike</th><th>Question</th><th>Method</th><th>Decides</th></tr></thead>
+    <tbody>
+      <tr><th>S1 Tauri at 120 Hz</th><td>Does the private WebKit flag work inside a real Tauri 2 window, and does the fallback to 60 work?</td><td>Load <code>spike.html</code> in Tauri with the flag switched off at WebView creation; repeat with it left on.</td><td>Whether decision D-02 on <a href="#stack">the stack page</a> stands.</td></tr>
+      <tr><th>S2 Electron frame rate</th><td>Does Chromium reach 120 frames per second on your display with no private setting?</td><td>Load the same page in an Electron window; record the same numbers.</td><td>Whether Electron is the public-release shell.</td></tr>
+      <tr><th>S3 Input latency</th><td>How long from finger movement to pixels for pan, zoom and drag?</td><td>High-speed capture or a latency tester in both shells.</td><td>The input-latency budget, which is currently unmeasured.</td></tr>
+      <tr><th>S4 Real content</th><td>Does a real map hold the budget, not only a synthetic one?</td><td>Render 5,000 nodes with real labels and 300 generated pictures in a first renderer.</td><td>Renderer design, texture budgets, level-of-detail thresholds.</td></tr>
+      <tr><th>S5 Codex client</th><td>Can the host stream nodes from <code>codex app-server</code> to the canvas reliably?</td><td>A Rust client for the handshake, a streamed turn, interrupt, and disabling the user's own tool servers by name.</td><td>The streaming protocol on <a href="#ai-engine">the AI page</a>.</td></tr>
+      <tr><th>S6 Picture batch</th><td>How long, how consistent and how costly is a subtree of pictures?</td><td>Generate 12 node pictures in one style with a reference image; record time per picture, how many come back transparent, visible style drift and the change in the usage meter.</td><td>Batch size, concurrency, the confirmation prompt, whether a second image provider is needed.</td></tr>
+      <tr><th>S7 SVG contract at scale</th><td>How often does generated SVG pass the contract as the subtree grows?</td><td>Ten runs each at 5, 12 and 25 nodes, with fixed anchor semantics and connectors forbidden; count passes, repairs and failures.</td><td>Whole-subtree versus per-node generation; the repair loop.</td></tr>
+      <tr><th>S8 The organic look</th><td>Can computed branches look hand-drawn?</td><td>Draw one map with tapered, seeded, slightly irregular branches and text along them; compare against admired hand-drawn maps.</td><td>The organic layout treatment, for which no published algorithm was found.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="callout evidence"><span class="tag">Evidence</span><p>Three of these already have a first data point from this research: one picture took about 12 seconds and another about 29, one transparent-background request returned a transparent image, and one five-node SVG passed every contract check. Each was a single sample. The spikes turn single samples into rates.</p></div>
+
+  <h2>What each milestone contains</h2>
+  <div class="grid two">
+    <div class="card"><h3>M1 Canvas core</h3><p class="meta">The foundation everything else stands on</p>
+      <ul>
+        <li>Document model with stable node identifiers and an operation log for undo.</li>
+        <li>Tidy-tree layout for nodes of different sizes, two-sided and one-sided variants, running off the main thread.</li>
+        <li>WebGL2 renderer: one branch mesh, glyph quads, picture quads, culling.</li>
+        <li>Pan, zoom towards the cursor, zoom to fit, selection.</li>
+        <li>The standard keyboard model: Tab for a child, Return for a sibling, inline editing in a real text field.</li>
+        <li>Save, load, autosave and crash recovery in the SQLite document file.</li>
+        <li>The performance test rig and regression gate from <a href="#quality">the quality page</a>.</li>
+      </ul></div>
+    <div class="card"><h3>M2 AI generation</h3><p class="meta">The first thing you asked for</p>
+      <ul>
+        <li>Host-side Codex client with supervision, isolation and cancel.</li>
+        <li>Topic and style prompt bar; nodes streaming onto the canvas.</li>
+        <li>Style request turned into a style sheet; a few presets.</li>
+        <li>Expand a node, regenerate a branch, shorten to keywords.</li>
+        <li>Every AI change is one undoable step, with what changed made visible.</li>
+        <li>Usage and rate-limit display.</li>
+      </ul></div>
+    <div class="card"><h3>M3 Organic style and outline</h3><p class="meta">Where it starts to look like nothing else</p>
+      <ul>
+        <li>Tapered, curved branches with a stored random seed; text on or beside the branch.</li>
+        <li>Themes, one colour per main branch, the Buzan preset and optional hints from his laws.</li>
+        <li>Radial and top-down layouts per main branch; manual moves as offsets.</li>
+        <li>Synchronised outline panel.</li>
+        <li>Markdown, OPML, FreeMind and JSON Canvas import and export; PNG, SVG and PDF export.</li>
+      </ul></div>
+    <div class="card"><h3>M4 Picture subtrees</h3><p class="meta">The first half of the signature feature</p>
+      <ul>
+        <li>Representation switch on any subtree, reversible.</li>
+        <li>Subtree style sheet and a reference image generated first.</li>
+        <li>Per-node image briefs, batch generation with placeholders and progress.</li>
+        <li>Transparent cut-outs, attachment points, branches ending under the picture.</li>
+        <li>Collapse, expand, regenerate one node, stale-art marking.</li>
+        <li>Asset cache with prompt and model recorded for each picture.</li>
+      </ul></div>
+    <div class="card"><h3>M5 SVG subtrees</h3><p class="meta">The second half</p>
+      <ul>
+        <li>Layout first, then a request for SVG that fills the computed boxes.</li>
+        <li>The node-group contract, validation, sanitising and the repair loop.</li>
+        <li>Rasterising visible SVG to textures by zoom level; live SVG when inspected closely.</li>
+        <li>Collapse by hiding groups; engine-drawn labels and branches.</li>
+        <li>Export of mixed maps to one SVG or PDF.</li>
+      </ul></div>
+    <div class="card"><h3>M6 Recall and review</h3><p class="meta">What makes the maps stick</p>
+      <ul>
+        <li>Collapse-and-recall mode and hidden labels on picture nodes.</li>
+        <li>Rebuild-from-memory exercise compared against the saved map.</li>
+        <li>Spaced review schedule with presets, including Buzan's.</li>
+        <li>AI-generated questions from a map, and a skeleton with blanks to fill.</li>
+      </ul></div>
+    <div class="card"><h3>M7 Packaging and polish</h3><p class="meta">From project to product</p>
+      <ul>
+        <li>Signing, notarisation and automatic updates.</li>
+        <li>Command-line tool and read-only agent server for maps.</li>
+        <li>Accessibility pass through the outline; reduced-motion and contrast checks.</li>
+        <li>Decision and first build for a second platform, if wanted.</li>
+      </ul></div>
+  </div>
+
+  <h2>Risks</h2>
+  <div class="table-wrap"><table>
+    <caption>Main risks, most consequential first</caption>
+    <thead><tr><th>Risk</th><th>Why it is real</th><th>Mitigation</th><th>Early signal</th></tr></thead>
+    <tbody>
+      <tr><th>The Codex interface changes under you</th><td><code>codex app-server</code> is labelled experimental, and one command present in older versions has already been removed.</td><td>Generate protocol types from the installed version; check compatibility at start-up; keep the one-shot <code>codex exec</code> path as a fallback; hide all of it behind the provider interface.</td><td>A Codex update that makes the start-up check fail.</td></tr>
+      <tr><th>Picture generation is too slow or too costly</th><td>One picture took about 12 seconds, and a second with a reference image attached took about 29. At those rates 300 pictures would take between one and two and a half hours if generated one after another. The documentation says image turns use the plan's limits faster than text, and the per-picture cost could not be measured.</td><td>Art is opt-in per subtree; preview one or two nodes first; confirm large batches; test concurrency in spike S6; allow a second image provider later.</td><td>Spike S6 shows a visible drop in the usage meter for a 12-node batch.</td></tr>
+      <tr><th>Sharing the app conflicts with OpenAI's terms</th><td>No text was found that permits or forbids an app driving the user's own Codex login. The official programme for third-party apps is known only through one secondary source.</td><td>Fine for personal use on your own login. Before sharing, read the current terms and consider the "Sign in with ChatGPT" programme; the provider interface allows an API-key engine as an alternative.</td><td>Any plan to distribute a build.</td></tr>
+      <tr><th>The private frame-rate setting disappears</th><td>It is private, undocumented and already contradicted by one community claim.</td><td>Automatic fallback to 60; Electron as the alternative shell; native shell as the last resort.</td><td>A macOS update after which the measured frame interval returns to 16.7 ms.</td></tr>
+      <tr><th>Generated artwork looks generic or drifts in style</th><td>A 2025 education pilot reported artefacts, distortion on repeated regeneration and stereotyped defaults in AI images; style consistency across a batch was not tested here.</td><td>A shared style sheet and reference image per subtree; a recurring symbol vocabulary; the engine draws all text; easy regeneration of one node.</td><td>Spike S6 pictures that look like different artists.</td></tr>
+      <tr><th>SVG generation fails as subtrees grow</th><td>The contract passed once, at five nodes, and the model still drew its own connectors and merged the two anchors.</td><td>Validation and a bounded repair loop; per-node generation for large subtrees; vector form always available.</td><td>Spike S7 pass rate falling at 12 or 25 nodes.</td></tr>
+      <tr><th>The organic look does not come out right</th><td>No published algorithm for Buzan-style organic layout was found; the design is the report's own proposal.</td><td>Spike S8 early; keep the tidy layout as the skeleton so the fallback is a clean conventional map.</td><td>Branches that look mechanical despite tapering and jitter.</td></tr>
+      <tr><th>AI-made maps do not help you learn</th><td>The evidence favours building or reworking a map over viewing one, and unguarded AI help has been shown to hurt later independent performance.</td><td>Generate drafts with deliberate gaps; recall and review features; do not treat the first generated map as finished.</td><td>You stop editing the maps the AI produces.</td></tr>
+      <tr><th>Scope</th><td>The requirement pages hold several hundred items between them.</td><td>Build only Must items until milestone 2 is in daily use; let real use reorder the rest.</td><td>Milestone 1 running past its estimate with Should items in it.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Decisions that are yours</h2>
+  <p>The research cannot settle these. Each changes part of the plan.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Question</th><th>Why it matters</th><th>Default the report assumes</th></tr></thead>
+    <tbody>
+      <tr><th>Will Radiant ever go through the Mac App Store?</th><td>Private settings are not allowed there, which removes the 120 frames per second route in a system WebView.</td><td>No. Direct download, signed and notarised.</td></tr>
+      <tr><th>What should a new map look like by default?</th><td>Buzan's organic style and MindNode's clean style pull in different directions, and admired maps disagree about colour saturation.</td><td>A clean style at first launch, with the organic Buzan preset one click away.</td></tr>
+      <tr><th>Is the app mainly for learning or for thinking and planning?</th><td>If learning, the recall and review milestone should move ahead of the artwork milestones.</td><td>Both, with recall after artwork.</td></tr>
+      <tr><th>How much hand editing do you expect to do?</th><td>A full manual editor at MindNode's level is the largest block of requirements.</td><td>Keyboard-first editing is a first-class Must; tasks, tags and stickers are later.</td></tr>
+      <tr><th>Do Windows and Linux matter in practice?</th><td>Linux in particular changes the shell choice.</td><td>Not until version 1 is in use on the Mac.</td></tr>
+      <tr><th>If you share it, open source or paid?</th><td>It affects the licence terms of what you depend on and the Codex policy question.</td><td>Undecided; nothing chosen so far blocks either.</td></tr>
+      <tr><th>Would you still prefer the host core in Elixir?</th><td>The report recommends Rust for the host because the work is small, but the Elixir route exists and you are fastest in it.</td><td>Rust host.</td></tr>
+      <tr><th>What is the app called?</th><td>"Radiant" is a placeholder taken from Buzan's term radiant thinking.</td><td>Radiant, until you choose.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>A first week</h2>
+  <ol class="flow">
+    <li><b>Day 1.</b> Create the Tauri project. Run spike S1 with the existing test page. Record frame intervals with the flag on and off.</li>
+    <li><b>Day 2.</b> Run the same page in Electron (S2). Decide the shell for now.</li>
+    <li><b>Day 3.</b> Write the Rust Codex client: handshake, one streamed turn, interrupt (S5).</li>
+    <li><b>Day 4.</b> Stream node lines into a bare canvas: a topic becomes dots and lines.</li>
+    <li><b>Day 5.</b> Picture batch and SVG runs (S6, S7). Write up the numbers and fix the budgets.</li>
+  </ol>
+  <p>At the end of that week every assumption this report could not test will have a number against it, and the first real milestone starts from facts.</p>
+</section>

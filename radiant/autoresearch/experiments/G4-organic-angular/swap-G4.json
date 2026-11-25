@@ -1,0 +1,177 @@
+{
+ "clean-300-fit": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 0,
+  "max": 0,
+  "inst": true,
+  "tris": 22864,
+  "bbox": null
+ },
+ "clean-300-z2": {
+  "over": 9,
+  "pct": 0.0001,
+  "any": 71,
+  "max": 63,
+  "inst": true,
+  "tris": 2912,
+  "bbox": [
+   1609,
+   171,
+   3376,
+   2165
+  ]
+ },
+ "clean-300-z0.5": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 0,
+  "max": 0,
+  "inst": true,
+  "tris": 7168,
+  "bbox": null
+ },
+ "buzan-300-fit": {
+  "over": 1,
+  "pct": 0.0,
+  "any": 1,
+  "max": 49,
+  "inst": true,
+  "tris": 24640,
+  "bbox": [
+   1794,
+   678,
+   1794,
+   678
+  ]
+ },
+ "buzan-300-z2": {
+  "over": 17,
+  "pct": 0.0002,
+  "any": 17,
+  "max": 49,
+  "inst": true,
+  "tris": 2960,
+  "bbox": [
+   1552,
+   91,
+   3357,
+   1837
+  ]
+ },
+ "buzan-300-z0.5": {
+  "over": 2,
+  "pct": 0.0,
+  "any": 2,
+  "max": 49,
+  "inst": true,
+  "tris": 7664,
+  "bbox": [
+   2111,
+   1155,
+   2153,
+   2017
+  ]
+ },
+ "hand-drawn-300-fit": {
+  "over": 1,
+  "pct": 0.0,
+  "any": 2,
+  "max": 47,
+  "inst": true,
+  "tris": 26800,
+  "bbox": [
+   1801,
+   1881,
+   1801,
+   1881
+  ]
+ },
+ "hand-drawn-300-z2": {
+  "over": 7,
+  "pct": 0.0001,
+  "any": 7,
+  "max": 48,
+  "inst": true,
+  "tris": 3344,
+  "bbox": [
+   1589,
+   894,
+   2882,
+   1962
+  ]
+ },
+ "hand-drawn-300-z0.5": {
+  "over": 4,
+  "pct": 0.0001,
+  "any": 4,
+  "max": 48,
+  "inst": true,
+  "tris": 8512,
+  "bbox": [
+   1673,
+   534,
+   2130,
+   2170
+  ]
+ },
+ "outline-300-fit": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 0,
+  "max": 0,
+  "inst": true,
+  "tris": 4784,
+  "bbox": null
+ },
+ "outline-300-z2": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 0,
+  "max": 0,
+  "inst": true,
+  "tris": 528,
+  "bbox": null
+ },
+ "outline-300-z0.5": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 0,
+  "max": 0,
+  "inst": true,
+  "tris": 1648,
+  "bbox": null
+ },
+ "boardroom-300-fit": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 0,
+  "max": 0,
+  "inst": true,
+  "tris": 11024,
+  "bbox": null
+ },
+ "boardroom-300-z2": {
+  "over": 1,
+  "pct": 0.0,
+  "any": 1,
+  "max": 54,
+  "inst": true,
+  "tris": 1072,
+  "bbox": [
+   1502,
+   1121,
+   1502,
+   1121
+  ]
+ },
+ "boardroom-300-z0.5": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 0,
+  "max": 0,
+  "inst": true,
+  "tris": 3776,
+  "bbox": null
+ }
+}

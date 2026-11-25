@@ -1,0 +1,1762 @@
+[
+ {
+  "n": "5000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 3.97,
+    "min": 3.77,
+    "max": 4.16
+   },
+   "B": {
+    "med": 4.09,
+    "min": 3.38,
+    "max": 4.34
+   },
+   "ratio": 1.03
+  },
+  "miss": {
+   "A": {
+    "med": 4.25,
+    "min": 4,
+    "max": 4.43
+   },
+   "B": {
+    "med": 4.39,
+    "min": 4.13,
+    "max": 4.88
+   },
+   "ratio": 1.033
+  },
+  "hit": {
+   "A": {
+    "med": 3.29,
+    "min": 2.89,
+    "max": 3.89
+   },
+   "B": {
+    "med": 2.25,
+    "min": 1.87,
+    "max": 2.85
+   },
+   "ratio": 0.684
+  },
+  "edit": {
+   "A": {
+    "med": 3.34,
+    "min": 3.07,
+    "max": 3.64
+   },
+   "B": {
+    "med": 2.23,
+    "min": 1.75,
+    "max": 2.75
+   },
+   "ratio": 0.668
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 8.93,
+    "min": 8.33,
+    "max": 10.38
+   },
+   "B": {
+    "med": 10.05,
+    "min": 9.46,
+    "max": 10.92
+   },
+   "ratio": 1.125
+  },
+  "miss": {
+   "A": {
+    "med": 8.97,
+    "min": 8.17,
+    "max": 13
+   },
+   "B": {
+    "med": 10.25,
+    "min": 9.36,
+    "max": 10.68
+   },
+   "ratio": 1.143
+  },
+  "hit": {
+   "A": {
+    "med": 6.19,
+    "min": 5.4,
+    "max": 7.17
+   },
+   "B": {
+    "med": 4.25,
+    "min": 3.32,
+    "max": 5.58
+   },
+   "ratio": 0.687
+  },
+  "edit": {
+   "A": {
+    "med": 6.55,
+    "min": 6.19,
+    "max": 7.47
+   },
+   "B": {
+    "med": 3.94,
+    "min": 3.42,
+    "max": 5.04
+   },
+   "ratio": 0.602
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 5.73,
+    "min": 5.22,
+    "max": 5.93
+   },
+   "B": {
+    "med": 5.64,
+    "min": 5.42,
+    "max": 6.1
+   },
+   "ratio": 0.984
+  },
+  "miss": {
+   "A": {
+    "med": 5.93,
+    "min": 5.51,
+    "max": 6.25
+   },
+   "B": {
+    "med": 6.13,
+    "min": 5.55,
+    "max": 6.35
+   },
+   "ratio": 1.034
+  },
+  "hit": {
+   "A": {
+    "med": 4,
+    "min": 3.65,
+    "max": 4.48
+   },
+   "B": {
+    "med": 2.76,
+    "min": 2.16,
+    "max": 3.41
+   },
+   "ratio": 0.69
+  },
+  "edit": {
+   "A": {
+    "med": 4.05,
+    "min": 3.55,
+    "max": 4.5
+   },
+   "B": {
+    "med": 2.43,
+    "min": 2.16,
+    "max": 3.14
+   },
+   "ratio": 0.6
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "lifted-arcs",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 6.8,
+    "min": 6.31,
+    "max": 7.34
+   },
+   "B": {
+    "med": 6.62,
+    "min": 5.99,
+    "max": 7.17
+   },
+   "ratio": 0.974
+  },
+  "miss": {
+   "A": {
+    "med": 7.07,
+    "min": 6.54,
+    "max": 7.5
+   },
+   "B": {
+    "med": 7,
+    "min": 6.62,
+    "max": 12.13
+   },
+   "ratio": 0.99
+  },
+  "hit": {
+   "A": {
+    "med": 4.05,
+    "min": 3.61,
+    "max": 4.6
+   },
+   "B": {
+    "med": 2.66,
+    "min": 2.29,
+    "max": 3.67
+   },
+   "ratio": 0.657
+  },
+  "edit": {
+   "A": {
+    "med": 4.1,
+    "min": 3.85,
+    "max": 4.68
+   },
+   "B": {
+    "med": 2.6,
+    "min": 2.28,
+    "max": 2.99
+   },
+   "ratio": 0.634
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 7.73,
+    "min": 7.32,
+    "max": 8.71
+   },
+   "B": {
+    "med": 7.89,
+    "min": 7.39,
+    "max": 8.52
+   },
+   "ratio": 1.021
+  },
+  "miss": {
+   "A": {
+    "med": 7.9,
+    "min": 7.56,
+    "max": 8.54
+   },
+   "B": {
+    "med": 8.1,
+    "min": 7.67,
+    "max": 8.86
+   },
+   "ratio": 1.025
+  },
+  "hit": {
+   "A": {
+    "med": 4.9,
+    "min": 4.58,
+    "max": 5.33
+   },
+   "B": {
+    "med": 3.56,
+    "min": 2.75,
+    "max": 4.48
+   },
+   "ratio": 0.727
+  },
+  "edit": {
+   "A": {
+    "med": 4.94,
+    "min": 4.13,
+    "max": 5.59
+   },
+   "B": {
+    "med": 3.26,
+    "min": 2.59,
+    "max": 3.63
+   },
+   "ratio": 0.66
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 45.55,
+    "min": 45.11,
+    "max": 46.83
+   },
+   "B": {
+    "med": 28.96,
+    "min": 28.38,
+    "max": 29.44
+   },
+   "ratio": 0.636
+  },
+  "miss": {
+   "A": {
+    "med": 49.12,
+    "min": 44.64,
+    "max": 49.84
+   },
+   "B": {
+    "med": 31.91,
+    "min": 31.59,
+    "max": 32.29
+   },
+   "ratio": 0.65
+  },
+  "hit": {
+   "A": {
+    "med": 34.61,
+    "min": 32.72,
+    "max": 35.91
+   },
+   "B": {
+    "med": 25.82,
+    "min": 23.67,
+    "max": 28.15
+   },
+   "ratio": 0.746
+  },
+  "edit": {
+   "A": {
+    "med": 34.38,
+    "min": 32.62,
+    "max": 36.89
+   },
+   "B": {
+    "med": 22.55,
+    "min": 21.49,
+    "max": 23.13
+   },
+   "ratio": 0.656
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 84.22,
+    "min": 82.32,
+    "max": 89.51
+   },
+   "B": {
+    "med": 59.75,
+    "min": 57.73,
+    "max": 60.42
+   },
+   "ratio": 0.709
+  },
+  "miss": {
+   "A": {
+    "med": 89.02,
+    "min": 86.25,
+    "max": 102.01
+   },
+   "B": {
+    "med": 63.65,
+    "min": 62.35,
+    "max": 63.85
+   },
+   "ratio": 0.715
+  },
+  "hit": {
+   "A": {
+    "med": 64.57,
+    "min": 60.8,
+    "max": 65.63
+   },
+   "B": {
+    "med": 36.73,
+    "min": 36.12,
+    "max": 44.77
+   },
+   "ratio": 0.569
+  },
+  "edit": {
+   "A": {
+    "med": 63.97,
+    "min": 60.83,
+    "max": 67.87
+   },
+   "B": {
+    "med": 39.56,
+    "min": 37.7,
+    "max": 40.5
+   },
+   "ratio": 0.618
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 61.09,
+    "min": 58.74,
+    "max": 61.51
+   },
+   "B": {
+    "med": 38.46,
+    "min": 37.11,
+    "max": 56.98
+   },
+   "ratio": 0.63
+  },
+  "miss": {
+   "A": {
+    "med": 65.48,
+    "min": 64.13,
+    "max": 74.71
+   },
+   "B": {
+    "med": 41.49,
+    "min": 40.13,
+    "max": 75.52
+   },
+   "ratio": 0.634
+  },
+  "hit": {
+   "A": {
+    "med": 39.3,
+    "min": 36.1,
+    "max": 41.57
+   },
+   "B": {
+    "med": 24.64,
+    "min": 23.54,
+    "max": 25.3
+   },
+   "ratio": 0.627
+  },
+  "edit": {
+   "A": {
+    "med": 38.29,
+    "min": 35.24,
+    "max": 41.66
+   },
+   "B": {
+    "med": 23.26,
+    "min": 22.05,
+    "max": 26.14
+   },
+   "ratio": 0.607
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "lifted-arcs",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 85.04,
+    "min": 71.8,
+    "max": 85.36
+   },
+   "B": {
+    "med": 51.3,
+    "min": 50.31,
+    "max": 52.67
+   },
+   "ratio": 0.603
+  },
+  "miss": {
+   "A": {
+    "med": 90.71,
+    "min": 88.59,
+    "max": 99.95
+   },
+   "B": {
+    "med": 55.82,
+    "min": 53.23,
+    "max": 57.74
+   },
+   "ratio": 0.615
+  },
+  "hit": {
+   "A": {
+    "med": 40.65,
+    "min": 37.04,
+    "max": 41.63
+   },
+   "B": {
+    "med": 25.79,
+    "min": 21.04,
+    "max": 29.06
+   },
+   "ratio": 0.634
+  },
+  "edit": {
+   "A": {
+    "med": 47.41,
+    "min": 41.4,
+    "max": 51.96
+   },
+   "B": {
+    "med": 29.25,
+    "min": 25.76,
+    "max": 31.71
+   },
+   "ratio": 0.617
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 58.1,
+    "min": 56.13,
+    "max": 75.91
+   },
+   "B": {
+    "med": 57.85,
+    "min": 56.5,
+    "max": 59.66
+   },
+   "ratio": 0.996
+  },
+  "miss": {
+   "A": {
+    "med": 62.11,
+    "min": 59.57,
+    "max": 64.28
+   },
+   "B": {
+    "med": 61.36,
+    "min": 59.65,
+    "max": 64.22
+   },
+   "ratio": 0.988
+  },
+  "hit": {
+   "A": {
+    "med": 48.14,
+    "min": 44.9,
+    "max": 51.1
+   },
+   "B": {
+    "med": 32.02,
+    "min": 29.26,
+    "max": 34.66
+   },
+   "ratio": 0.665
+  },
+  "edit": {
+   "A": {
+    "med": 52.87,
+    "min": 48.46,
+    "max": 58.16
+   },
+   "B": {
+    "med": 37.48,
+    "min": 30.47,
+    "max": 40.83
+   },
+   "ratio": 0.709
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 42.94,
+    "min": 2.96,
+    "max": 44.86
+   },
+   "B": {
+    "med": 2.88,
+    "min": 2.64,
+    "max": 4.4
+   },
+   "ratio": 0.067
+  },
+  "miss": {
+   "A": {
+    "med": 43.28,
+    "min": 3.04,
+    "max": 44.1
+   },
+   "B": {
+    "med": 3.08,
+    "min": 2.78,
+    "max": 4.4
+   },
+   "ratio": 0.071
+  },
+  "hit": {
+   "A": {
+    "med": 3.72,
+    "min": 2.92,
+    "max": 6.56
+   },
+   "B": {
+    "med": 1.82,
+    "min": 1.6,
+    "max": 3.28
+   },
+   "ratio": 0.489
+  },
+  "edit": {
+   "A": {
+    "med": 6.34,
+    "min": 5.36,
+    "max": 7.32
+   },
+   "B": {
+    "med": 2.14,
+    "min": 1.74,
+    "max": 3.44
+   },
+   "ratio": 0.338
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 57.88,
+    "min": 7.58,
+    "max": 59.3
+   },
+   "B": {
+    "med": 7.98,
+    "min": 7.4,
+    "max": 9.6
+   },
+   "ratio": 0.138
+  },
+  "miss": {
+   "A": {
+    "med": 58.74,
+    "min": 8.1,
+    "max": 60.3
+   },
+   "B": {
+    "med": 8.4,
+    "min": 7.3,
+    "max": 12.5
+   },
+   "ratio": 0.143
+  },
+  "hit": {
+   "A": {
+    "med": 7.7,
+    "min": 5.68,
+    "max": 21.86
+   },
+   "B": {
+    "med": 5.16,
+    "min": 3.02,
+    "max": 18.5
+   },
+   "ratio": 0.67
+  },
+  "edit": {
+   "A": {
+    "med": 12.04,
+    "min": 9.3,
+    "max": 15.34
+   },
+   "B": {
+    "med": 5.34,
+    "min": 3.52,
+    "max": 7.14
+   },
+   "ratio": 0.444
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 7.24,
+    "min": 6.52,
+    "max": 13.22
+   },
+   "B": {
+    "med": 6.82,
+    "min": 6.32,
+    "max": 7.92
+   },
+   "ratio": 0.942
+  },
+  "miss": {
+   "A": {
+    "med": 7.34,
+    "min": 6.62,
+    "max": 16.78
+   },
+   "B": {
+    "med": 7.44,
+    "min": 6.58,
+    "max": 9.26
+   },
+   "ratio": 1.014
+  },
+  "hit": {
+   "A": {
+    "med": 6.82,
+    "min": 5.82,
+    "max": 9.2
+   },
+   "B": {
+    "med": 4.22,
+    "min": 3.18,
+    "max": 5.88
+   },
+   "ratio": 0.619
+  },
+  "edit": {
+   "A": {
+    "med": 9.92,
+    "min": 8.54,
+    "max": 12.8
+   },
+   "B": {
+    "med": 4.5,
+    "min": 3.5,
+    "max": 9.64
+   },
+   "ratio": 0.454
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "lifted-arcs",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 64.76,
+    "min": 8.04,
+    "max": 69.24
+   },
+   "B": {
+    "med": 7.86,
+    "min": 6.94,
+    "max": 14.22
+   },
+   "ratio": 0.121
+  },
+  "miss": {
+   "A": {
+    "med": 65.92,
+    "min": 7.72,
+    "max": 158.3
+   },
+   "B": {
+    "med": 8.14,
+    "min": 7.54,
+    "max": 11.36
+   },
+   "ratio": 0.123
+  },
+  "hit": {
+   "A": {
+    "med": 5.92,
+    "min": 3.86,
+    "max": 27.52
+   },
+   "B": {
+    "med": 4.7,
+    "min": 2.1,
+    "max": 94.8
+   },
+   "ratio": 0.794
+  },
+  "edit": {
+   "A": {
+    "med": 10.1,
+    "min": 8.44,
+    "max": 27.56
+   },
+   "B": {
+    "med": 4.78,
+    "min": 2.58,
+    "max": 8.04
+   },
+   "ratio": 0.473
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 14.56,
+    "min": 12.76,
+    "max": 44.02
+   },
+   "B": {
+    "med": 6.74,
+    "min": 5.58,
+    "max": 70.32
+   },
+   "ratio": 0.463
+  },
+  "miss": {
+   "A": {
+    "med": 14.38,
+    "min": 12.98,
+    "max": 31.38
+   },
+   "B": {
+    "med": 6.74,
+    "min": 5.98,
+    "max": 42.92
+   },
+   "ratio": 0.469
+  },
+  "hit": {
+   "A": {
+    "med": 8.2,
+    "min": 5.12,
+    "max": 36.46
+   },
+   "B": {
+    "med": 5.24,
+    "min": 3.22,
+    "max": 30.44
+   },
+   "ratio": 0.639
+  },
+  "edit": {
+   "A": {
+    "med": 12.68,
+    "min": 10.12,
+    "max": 19.76
+   },
+   "B": {
+    "med": 6,
+    "min": 3.56,
+    "max": 20.12
+   },
+   "ratio": 0.473
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 70.82,
+    "min": 27.32,
+    "max": 289.48
+   },
+   "B": {
+    "med": 71.1,
+    "min": 35.32,
+    "max": 229.82
+   },
+   "ratio": 1.004
+  },
+  "miss": {
+   "A": {
+    "med": 48.62,
+    "min": 31.38,
+    "max": 76.78
+   },
+   "B": {
+    "med": 47.56,
+    "min": 35.36,
+    "max": 80.76
+   },
+   "ratio": 0.978
+  },
+  "hit": {
+   "A": {
+    "med": 217.44,
+    "min": 68.48,
+    "max": 591.14
+   },
+   "B": {
+    "med": 63.7,
+    "min": 31.6,
+    "max": 110.82
+   },
+   "ratio": 0.293
+  },
+  "edit": {
+   "A": {
+    "med": 97.16,
+    "min": 63.56,
+    "max": 161.28
+   },
+   "B": {
+    "med": 95.68,
+    "min": 31.26,
+    "max": 312.16
+   },
+   "ratio": 0.985
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 110.96,
+    "min": 79.88,
+    "max": 212.86
+   },
+   "B": {
+    "med": 120.2,
+    "min": 77.44,
+    "max": 162.54
+   },
+   "ratio": 1.083
+  },
+  "miss": {
+   "A": {
+    "med": 110.78,
+    "min": 74.18,
+    "max": 480.04
+   },
+   "B": {
+    "med": 159.58,
+    "min": 76.2,
+    "max": 202.86
+   },
+   "ratio": 1.441
+  },
+  "hit": {
+   "A": {
+    "med": 298.56,
+    "min": 94.14,
+    "max": 381.6
+   },
+   "B": {
+    "med": 117.58,
+    "min": 69.18,
+    "max": 188.48
+   },
+   "ratio": 0.394
+  },
+  "edit": {
+   "A": {
+    "med": 175.36,
+    "min": 109.24,
+    "max": 460.16
+   },
+   "B": {
+    "med": 73.34,
+    "min": 42.66,
+    "max": 139.68
+   },
+   "ratio": 0.418
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 123.96,
+    "min": 61.54,
+    "max": 327.56
+   },
+   "B": {
+    "med": 84.38,
+    "min": 55.92,
+    "max": 182.88
+   },
+   "ratio": 0.681
+  },
+  "miss": {
+   "A": {
+    "med": 99.1,
+    "min": 63.56,
+    "max": 234.52
+   },
+   "B": {
+    "med": 94.58,
+    "min": 68.04,
+    "max": 143.68
+   },
+   "ratio": 0.954
+  },
+  "hit": {
+   "A": {
+    "med": 204.28,
+    "min": 83.62,
+    "max": 410.02
+   },
+   "B": {
+    "med": 102.58,
+    "min": 57.84,
+    "max": 404.96
+   },
+   "ratio": 0.502
+  },
+  "edit": {
+   "A": {
+    "med": 159.86,
+    "min": 88.52,
+    "max": 301.96
+   },
+   "B": {
+    "med": 60.44,
+    "min": 33.28,
+    "max": 90
+   },
+   "ratio": 0.378
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "lifted-arcs",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 100.48,
+    "min": 69.28,
+    "max": 588.54
+   },
+   "B": {
+    "med": 98,
+    "min": 61.52,
+    "max": 224.42
+   },
+   "ratio": 0.975
+  },
+  "miss": {
+   "A": {
+    "med": 214.56,
+    "min": 73.14,
+    "max": 777.44
+   },
+   "B": {
+    "med": 219.38,
+    "min": 68.8,
+    "max": 896.2
+   },
+   "ratio": 1.022
+  },
+  "hit": {
+   "A": {
+    "med": 237.72,
+    "min": 55.78,
+    "max": 333.84
+   },
+   "B": {
+    "med": 112.8,
+    "min": 35.54,
+    "max": 347.5
+   },
+   "ratio": 0.475
+  },
+  "edit": {
+   "A": {
+    "med": 203.12,
+    "min": 102.76,
+    "max": 918.22
+   },
+   "B": {
+    "med": 63.62,
+    "min": 28.58,
+    "max": 226.7
+   },
+   "ratio": 0.313
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "tess": {
+   "A": {
+    "med": 190.24,
+    "min": 102.44,
+    "max": 204.6
+   },
+   "B": {
+    "med": 48.24,
+    "min": 42.72,
+    "max": 88.76
+   },
+   "ratio": 0.254
+  },
+  "miss": {
+   "A": {
+    "med": 183.7,
+    "min": 116.84,
+    "max": 239
+   },
+   "B": {
+    "med": 69.06,
+    "min": 56.14,
+    "max": 332.96
+   },
+   "ratio": 0.376
+  },
+  "hit": {
+   "A": {
+    "med": 347.94,
+    "min": 96.7,
+    "max": 991.3
+   },
+   "B": {
+    "med": 135.06,
+    "min": 63.34,
+    "max": 694.56
+   },
+   "ratio": 0.388
+  },
+  "edit": {
+   "A": {
+    "med": 226.1,
+    "min": 107.56,
+    "max": 895.18
+   },
+   "B": {
+    "med": 88.96,
+    "min": 43.26,
+    "max": 302.92
+   },
+   "ratio": 0.393
+  },
+  "engine": "webkit",
+  "round": 0
+ }
+]

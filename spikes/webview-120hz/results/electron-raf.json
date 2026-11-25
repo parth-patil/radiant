@@ -1,0 +1,52 @@
+{
+  "electron": "44.9.3",
+  "displayHz": 120.00000762939453,
+  "mode": "raf",
+  "final": true,
+  "page": {
+    "screen_w": 1728,
+    "screen_h": 1117,
+    "availW": 1728,
+    "devicePixelRatio": 2,
+    "innerW": 1200,
+    "innerH": 768,
+    "isSecureContext": true,
+    "visibility": "visible",
+    "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Electron/44.9.3 Safari/537.36",
+    "hasFocus": true
+  },
+  "raf_trivial": {
+    "frames": 436,
+    "mean_ms": 8.333,
+    "median_ms": 8.3,
+    "p95_ms": 9.2,
+    "p99_ms": 9.3,
+    "max_ms": 9.4,
+    "fps_from_mean": 120.011,
+    "fps_from_median": 120.482,
+    "dropped_gt_1p5x_median": 0,
+    "intervals_gt_16p7ms": 0,
+    "intervals_gt_8p4ms": 160,
+    "js_mean_ms": 0.024,
+    "js_p95_ms": 0.1
+  },
+  "raf_empty": {
+    "frames": 290,
+    "mean_ms": 8.334,
+    "median_ms": 8.3,
+    "p95_ms": 9,
+    "p99_ms": 9.3,
+    "max_ms": 9.3,
+    "fps_from_mean": 119.993,
+    "fps_from_median": 120.482,
+    "dropped_gt_1p5x_median": 0,
+    "intervals_gt_16p7ms": 0,
+    "intervals_gt_8p4ms": 97,
+    "js_mean_ms": 0.003,
+    "js_p95_ms": 0
+  },
+  "world": {
+    "W": 2800,
+    "note": "branches uniformly in WxW world; viewport sees ~16% at zoom 1, ~29% at zoom .75, ~10% at 1.25"
+  }
+}

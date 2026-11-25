@@ -1,0 +1,298 @@
+[
+ {
+  "n": "5000",
+  "theme": "clean",
+  "instMs": 3.28,
+  "cold": {
+   "wasm_miss": 16.56,
+   "ts_miss": 14.39
+  },
+  "memMB": 25.2,
+  "ts_miss": {
+   "med": 14.78,
+   "min": 8.38,
+   "max": 17.45
+  },
+  "wasm_miss": {
+   "med": 5.96,
+   "min": 5.51,
+   "max": 7.78
+  },
+  "wasm_copy": {
+   "med": 1.75,
+   "min": 1.43,
+   "max": 6.98
+  },
+  "ts_edit": {
+   "med": 12.49,
+   "min": 5.81,
+   "max": 15.04
+  },
+  "wasm_edit": {
+   "med": 11.91,
+   "min": 5.47,
+   "max": 17.22
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "instMs": 1.82,
+  "cold": {
+   "wasm_miss": 151.76,
+   "ts_miss": 81.67
+  },
+  "memMB": 217.4,
+  "ts_miss": {
+   "med": 99.5,
+   "min": 57.36,
+   "max": 119.55
+  },
+  "wasm_miss": {
+   "med": 50.08,
+   "min": 48.81,
+   "max": 52.55
+  },
+  "wasm_copy": {
+   "med": 15.07,
+   "min": 14.63,
+   "max": 16.54
+  },
+  "ts_edit": {
+   "med": 94.21,
+   "min": 46.82,
+   "max": 99.5
+  },
+  "wasm_edit": {
+   "med": 93.25,
+   "min": 47.78,
+   "max": 108.17
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "clean",
+  "instMs": 1.9,
+  "cold": {
+   "wasm_miss": 16.12,
+   "ts_miss": 14.42
+  },
+  "memMB": 25.2,
+  "ts_miss": {
+   "med": 14.26,
+   "min": 8.07,
+   "max": 15.73
+  },
+  "wasm_miss": {
+   "med": 5.86,
+   "min": 5.3,
+   "max": 6.34
+  },
+  "wasm_copy": {
+   "med": 1.6,
+   "min": 1.44,
+   "max": 2.03
+  },
+  "ts_edit": {
+   "med": 12.52,
+   "min": 6.26,
+   "max": 14.42
+  },
+  "wasm_edit": {
+   "med": 12,
+   "min": 5.77,
+   "max": 14.61
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "instMs": 2.17,
+  "cold": {
+   "wasm_miss": 125.93,
+   "ts_miss": 72.85
+  },
+  "memMB": 217.4,
+  "ts_miss": {
+   "med": 100.06,
+   "min": 56.15,
+   "max": 113.71
+  },
+  "wasm_miss": {
+   "med": 49.58,
+   "min": 48.92,
+   "max": 52.03
+  },
+  "wasm_copy": {
+   "med": 14.92,
+   "min": 14.59,
+   "max": 16.43
+  },
+  "ts_edit": {
+   "med": 92.95,
+   "min": 46.9,
+   "max": 105.19
+  },
+  "wasm_edit": {
+   "med": 93.31,
+   "min": 47.9,
+   "max": 96.63
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "5000",
+  "theme": "clean",
+  "instMs": 9.12,
+  "cold": {
+   "wasm_miss": 17.96,
+   "ts_miss": 20.72
+  },
+  "memMB": 25.2,
+  "ts_miss": {
+   "med": 5.08,
+   "min": 4.62,
+   "max": 6.06
+  },
+  "wasm_miss": {
+   "med": 4.32,
+   "min": 3.88,
+   "max": 6.36
+  },
+  "wasm_copy": {
+   "med": 0.58,
+   "min": 0.36,
+   "max": 1.58
+  },
+  "ts_edit": {
+   "med": 4.6,
+   "min": 3.78,
+   "max": 6.92
+  },
+  "wasm_edit": {
+   "med": 4.24,
+   "min": 3.18,
+   "max": 6.68
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "instMs": 3.1,
+  "cold": {
+   "wasm_miss": 71.1,
+   "ts_miss": 84.02
+  },
+  "memMB": 217.4,
+  "ts_miss": {
+   "med": 53.86,
+   "min": 45.86,
+   "max": 84.64
+  },
+  "wasm_miss": {
+   "med": 52.44,
+   "min": 36.84,
+   "max": 90.62
+  },
+  "wasm_copy": {
+   "med": 21.1,
+   "min": 3.88,
+   "max": 65.56
+  },
+  "ts_edit": {
+   "med": 61.6,
+   "min": 41.2,
+   "max": 73.78
+  },
+  "wasm_edit": {
+   "med": 54.86,
+   "min": 40.06,
+   "max": 71.64
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "clean",
+  "instMs": 3.1,
+  "cold": {
+   "wasm_miss": 15.12,
+   "ts_miss": 20.68
+  },
+  "memMB": 25.2,
+  "ts_miss": {
+   "med": 4.42,
+   "min": 4.08,
+   "max": 5.9
+  },
+  "wasm_miss": {
+   "med": 4.12,
+   "min": 3.84,
+   "max": 6.16
+  },
+  "wasm_copy": {
+   "med": 0.4,
+   "min": 0.34,
+   "max": 1.64
+  },
+  "ts_edit": {
+   "med": 3.5,
+   "min": 3.02,
+   "max": 6.04
+  },
+  "wasm_edit": {
+   "med": 3.56,
+   "min": 3.2,
+   "max": 5.92
+  },
+  "engine": "webkit",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "instMs": 3.08,
+  "cold": {
+   "wasm_miss": 63.4,
+   "ts_miss": 79.76
+  },
+  "memMB": 217.4,
+  "ts_miss": {
+   "med": 52.76,
+   "min": 40.4,
+   "max": 70.94
+  },
+  "wasm_miss": {
+   "med": 45.38,
+   "min": 38.1,
+   "max": 62.48
+  },
+  "wasm_copy": {
+   "med": 15.88,
+   "min": 3.66,
+   "max": 40.12
+  },
+  "ts_edit": {
+   "med": 62.26,
+   "min": 43.6,
+   "max": 75.68
+  },
+  "wasm_edit": {
+   "med": 62.54,
+   "min": 37.5,
+   "max": 70.9
+  },
+  "engine": "webkit",
+  "round": 1
+ }
+]

@@ -1,0 +1,22 @@
+[package]
+name = "gpui-spike"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace]
+
+[dependencies]
+# runtime_shaders: the Command Line Tools on this machine have no `metal` compiler (xcrun -f metal fails),
+# so gpui's build.rs must not compile shaders.metal ahead of time; it compiles it at startup instead.
+gpui = { version = "=0.2.2", default-features = false, features = ["font-kit", "runtime_shaders"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+log = "0.4"
+libc = "0.2"
+# only used to drive frames while the window is occluded (screen locked): [[view layer] setNeedsDisplay]
+objc = "0.2"
+raw-window-handle = "0.6"
+
+[profile.release]
+debug = false

@@ -1,0 +1,251 @@
+<section class="page" id="p-mindnode" data-g="landscape" data-title="MindNode, feature by feature" data-nav="MindNode">
+  <h1>MindNode, feature by feature</h1>
+  <p class="lead">MindNode is the app the reader uses today, so it is the baseline for Radiant. This page inventories what MindNode does as of November 2026, explains how each feature behaves where the documentation says, and gives a verdict on every feature: adopt as is, adapt, or skip. The verdicts are judged against Radiant's goals of speed on large maps, AI generation through Codex, picture and SVG subtrees, and memorability.</p>
+
+  <div class="callout wide"><span class="tag">Implication for Radiant</span><p>Most of MindNode's core interaction model should be copied closely: the Tab and Return keyboard model, an auto layout with relative-offset manual moves, folding, a synced outline, cross connections and themes. The main departures are to make layout incremental for large maps, to generalise stickers into image and SVG subtrees, to replace iCloud sync with an open file format, and to use MindNode's read-only-by-default agent pattern for the Codex integration.</p></div>
+
+  <h2>MindNode in 2026</h2>
+  <p>MindNode today is a rebuilt app named "MindNode: Mind Map &amp; Outline" in the App Store. It was previously called MindNode Next and, according to the developer, will be called simply MindNode. It runs on Mac, iPhone, iPad, Vision Pro and Apple Watch, and has no Windows, Linux or web version. <a class="src" href="https://mindnode.com/" title="MindNode: home page (company, platforms, Liquid Glass UI, iCloud data)">MindNode site</a></p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Company and platforms</h3>
+      <p class="meta">Documented</p>
+      <p>IdeasOnCanvas GmbH describes the company as independently crafted in Europe, user-funded and founder-owned, with no investors and about 18 years of development. The interface uses Apple's "Liquid Glass" design and data lives in the user's iCloud. <a class="src" href="https://mindnode.com/" title="MindNode: home page (company, platforms, Liquid Glass UI, iCloud data)">MindNode site</a></p>
+    </div>
+    <div class="card">
+      <h3>Price</h3>
+      <p class="meta">Documented</p>
+      <p>There is a free tier covering mind mapping and import and export. MindNode Plus costs $2.99 per month or $24.99 per year, with a free trial, and is also available in Setapp. Plus adds outlining, Apple Intelligence features, connections, notes and tasks, images, emojis and stickers, Focus Mode and visual tags, styling and themes, collaboration and the Apple Watch app. <a class="src" href="https://mindnode.com/pricing" title="MindNode: pricing page">MindNode pricing</a></p>
+    </div>
+    <div class="card">
+      <h3>Store listing</h3>
+      <p class="meta">Documented</p>
+      <p>Version 2026.7.2, released 10 November 2026, with a rating of 4.6 out of 5 from 337 ratings. It requires iOS 18, macOS 15, visionOS 2 or watchOS 11. Recent updates are described as improving loading, typing, editing and import performance on large documents. <a class="src" href="https://apps.apple.com/us/app/mindnode-mind-map-outline/id6446116532" title="Apple App Store: MindNode: Mind Map &amp; Outline">App Store</a></p>
+    </div>
+    <div class="card">
+      <h3>AI and agents</h3>
+      <p class="meta">Documented</p>
+      <p>On-device Apple Intelligence provides brainstorming, text generation and image background removal. An MCP server (Model Context Protocol, a standard way for AI assistants to call an app's tools) exists on the Mac only. Assistants are read-only by default and write access must be granted. It works with Claude Desktop, Claude Code, ChatGPT for Mac, Codex and Mistral Vibe. AI can be turned off in Settings. <a class="src" href="https://www.mindnode.com/blog/2026.5" title="MindNode blog: release 2026.5 (MCP agent integration)">MindNode 2026.5</a></p>
+    </div>
+  </div>
+
+  <h3>The Classic and rebuilt app situation</h3>
+  <p>MindNode Classic still exists and is included with any Plus subscription. The rebuilt app is built on a new foundation for conflict-free sync and collaboration. It does not sync with Classic because the architecture is very different, although files can be imported in both directions with some loss of features. Documents in the rebuilt app are managed inside the app through iCloud and are not visible files. <a class="src" href="https://www.mindnode.com/support/guides/mindnode-next" title="MindNode support: MindNode Next guide">Next guide</a></p>
+  <p>Feature parity between Classic and the rebuilt app is published only as a roadmap drawn as an SVG mind map, which the research could not read as text. Which Classic features are still missing in November 2026 is therefore unverified. <a class="src" href="https://www.mindnode.com/article/features-classic-next" title="MindNode: features in Classic and Next (roadmap)">Parity roadmap</a> At the rebuilt app's launch, around December 2024, manual layout and many exporters were missing, the developer called manual layout a priority, and Quick Entry was reported missing. <a class="src" href="https://www.podfeet.com/blog/2024/12/mindnode-next/" title="Podfeet: MindNode Next">Podfeet</a> <a class="src" href="https://outlinersoftware.com/topics/viewt/11145" title="Outliner Software forum: MindNode Next thread">Outliner thread</a></p>
+
+  <h3>Release cadence, 2025 to 2026</h3>
+  <p>MindNode ships roughly monthly. The official release notes give the following sequence. <a class="src" href="https://www.mindnode.com/releases" title="MindNode: release notes">MindNode releases</a></p>
+  <ol class="timeline">
+    <li><span class="when">7 Jul 2025</span><div><h4>2025.5</h4><p>Personal Themes, Reminders sync, image and text resizing.</p></div></li>
+    <li><span class="when">15 Sep 2025</span><div><h4>2025.6</h4><p>Liquid Glass design, AI brainstorming and text generation with on-device Apple Intelligence, automatic image background removal.</p></div></li>
+    <li><span class="when">17 Nov 2025</span><div><h4>2025.7</h4><p>Improved Inspector, MindNode Alias, task export to Things and OmniFocus, theme sync.</p></div></li>
+    <li><span class="when">10 Feb 2026</span><div><h4>2026.1</h4><p>Apple Watch app, new unfold actions, search and replace in notes.</p></div></li>
+    <li><span class="when">30 Mar 2026</span><div><h4>2026.2</h4><p>Document History on Mac, document linking, task highlighting, enhanced notes and notes sidebar.</p></div></li>
+    <li><span class="when">27 May 2026</span><div><h4>2026.3</h4><p>Nested folders, widgets, Marked integration, Document History on iOS and visionOS, Outline on Vision Pro.</p></div></li>
+    <li><span class="when">6 Jul 2026</span><div><h4>2026.4</h4><p>Radial layout, circle and square shapes, tapered branches, LaTeX equations.</p></div></li>
+    <li><span class="when">1 Sep 2026</span><div><h4>2026.5</h4><p>Printing options, MCP agent integration, document history marks AI and MCP changes.</p></div></li>
+    <li><span class="when">14 Sep 2026</span><div><h4>2026.6</h4><p>iOS and macOS 27 support, Spotlight search for nodes, Siri creates documents.</p></div></li>
+    <li><span class="when">21 Oct 2026</span><div><h4>2026.7</h4><p>iPhone Duo support, side-by-side map and outline. (2026.6.2 on 5 October added Ukrainian.)</p></div></li>
+    <li><span class="when">10 Nov 2026</span><div><h4>2026.7.2</h4><p>iPad keyboard toolbar, iPhone sibling and parent shortcuts, easier formatting of cross-connection titles.</p></div></li>
+  </ol>
+
+  <h3>Direction of the product</h3>
+  <p>The notes infer that MindNode in 2026 is Apple-native, collaborative (the conflict-free wording suggests CRDT-style sync, which is inferred) and AI-assistive rather than AI-generative-first. An app that takes a topic and a requested style and has Codex produce the whole map is therefore differentiated from MindNode's Apple Intelligence brainstorming. The absence of any Windows, Linux or web app also leaves an open lane for a cross-platform, fast desktop app. Both points are inferences, not statements from MindNode.</p>
+  <p>MindNode also retired its web publishing service, myMindNode. New uploads stopped in September 2024, the service ended on 28 March 2025 and data was deleted on 15 April 2025. The shutdown notice says it never found a large audience and that SVG export is the suggested web alternative. <a class="src" href="https://www.mindnode.com/blog/mymindnode-web-service-shutdown" title="MindNode blog: myMindNode web service shutdown">Shutdown notice</a></p>
+
+  <h2>Canvas and nodes</h2>
+  <p>MindNode's canvas holds one or more main nodes per document, each with its own tree of children. New main nodes are added with Shift+Return. <a class="src" href="https://www.mindnode.com/support/guides/mind-map-and-canvas-styling" title="MindNode support: Mind map and canvas styling guide">Styling guide</a> The notes do not document the canvas size limits, zoom range or whether the canvas is strictly infinite, beyond an improved zoom in release 2026.4 and the shortcuts for zoom, zoom to fit and centring the selection. <a class="src" href="https://www.mindnode.com/blog/2026.4" title="MindNode blog: release 2026.4 (tapered branches, shapes, zoom)">MindNode 2026.4</a></p>
+  <dl class="kv">
+    <dt>Node shapes</dt><dd>Eight shapes in total, including circle and square added in 2026.4. The notes do not document borders or the full list. <a class="src" href="https://www.mindnode.com/blog/2026.4" title="MindNode blog: release 2026.4 (tapered branches, shapes, zoom)">MindNode 2026.4</a></dd>
+    <dt>Detaching</dt><dd>Holding "d" while dragging detaches a node from its parent. Shift+Cmd+D detaches from the keyboard. <a class="src" href="https://www.mindnode.com/blog/2026.4" title="MindNode blog: release 2026.4 (tapered branches, shapes, zoom)">MindNode 2026.4</a></dd>
+    <dt>Images</dt><dd>Stickers (tinted and in colour), emojis and photos can be attached to a selected node or created as a main node, and resized with knobs. Apple Intelligence can remove an image background. <a class="src" href="https://www.mindnode.com/support/guides/stickers-emojis-and-photos" title="MindNode support: Stickers, emojis and photos">Stickers guide</a></dd>
+    <dt>Notes and LaTeX</dt><dd>Nodes carry notes, shown in a notes sidebar, with search and replace added in 2026.1 and LaTeX equations in 2026.4. <a class="src" href="https://www.mindnode.com/releases" title="MindNode: release notes">MindNode releases</a></dd>
+    <dt>Document linking</dt><dd>Documents can link to each other, added in 2026.2. Nodes can also be found through Spotlight from 2026.6. <a class="src" href="https://www.mindnode.com/releases" title="MindNode: release notes">MindNode releases</a></dd>
+  </dl>
+
+  <h2>Layout and branches</h2>
+  <p>Layout is set per main node, so one document can mix styles. <a class="src" href="https://www.mindnode.com/support/guides/mind-map-and-canvas-styling" title="MindNode support: Mind map and canvas styling guide">Styling guide</a></p>
+  <div class="table-wrap"><table>
+    <caption>Layout options documented in the styling guide</caption>
+    <thead><tr><th>Option</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><th>Horizontal</th><td>Children go left, right or both sides.</td></tr>
+      <tr><th>Vertical</th><td>Children go up, down or both.</td></tr>
+      <tr><th>Compact</th><td>An organisation-chart arrangement.</td></tr>
+      <tr><th>Radial</th><td>Children spread evenly around the node. Added in release 2026.4 (July 2026).</td></tr>
+      <tr><th>Spacing</th><td>Narrow, default or wide.</td></tr>
+      <tr><th>Branch type</th><td>Rounded or angular. First-level branches can also be tapered, wide at the root and narrow at the tip, from July 2026. <a class="src" href="https://www.mindnode.com/blog/2026.4" title="MindNode blog: release 2026.4 (tapered branches, shapes, zoom)">MindNode 2026.4</a></td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Manual moves as offsets</h3>
+  <p>The rebuilt app has no separate manual mode. Any node can be dragged and then keeps its position relative to its parent. While dragging, a shadow shows where the node will snap back to, and dragging far enough shows an indicator that the node will stay at an offset. Holding Option overrides the behaviour. The Organize menu offers Balance, Move All Nodes and Reset Position. <a class="src" href="https://www.mindnode.com/support/guides/mind-map-and-canvas-styling" title="MindNode support: Mind map and canvas styling guide">Styling guide</a></p>
+  <p>The notes infer that the app stores a delta from the automatic layout position, so the automatic layout stays authoritative and manual tweaks survive a reflow. The notes also infer, without documentation, that overlap avoidance is a layout pass that sizes subtrees and spaces siblings, with manual offsets applied afterwards. Both are inferred.</p>
+  <div class="callout gap"><span class="tag">Not verified</span><p>Smart Layout (a Classic feature recalled from background knowledge, not from a fetched page) and the details of how overlap avoidance works are not documented in the notes. One App Store reviewer wanted better layouts after nodes are moved, and another wanted both branch styles in a single map. <a class="src" href="https://appshunter.io/ios/app/1218718027/reviews/3" title="AppsHunter: MindNode app reviews">AppsHunter reviews</a></p></div>
+
+  <h2>Outline, focus and capture</h2>
+  <h3>Outline</h3>
+  <p>The outline is always in sync with the map. Main nodes appear in creation order. First-level children follow clockwise map order, and deeper levels run top to bottom. Font size and colour are ignored in the outline, while bold and italic are kept. Return splits a node in the middle of its text and Backspace merges nodes. Dragging a line left or right changes its hierarchy level. Tasks appear on the right, and options show tags and content indicators. <a class="src" href="https://www.mindnode.com/support/guides/outlining" title="MindNode support: Outlining guide">Outlining guide</a> A side-by-side map and outline view arrived on 21 October 2026. <a class="src" href="https://www.mindnode.com/releases" title="MindNode: release notes">MindNode releases</a> Outline editing is a Plus feature. <a class="src" href="https://apps.apple.com/us/app/mindnode-mind-map-outline/id6446116532" title="Apple App Store: MindNode: Mind Map &amp; Outline">App Store</a></p>
+
+  <h3>Folding</h3>
+  <p>Holding Option while hovering a node shows a fold arrow, and an indicator on a folded node unfolds it. There is an action to unfold one level, and nested folders arrived in 2026.3. <a class="src" href="https://www.mindnode.com/support/guides/folding" title="MindNode support: Folding guide">Folding guide</a></p>
+
+  <h3>Focus Mode, visual tags and capture</h3>
+  <p>Focus Mode (Shift+Cmd+F) and Visual Tags are listed as Plus features. <a class="src" href="https://mindnode.com/pricing" title="MindNode: pricing page">MindNode pricing</a> Their behaviour is not described in the documentation pages the research retrieved. Quick Entry, a menu-bar capture feature, is recalled from background knowledge about Classic and was reported missing from the rebuilt app at launch. "Wells", a further MindNode term that came up during the research, does not appear in any page the research fetched.</p>
+  <span class="badge unverified">Unverified</span>
+
+  <h2>Styling and themes</h2>
+  <p>Themes are the best-documented styling feature. Personal themes extract the canvas colour, main node style, child node style, branch style, branch colouring of first-level nodes, connection style and fonts from an existing document. MindNode recommends a sample with one main node, six children and one connection. There are also hierarchical themes, and dynamic themes that follow the system light and dark mode. <a class="src" href="https://www.mindnode.com/support/guides/themes" title="MindNode support: Themes guide">Themes guide</a> Release 2026.3 gave free users extra styling and layout controls, a basic sticker set and an "Important" tag, although the pricing page still lists many of these under Plus, so the exact free and paid split is unclear. <a class="src" href="https://www.mindnode.com/blog/2026.3" title="MindNode blog: release 2026.3">MindNode 2026.3</a></p>
+  <p>Style copy and paste is available with Option+Cmd+C and Option+Cmd+V. <a class="src" href="https://www.mindnode.com/support/guides/keyboard-shortcuts" title="MindNode support: Keyboard shortcuts">Shortcuts</a> Typography options, tag colours and the size of the sticker library are not documented in the fetched pages.</p>
+
+  <h2>Tasks, tags and connections</h2>
+  <h3>Cross connections</h3>
+  <p>A connection is created with Cmd+L and a click on the target, or by Shift+dragging. A draggable middle waypoint curves the line and a double-click straightens it. A double-click on the connection adds a title. <a class="src" href="https://www.mindnode.com/support/guides/connections" title="MindNode support: Connections guide">Connections guide</a></p>
+
+  <h3>Tasks</h3>
+  <p>A node can carry a checkbox. A parent node then shows a progress indicator with a percentage on hover, and clicking the parent's indicator completes all subtasks. Reminders sync is two-way for completion, but creation goes one way only: tasks made in MindNode appear in Reminders, while tasks made in Reminders do not appear in MindNode. The Reminders list is named after the document, and each reminder includes the notes, tags, path and a deep link. Export to Things and OmniFocus is one-way. The page does not mention due dates. <a class="src" href="https://www.mindnode.com/support/guides/tasks" title="MindNode support: Tasks guide">Tasks guide</a></p>
+
+  <h2>Keyboard model</h2>
+  <p>The documented Mac shortcuts show a keyboard-first design in which Tab creates a child and Return creates a sibling. This matches the de facto convention across tools (see <a href="#desktop-tools">the desktop tools page</a>). <a class="src" href="https://www.mindnode.com/support/guides/keyboard-shortcuts" title="MindNode support: Keyboard shortcuts">Shortcuts</a></p>
+  <div class="table-wrap"><table class="dense">
+    <caption>Documented MindNode shortcuts on the Mac</caption>
+    <thead><tr><th>Area</th><th>Action</th><th>Shortcut</th></tr></thead>
+    <tbody>
+      <tr><th rowspan="6">Create</th><td>Child node</td><td>Tab</td></tr>
+      <tr><td>Parent node</td><td>Option+Tab</td></tr>
+      <tr><td>Sibling after</td><td>Return</td></tr>
+      <tr><td>Sibling above</td><td>Option+Return</td></tr>
+      <tr><td>New main node</td><td>Shift+Return</td></tr>
+      <tr><td>Duplicate</td><td>Cmd+D</td></tr>
+      <tr><th rowspan="5">Edit and delete</th><td>Edit title</td><td>Cmd+Return</td></tr>
+      <tr><td>Delete node and subtree</td><td>Delete</td></tr>
+      <tr><td>Delete node, promote children</td><td>Option+Delete</td></tr>
+      <tr><td>Copy style</td><td>Option+Cmd+C</td></tr>
+      <tr><td>Paste style</td><td>Option+Cmd+V</td></tr>
+      <tr><th rowspan="5">Select and move</th><td>Move selection</td><td>Arrow keys</td></tr>
+      <tr><td>Select next in a direction</td><td>Shift+arrow</td></tr>
+      <tr><td>Select main node</td><td>Cmd+R</td></tr>
+      <tr><td>Move node</td><td>Cmd+arrow</td></tr>
+      <tr><td>Detach</td><td>Shift+Cmd+D</td></tr>
+      <tr><th rowspan="4">Layout</th><td>Reset manual positions</td><td>Ctrl+Cmd+R</td></tr>
+      <tr><td>Balance</td><td>Option+Cmd+B</td></tr>
+      <tr><td>Sort children</td><td>Menu command (alphabetical or by task state)</td></tr>
+      <tr><td>Cross connection</td><td>Cmd+L</td></tr>
+      <tr><th rowspan="3">Fold</th><td>Fold</td><td>Option+.</td></tr>
+      <tr><td>Fold with siblings</td><td>Option+Cmd+.</td></tr>
+      <tr><td>Unfold one level</td><td>Ctrl+Option+.</td></tr>
+      <tr><th rowspan="5">Content</th><td>Link</td><td>Cmd+K</td></tr>
+      <tr><td>Notes</td><td>Shift+Cmd+K</td></tr>
+      <tr><td>Task</td><td>Shift+Cmd+T</td></tr>
+      <tr><td>Complete task</td><td>Ctrl+Cmd+T</td></tr>
+      <tr><td>Quick Look</td><td>Space</td></tr>
+      <tr><th rowspan="6">View and search</th><td>Zoom in, out, reset</td><td>Cmd++, Cmd+-, Cmd+0</td></tr>
+      <tr><td>Zoom to fit</td><td>Cmd+*</td></tr>
+      <tr><td>Centre selection</td><td>Shift+Cmd+8</td></tr>
+      <tr><td>Focus Mode</td><td>Shift+Cmd+F</td></tr>
+      <tr><td>Find, replace</td><td>Cmd+F, Option+Cmd+F</td></tr>
+      <tr><td>Map view, outline view</td><td>Cmd+1, Cmd+2</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Import, export and files</h2>
+  <div class="table-wrap"><table>
+    <caption>MindNode import and export formats</caption>
+    <thead><tr><th>Format</th><th>Import</th><th>Export</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><th>MindNode (Next and Classic)</th><td>Yes</td><td>Yes</td><td>Some feature loss between versions.</td></tr>
+      <tr><th>Plain and rich text</th><td>Yes</td><td>Yes</td><td>Text export also covers TaskPaper.</td></tr>
+      <tr><th>Word</th><td>Yes (Mac)</td><td>No</td><td></td></tr>
+      <tr><th>Markdown and TextBundle</th><td>Yes</td><td>Yes</td><td>Markdown export is via TextBundle.</td></tr>
+      <tr><th>OPML</th><td>Yes</td><td>Yes</td><td></td></tr>
+      <tr><th>FreeMind</th><td>Yes</td><td>Yes</td><td></td></tr>
+      <tr><th>iThoughts</th><td>Yes</td><td>Not listed</td><td></td></tr>
+      <tr><th>XMind</th><td>Yes</td><td>Not listed</td><td></td></tr>
+      <tr><th>PDF</th><td>No</td><td>Yes</td><td>Outline exports can include notes and tags.</td></tr>
+      <tr><th>SVG</th><td>No</td><td>Yes</td><td>Editable vector. A Plus feature per the store listing.</td></tr>
+      <tr><th>PNG</th><td>No</td><td>Yes</td><td>Transparent or solid background.</td></tr>
+    </tbody>
+  </table></div>
+  <p>The source for this table is MindNode's import and export guide, which lists no CSV or MindManager export. <a class="src" href="https://www.mindnode.com/support/guides/import-and-export" title="MindNode support: Import and export">Import and export</a></p>
+
+  <h3>File format</h3>
+  <p>MindNode documents sync through iCloud (CloudKit) and collaboration is live. <a class="src" href="https://www.mindnode.com/support/guides/mindnode-next" title="MindNode support: MindNode Next guide">Next guide</a> The rebuilt app's internal format is undocumented and no official specification was found. Documents are not exposed as files, which is a known user complaint about file locations. <a class="src" href="https://talk.macpowerusers.com/t/mindnode-next-where-are-the-files-stored/39127" title="MacPowerUsers forum: MindNode Next, where are the files stored (title only)">MPU forum</a></p>
+  <p>A third-party README for an MCP server claims that the Classic <code>.mindnode</code> file is a package whose <code>contents.xml</code> is an Apple binary property list, with a recursive node tree at <code>canvas.mindMaps[].mainNode</code>, format version 9, and a resources folder for images. <a class="src" href="https://claudemarket.ai/mcp/masamitsu-konya/mindnode-mcp" title="claudemarket.ai: mindnode-mcp listing (README)">mindnode-mcp</a> This is not checked against MindNode documentation.</p>
+  <span class="badge reported">Third-party</span> <span class="badge unverified">Unverified</span>
+
+  <h2>What users praise and criticise</h2>
+  <div class="grid two">
+    <div class="card">
+      <h3>Praise</h3>
+      <ul>
+        <li>The Sweet Setup names MindNode its best mind mapping app and rates it easier to use than iThoughts. <a class="src" href="https://thesweetsetup.com/apps/best-mind-mapping-app/" title="The Sweet Setup: Best mind mapping app">Sweet Setup</a></li>
+        <li>MacStories reviews of MindNode 5 and 6 are strongly positive, with phrases such as "finally clicked for me" and "refined". <a class="src" href="https://www.macstories.net/?p=52089" title="MacStories: MindNode 5 review">MacStories 5</a> <a class="src" href="https://www.macstories.net/?p=59013" title="MacStories: MindNode 6 review">MacStories 6</a></li>
+        <li>App Store reviewers praise cross-device support. <a class="src" href="https://apps.apple.com/us/app/mindnode-mind-map-outline/id6446116532" title="Apple App Store: MindNode: Mind Map &amp; Outline">App Store</a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Criticism</h3>
+      <ul>
+        <li>TechRadar calls it excellent but says it lacks customisable templates. <a class="src" href="https://www.techradar.com/pro/mindnode-review" title="TechRadar: MindNode review">TechRadar</a></li>
+        <li>A Capterra comparison says it has fewer advanced diagram types and less granular control for large complex maps than Xmind. <a class="src" href="https://www.capterra.com/compare/128088-207384/XMind-vs-MindNode" title="Capterra: XMind vs MindNode comparison">Capterra</a></li>
+        <li>A forum thread calls moving and positioning topics on iOS cumbersome compared with iThoughts (MindNode 6.0.1). <a class="src" href="https://talk.macpowerusers.com/t/mindnode-6-0-1-ios-cumbersome-moving-positioning-of-topics-vs-ithoughts/12138" title="MacPowerUsers forum: MindNode 6.0.1 iOS cumbersome moving and positioning of topics vs iThoughts">MPU forum</a></li>
+        <li>The move to a Plus subscription angered some long-time users, with one second-hand quote saying it "gutted the version I bought". <a class="src" href="https://talk.macpowerusers.com/t/mindnode-switches-to-a-subscription-business-model/14947?page=3" title="MacPowerUsers forum: MindNode switches to a subscription business model">MPU forum</a></li>
+        <li>One reviewer criticised limited spatial computing support. <a class="src" href="https://apps.apple.com/us/app/mindnode-mind-map-outline/id6446116532" title="Apple App Store: MindNode: Mind Map &amp; Outline">App Store</a></li>
+      </ul>
+    </div>
+  </div>
+  <p>No Reddit threads could be retrieved, no MacSparky review was found, and no complaint about large-map performance in MindNode was found. That absence says nothing either way about MindNode's performance.</p>
+
+  <h2>Adopt, adapt or skip</h2>
+  <p>The table gives a verdict for each feature. "Adopt" means copy the behaviour closely. "Adapt" means keep the idea and change the implementation. "Skip" means leave it out, at least at first. Verdicts are the research's own judgement against Radiant's goals, and several rest on documentation that does not describe the feature in depth.</p>
+  <div class="table-wrap"><table class="dense">
+    <caption>Verdict for each MindNode feature</caption>
+    <thead><tr><th>Feature</th><th>MindNode behaviour</th><th>Verdict</th><th>What Radiant does</th></tr></thead>
+    <tbody>
+      <tr><th>Infinite canvas, multiple main nodes</th><td>Several roots per document, added with Shift+Return.</td><td><span class="badge adopt">Adopt</span></td><td>Core to Radiant's goals. Same model.</td></tr>
+      <tr><th>Tab and Return keyboard model</th><td>Tab child, Return sibling, Option variants for parent and sibling above.</td><td><span class="badge adopt">Adopt</span></td><td>Matches cross-tool muscle memory and is fast. Keep the whole shortcut set.</td></tr>
+      <tr><th>Auto layout with relative-offset manual moves</th><td>Dragged nodes keep an offset from their parent, with a snap-back shadow. Reset Position clears it.</td><td><span class="badge adapt">Adapt</span></td><td>Keep the model, but make layout incremental so a change re-lays out only the affected subtree on large maps.</td></tr>
+      <tr><th>Per-main-node layout</th><td>Horizontal, vertical, compact and radial, chosen per main node.</td><td><span class="badge adapt">Adapt</span></td><td>Choose layout per subtree, so it also fits picture and SVG subtrees.</td></tr>
+      <tr><th>Rounded, angular and tapered branches</th><td>Tapered branches apply to first-level branches since July 2026.</td><td><span class="badge adapt">Adapt</span></td><td>Add true organic curves with taper along every level (see <a href="#desktop-tools">Ayoa</a> and <a href="#art-subtrees">art subtrees</a>).</td></tr>
+      <tr><th>Folding, unfold one level</th><td>Option+hover arrow, fold with siblings, nested folders.</td><td><span class="badge adopt">Adopt</span></td><td>Required so that rendered subtrees stay collapsible.</td></tr>
+      <tr><th>Cross connections</th><td>Cmd+L or Shift+drag, curve waypoint, double-click for a title.</td><td><span class="badge adopt">Adopt</span></td><td>Cheap and expected.</td></tr>
+      <tr><th>Task checkbox with progress roll-up</th><td>Parent shows a percentage, clicking it completes subtasks.</td><td><span class="badge adapt">Adapt</span></td><td>Build the roll-up. Leave Reminders sync, Things and OmniFocus export for later because they are platform-specific.</td></tr>
+      <tr><th>Reminders, Things and OmniFocus sync</th><td>Two-way completion, one-way creation, one-way export.</td><td><span class="badge skip">Skip</span></td><td>Apple-specific and outside the stated goals. Revisit later.</td></tr>
+      <tr><th>Notes</th><td>Per-node notes with a sidebar and search and replace.</td><td><span class="badge adapt">Adapt</span></td><td>Start with plain text or Markdown notes.</td></tr>
+      <tr><th>LaTeX equations</th><td>Added in 2026.4.</td><td><span class="badge adapt">Adapt</span></td><td>Later phase, after notes.</td></tr>
+      <tr><th>Stickers, photos, emojis</th><td>Attach to a node or make a main node, resize with knobs.</td><td><span class="badge adapt">Adapt</span></td><td>Generalise to image and SVG subtrees, with stickers as one kind of content.</td></tr>
+      <tr><th>Background removal</th><td>Apple Intelligence removes an image background.</td><td><span class="badge adapt">Adapt</span></td><td>Useful for picture nodes. The implementation depends on the platform, so choose a portable method.</td></tr>
+      <tr><th>Outline view synced to map</th><td>Live two-way sync, side-by-side view, hierarchy by dragging.</td><td><span class="badge adopt">Adopt</span></td><td>Strong feature. Use the outline as the input and output format for AI generation.</td></tr>
+      <tr><th>Focus Mode</th><td>Plus feature. Behaviour not documented in the fetched pages.</td><td><span class="badge adapt">Adapt</span></td><td>Low cost as a filter, but specify it from scratch.</td></tr>
+      <tr><th>Visual tags</th><td>Plus feature. Behaviour not documented.</td><td><span class="badge adapt">Adapt</span></td><td>Cheap filters. Specify from scratch.</td></tr>
+      <tr><th>Themes and personal themes</th><td>Extract style from a document, hierarchical and dynamic light and dark themes.</td><td><span class="badge adopt">Adopt</span></td><td>Extracting a style from a document also gives a way to express the "requested style" in AI generation.</td></tr>
+      <tr><th>Style copy and paste</th><td>Option+Cmd+C and V.</td><td><span class="badge adopt">Adopt</span></td><td>Cheap and useful.</td></tr>
+      <tr><th>Quick Entry menu-bar capture</th><td>Reported missing at launch. Details unverified.</td><td><span class="badge adapt">Adapt</span></td><td>Useful, later phase.</td></tr>
+      <tr><th>Import and export</th><td>OPML, FreeMind, Markdown, SVG, PNG, PDF and more.</td><td><span class="badge adopt">Adopt</span></td><td>Interoperability. Skip TaskPaper, Things and OmniFocus at first.</td></tr>
+      <tr><th>iCloud sync and live collaboration</th><td>CloudKit with conflict-free sync.</td><td><span class="badge skip">Skip</span></td><td>Not in the stated goals. Use an open file the user can sync with any service.</td></tr>
+      <tr><th>myMindNode web publishing</th><td>Retired by MindNode in March 2025.</td><td><span class="badge skip">Skip</span></td><td>SVG export replaced it.</td></tr>
+      <tr><th>MCP agent interface</th><td>Mac only, read-only by default, write access granted explicitly.</td><td><span class="badge adapt">Adapt</span></td><td>Fits the Codex plan. Copy the read-only default.</td></tr>
+      <tr><th>Document history</th><td>History marks AI and MCP changes.</td><td><span class="badge adapt">Adapt</span></td><td>Mark AI-generated changes in the history, as MindNode does.</td></tr>
+      <tr><th>On-device AI brainstorming</th><td>Apple Intelligence generates text and ideas.</td><td><span class="badge skip">Skip</span></td><td>Replaced by Codex generation of whole maps, which has no Apple dependency.</td></tr>
+      <tr><th>Apple Watch, Vision Pro, widgets, Siri, Shortcuts</th><td>Apple-platform integrations.</td><td><span class="badge skip">Skip</span></td><td>Outside a macOS-first desktop tool.</td></tr>
+      <tr><th>Document linking</th><td>Documents link to each other since 2026.2.</td><td><span class="badge adapt">Adapt</span></td><td>Possible later. Not in the early scope.</td></tr>
+      <tr><th>Printing options</th><td>Added in 2026.5.</td><td><span class="badge skip">Skip</span></td><td>Cover with PDF and SVG export first.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>What this means for Radiant</h2>
+  <ul>
+    <li><b>Copy the keyboard model completely.</b> MindNode's Tab and Return conventions match the rest of the market, so a user moving from MindNode keeps their habits.</li>
+    <li><b>Store manual moves as offsets from the automatic position.</b> This lets automatic layout stay authoritative. Radiant should add incremental layout so that editing one node does not re-lay out a large map.</li>
+    <li><b>Choose layout and representation per subtree.</b> MindNode already allows layout per main node. Radiant extends the same idea to a raster or SVG representation for any subtree.</li>
+    <li><b>Treat the outline as the AI interface.</b> A synced outline gives Codex a plain-text format to read and write. See <a href="#ai-engine">the AI engine</a>.</li>
+    <li><b>Own an open file format.</b> MindNode hides its documents inside iCloud, which is a known complaint. The notes infer that a JSON file plus an assets folder is a good choice, with OPML, FreeMind <code>.mm</code>, Markdown and SVG or PNG export first. See <a href="#features">the feature list</a>.</li>
+    <li><b>Make agent access read-only by default.</b> MindNode's MCP server asks the user to grant write access, and its history marks AI changes. Both are good patterns for Codex.</li>
+    <li><b>Do not rely on MindNode's documentation for everything.</b> Several features still need a hands-on check in the app the reader already has, as listed below.</li>
+  </ul>
+
+  <h2>Limits of this research</h2>
+  <div class="callout gap wide"><span class="tag">Not verified</span><p>The notes could not verify the behaviour of wells, Smart Layout, Quick Entry, Visual Tags or Focus Mode from MindNode documentation. The Classic versus rebuilt parity roadmap is an image, so current gaps are unknown. Node border and shape details, tag colours, due dates, sticker library size and typography options were not documented in the fetched pages. The rebuilt app's file format is undocumented, and the Classic format claim is third-party and unchecked.</p></div>
+  <div class="callout gap wide"><span class="tag">Not verified</span><p>No performance data for large MindNode maps was found beyond the App Store statement that loading, typing, editing and import performance improved. Reddit sentiment was not retrievable. Any figures about how MindNode behaves at thousands of nodes would need measuring in the app itself.</p></div>
+</section>

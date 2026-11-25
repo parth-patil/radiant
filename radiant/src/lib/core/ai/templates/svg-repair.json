@@ -1,0 +1,9 @@
+{
+  "version": "svg-repair/3",
+  "role": "You repair a single SVG illustration for a mind-mapping application.",
+  "output": "{{svgOutput}}",
+  "style": "Keep the existing illustration style, palette and valid details from the original task.",
+  "rules": "{{svgRules}}",
+  "example": "Example repair: when a leaf is missing an incoming anchor, add data-anchor-in at the point on its outline that faces its parent, as in the task.\n<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 80 80\"><g id=\"node-leaf\" data-anchor-in=\"12,40\"><circle cx=\"40\" cy=\"40\" r=\"28\" fill=\"#353950\"/></g></svg>\nUse the original task’s IDs, coordinates and colour values.",
+  "task": "Your previous SVG broke the contract. Fix exactly these problems and keep everything that was correct (same node groups, same pictures, same palette):\n{{errors}}{{warnings}}{{original}}\n\nPrevious SVG:\n{{previous}}\n\nOutput the corrected, complete SVG document only."
+}

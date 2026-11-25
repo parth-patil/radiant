@@ -1,0 +1,27 @@
+[package]
+name = "native-spike"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Feasibility spike: draw an exported Radiant scene natively with wgpu + winit (not part of the app)"
+
+# Independent of radiant/src-tauri: this crate is its own workspace root.
+[workspace]
+
+[[bin]]
+name = "wgpu-spike"
+path = "src/main.rs"
+
+[dependencies]
+wgpu = "30"
+winit = "0.30"
+cosmic-text = "0.19"
+bytemuck = { version = "1", features = ["derive"] }
+pollster = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+libc = "0.2"
+png = "0.18"
+
+[profile.release]
+debug = false

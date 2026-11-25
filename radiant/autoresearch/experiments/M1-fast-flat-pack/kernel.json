@@ -1,0 +1,1570 @@
+[
+ {
+  "n": "5000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 2.46,
+    "min": 2.36,
+    "max": 2.61
+   },
+   "B": {
+    "med": 2.01,
+    "min": 1.94,
+    "max": 2.12
+   },
+   "ratio": 0.817
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 4.51,
+    "min": 3.52,
+    "max": 15.69
+   },
+   "B": {
+    "med": 4.27,
+    "min": 3.46,
+    "max": 61.57
+   },
+   "ratio": 0.947
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 2.69,
+    "min": 2.56,
+    "max": 2.88
+   },
+   "B": {
+    "med": 2.73,
+    "min": 2.61,
+    "max": 2.88
+   },
+   "ratio": 1.015
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 5.45,
+    "min": 3.83,
+    "max": 36.91
+   },
+   "B": {
+    "med": 6.11,
+    "min": 4.03,
+    "max": 33.43
+   },
+   "ratio": 1.121
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 71.61,
+    "min": 27.21,
+    "max": 93.5
+   },
+   "B": {
+    "med": 17.89,
+    "min": 17.56,
+    "max": 19.25
+   },
+   "ratio": 0.25
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 34.73,
+    "min": 29.17,
+    "max": 59.16
+   },
+   "B": {
+    "med": 42.01,
+    "min": 29.36,
+    "max": 82.72
+   },
+   "ratio": 1.21
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 21.77,
+    "min": 20.02,
+    "max": 69.56
+   },
+   "B": {
+    "med": 21.16,
+    "min": 20.47,
+    "max": 23.79
+   },
+   "ratio": 0.972
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 23.02,
+    "min": 22.83,
+    "max": 80.54
+   },
+   "B": {
+    "med": 23.45,
+    "min": 22.89,
+    "max": 24.38
+   },
+   "ratio": 1.019
+  },
+  "engine": "chrome",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 2.5,
+    "min": 2.43,
+    "max": 2.71
+   },
+   "B": {
+    "med": 2.09,
+    "min": 2,
+    "max": 2.7
+   },
+   "ratio": 0.836
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "5000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 3.52,
+    "min": 3.29,
+    "max": 3.66
+   },
+   "B": {
+    "med": 3.46,
+    "min": 3.2,
+    "max": 3.63
+   },
+   "ratio": 0.983
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "5000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 2.64,
+    "min": 2.55,
+    "max": 16.08
+   },
+   "B": {
+    "med": 2.67,
+    "min": 2.57,
+    "max": 6.2
+   },
+   "ratio": 1.011
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "5000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 3.52,
+    "min": 3.36,
+    "max": 3.84
+   },
+   "B": {
+    "med": 3.51,
+    "min": 3.3,
+    "max": 3.88
+   },
+   "ratio": 0.997
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 71.13,
+    "min": 27.37,
+    "max": 72.86
+   },
+   "B": {
+    "med": 17.94,
+    "min": 17.37,
+    "max": 33.59
+   },
+   "ratio": 0.252
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 39.85,
+    "min": 28.44,
+    "max": 82.6
+   },
+   "B": {
+    "med": 96.78,
+    "min": 30.18,
+    "max": 189.49
+   },
+   "ratio": 2.429
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 20.69,
+    "min": 19.24,
+    "max": 89.68
+   },
+   "B": {
+    "med": 23,
+    "min": 20.41,
+    "max": 32.25
+   },
+   "ratio": 1.112
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 24.17,
+    "min": 23.32,
+    "max": 83.55
+   },
+   "B": {
+    "med": 24.82,
+    "min": 23.98,
+    "max": 25.32
+   },
+   "ratio": 1.027
+  },
+  "engine": "chrome",
+  "round": 1
+ },
+ {
+  "n": "5000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 2.34,
+    "min": 2.18,
+    "max": 2.54
+   },
+   "B": {
+    "med": 1.6,
+    "min": 1.46,
+    "max": 2.12
+   },
+   "ratio": 0.684
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 4.46,
+    "min": 2.6,
+    "max": 15.92
+   },
+   "B": {
+    "med": 4.6,
+    "min": 2.72,
+    "max": 17.7
+   },
+   "ratio": 1.031
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 3,
+    "min": 2.04,
+    "max": 11.78
+   },
+   "B": {
+    "med": 2.78,
+    "min": 2,
+    "max": 9
+   },
+   "ratio": 0.927
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 3.02,
+    "min": 2.72,
+    "max": 4.16
+   },
+   "B": {
+    "med": 3,
+    "min": 2.7,
+    "max": 3.74
+   },
+   "ratio": 0.993
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 58.22,
+    "min": 22.66,
+    "max": 224.24
+   },
+   "B": {
+    "med": 24.34,
+    "min": 14.64,
+    "max": 56.4
+   },
+   "ratio": 0.418
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 30.62,
+    "min": 24.56,
+    "max": 57.64
+   },
+   "B": {
+    "med": 28,
+    "min": 25.64,
+    "max": 34.96
+   },
+   "ratio": 0.914
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 21.22,
+    "min": 14.52,
+    "max": 75.74
+   },
+   "B": {
+    "med": 28.6,
+    "min": 14.4,
+    "max": 122.3
+   },
+   "ratio": 1.348
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "50000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 46.92,
+    "min": 21.8,
+    "max": 197.6
+   },
+   "B": {
+    "med": 37.88,
+    "min": 18.88,
+    "max": 118.18
+   },
+   "ratio": 0.807
+  },
+  "engine": "webkit",
+  "round": 0
+ },
+ {
+  "n": "5000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 2.36,
+    "min": 2.2,
+    "max": 3.02
+   },
+   "B": {
+    "med": 1.52,
+    "min": 1.38,
+    "max": 1.92
+   },
+   "ratio": 0.644
+  },
+  "engine": "webkit",
+  "round": 1
+ },
+ {
+  "n": "5000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 3.48,
+    "min": 2.56,
+    "max": 11.44
+   },
+   "B": {
+    "med": 3.16,
+    "min": 2.66,
+    "max": 8.56
+   },
+   "ratio": 0.908
+  },
+  "engine": "webkit",
+  "round": 1
+ },
+ {
+  "n": "5000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 5.38,
+    "min": 1.86,
+    "max": 14.96
+   },
+   "B": {
+    "med": 7.16,
+    "min": 1.94,
+    "max": 24.72
+   },
+   "ratio": 1.331
+  },
+  "engine": "webkit",
+  "round": 1
+ },
+ {
+  "n": "5000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 2.78,
+    "min": 2.6,
+    "max": 3.46
+   },
+   "B": {
+    "med": 2.78,
+    "min": 2.46,
+    "max": 3.2
+   },
+   "ratio": 1
+  },
+  "engine": "webkit",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "clean",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 21.18,
+    "min": 20.62,
+    "max": 52.7
+   },
+   "B": {
+    "med": 13.88,
+    "min": 13.4,
+    "max": 15.52
+   },
+   "ratio": 0.655
+  },
+  "engine": "webkit",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "rope",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 25.32,
+    "min": 21.34,
+    "max": 52.32
+   },
+   "B": {
+    "med": 29.6,
+    "min": 21.92,
+    "max": 41.2
+   },
+   "ratio": 1.169
+  },
+  "engine": "webkit",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "soft-clay",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 16.92,
+    "min": 15.42,
+    "max": 17.7
+   },
+   "B": {
+    "med": 16.82,
+    "min": 14.78,
+    "max": 50.8
+   },
+   "ratio": 0.994
+  },
+  "engine": "webkit",
+  "round": 1
+ },
+ {
+  "n": "50000",
+  "theme": "paper-quilling",
+  "checks": {
+   "fresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "hit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "edit": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   },
+   "editFresh": {
+    "positions": true,
+    "indices": true,
+    "bounds": true,
+    "ends": true,
+    "packed": true
+   }
+  },
+  "pack": {
+   "A": {
+    "med": 46.06,
+    "min": 21.44,
+    "max": 65.98
+   },
+   "B": {
+    "med": 37.4,
+    "min": 22.02,
+    "max": 229.68
+   },
+   "ratio": 0.812
+  },
+  "engine": "webkit",
+  "round": 1
+ }
+]

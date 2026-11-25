@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "radiant": {
+      "command": "bun",
+      "args": [
+        "radiant/tools/agent-cli.ts",
+        "mcp",
+        "--live"
+      ]
+    }
+  }
+}

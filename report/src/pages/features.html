@@ -1,0 +1,911 @@
+<section class="page" id="p-features" data-g="product" data-title="Functional requirements" data-nav="Features">
+  <h1>Functional requirements</h1>
+  <p class="lead">This page lists 142 numbered functional requirements for everything the user does in Radiant other than AI generation and picture or SVG artwork. Each requirement is specific enough to implement and test, carries a priority, and links to the research page that justifies it. 44 of them are Must, the minimum for a usable first version.</p>
+  <p>Read this page together with the <a href="#vision">vision and scope page</a>, which explains the principles behind the choices, and with the other requirement pages: <a href="#ai-engine">AI generation and the Codex engine</a> (prefix <code>FR-AI</code>), <a href="#art-subtrees">picture and SVG subtrees</a> (<code>FR-ART</code>), <a href="#engine">engine internals</a> (<code>ENG</code>) and <a href="#quality">non-functional requirements</a> (<code>NFR</code>). The end of this page has a traceability table that shows which requirement answers each MindNode feature and each ranked community need.</p>
+  <p><b>How to read this page.</b> Each requirement has an identifier that never changes, a priority, a short statement, an acceptance check and the reason. <span class="badge must">Must</span> means needed for the first usable version (milestones M1 to M3). <span class="badge should">Should</span> means part of version 1 (up to milestone M6). <span class="badge could">Could</span> means worth doing after version 1 if it proves valuable. <span class="badge later">Later</span> means deliberately deferred. A requirement that says "must" in its text is binding once its priority is reached. Wherever the evidence page and Tony Buzan disagree, the behaviour is a default that the user can change, and the requirement says so. Numbers in acceptance checks come from the performance targets that this report proposes, which the spikes in milestone M0 are to confirm. The milestone given for each requirement is the earliest milestone of the <a href="#roadmap">roadmap</a> in which it should be built.</p>
+  <div class="table-wrap"><table>
+<caption>Requirement counts by area on this page</caption>
+<thead><tr><th>Prefix</th><th>Area</th><th class="num">Requirements</th><th class="num">Must</th><th class="num">Should</th><th class="num">Could or Later</th></tr></thead>
+<tbody><tr><th><code>FR-CAN</code></th><td>Canvas and navigation</td><td class="num">16</td><td class="num">9</td><td class="num">5</td><td class="num">2</td></tr><tr><th><code>FR-EDT</code></th><td>Editing and keyboard</td><td class="num">29</td><td class="num">13</td><td class="num">9</td><td class="num">7</td></tr><tr><th><code>FR-LAY</code></th><td>Layout</td><td class="num">15</td><td class="num">6</td><td class="num">6</td><td class="num">3</td></tr><tr><th><code>FR-STY</code></th><td>Styles and themes</td><td class="num">24</td><td class="num">5</td><td class="num">10</td><td class="num">9</td></tr><tr><th><code>FR-OUT</code></th><td>Outline</td><td class="num">8</td><td class="num">2</td><td class="num">4</td><td class="num">2</td></tr><tr><th><code>FR-ORG</code></th><td>Organising and finding</td><td class="num">13</td><td class="num">3</td><td class="num">5</td><td class="num">5</td></tr><tr><th><code>FR-MEM</code></th><td>Recall and review</td><td class="num">12</td><td class="num">0</td><td class="num">5</td><td class="num">7</td></tr><tr><th><code>FR-IO</code></th><td>Files, import and export</td><td class="num">19</td><td class="num">6</td><td class="num">8</td><td class="num">5</td></tr><tr><th><code>FR-AGT</code></th><td>Agent interface</td><td class="num">6</td><td class="num">0</td><td class="num">0</td><td class="num">6</td></tr><tr><th>Total</th><td></td><td class="num">142</td><td class="num">44</td><td class="num">52</td><td class="num">46</td></tr></tbody>
+</table></div>
+  <h2>Canvas and navigation</h2>
+  <p>The canvas is where the user spends most of the time, so its conventions follow the trackpad habits of other canvas tools and keep a very large map navigable. Speed targets for pan and zoom are non-functional requirements and sit on the <a href="#quality">quality page</a>.</p>
+  <div class="req-list">
+    <div class="req" id="FR-CAN-01">
+      <div class="req-head"><code class="req-id">FR-CAN-01</code><span class="badge must">Must</span><h4>Infinite canvas</h4></div>
+      <p>The canvas must have no fixed page or bounds. The user must be able to pan in any direction without limit, and content must never be clipped to a page edge.</p>
+      <p class="req-meta"><b>Accept when:</b> Drag a node repeatedly in one direction and keep panning after it. Text and branches stay sharp and do not jitter at any distance reached. <b>Why:</b> The infinite canvas is one of the stated goals and MindNode adopts it (<a href="#mindnode">MindNode verdicts</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-02">
+      <div class="req-head"><code class="req-id">FR-CAN-02</code><span class="badge must">Must</span><h4>Trackpad and mouse conventions</h4></div>
+      <p>Two-finger scroll must pan, pinch must zoom, and a mouse wheel with the Command key held must zoom. Holding Space and dragging, or dragging with the middle button, must pan.</p>
+      <p class="req-meta"><b>Accept when:</b> On a trackpad the four gestures work as described. On a mouse with a wheel, Command plus wheel zooms and plain wheel pans. Each convention can be changed in settings. <b>Why:</b> These are the controls familiar from other canvas tools such as Kinopio and Heptabase (<a href="#ai-tools">AI and canvas tools</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-03">
+      <div class="req-head"><code class="req-id">FR-CAN-03</code><span class="badge must">Must</span><h4>Zoom towards the cursor</h4></div>
+      <p>Zooming must keep the point under the cursor (or the pinch centre) fixed on screen, so the user zooms into what they are looking at.</p>
+      <p class="req-meta"><b>Accept when:</b> Place the pointer over a node, zoom in and out by wheel and by pinch. The node stays under the pointer throughout. <b>Why:</b> A zoom that drifts away from the pointer makes a large map hard to navigate; this is the standard canvas behaviour in the <a href="#desktop-tools">desktop tools</a>. <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-04">
+      <div class="req-head"><code class="req-id">FR-CAN-04</code><span class="badge must">Must</span><h4>Zoom commands and zoom to fit</h4></div>
+      <p>Radiant must offer zoom in (Cmd++), zoom out (Cmd+-), reset to 100% (Cmd+0) and zoom to fit the whole map (Cmd+*), all from the menu and the keyboard.</p>
+      <p class="req-meta"><b>Accept when:</b> After zoom to fit, every node of the document is inside the window with a margin. Reset to 100% returns the scale to exactly 100%. <b>Why:</b> These are MindNode's documented zoom shortcuts, adopted as they are (<a href="#mindnode">MindNode shortcuts</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-05">
+      <div class="req-head"><code class="req-id">FR-CAN-05</code><span class="badge must">Must</span><h4>Zoom to selection and centre selection</h4></div>
+      <p>Radiant must zoom to fit the current selection and must centre the selection without changing the zoom (Shift+Cmd+8).</p>
+      <p class="req-meta"><b>Accept when:</b> Select a deep branch and run the command. All selected nodes fill the window. The centre command changes the position only. <b>Why:</b> MindNode provides both commands and users depend on them to find their place in large maps (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-06">
+      <div class="req-head"><code class="req-id">FR-CAN-06</code><span class="badge should">Should</span><h4>Focus on a branch</h4></div>
+      <p>Radiant should offer a focus mode (Shift+Cmd+F) that dims or hides everything outside the selected branch and zooms to it. Escape must leave the mode and restore the previous view.</p>
+      <p class="req-meta"><b>Accept when:</b> Enable focus on a branch: nodes outside it are not drawn at full strength, and Escape returns to the earlier zoom and position. No node is moved or edited by entering or leaving the mode. <b>Why:</b> MindNode lists Focus Mode but does not document it, so the behaviour is specified from scratch here (<a href="#mindnode">MindNode verdicts</a>, status unverified). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-07">
+      <div class="req-head"><code class="req-id">FR-CAN-07</code><span class="badge should">Should</span><h4>Minimap</h4></div>
+      <p>Radiant should show an optional minimap with the viewport rectangle, in which clicking or dragging moves the view.</p>
+      <p class="req-meta"><b>Accept when:</b> Toggle the minimap from the View menu. Dragging the viewport rectangle pans the main canvas, and the minimap tracks every pan and zoom. <b>Why:</b> Orientation aids such as minimaps help in large hierarchies (<a href="#science">evidence, moderate</a>) and users report that big maps are hard to navigate (<a href="#community">community</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-08">
+      <div class="req-head"><code class="req-id">FR-CAN-08</code><span class="badge must">Must</span><h4>Several main nodes on one canvas</h4></div>
+      <p>A document must be able to hold any number of main nodes, each with its own tree, on one canvas. A command must create a new main node at the view centre (Shift+Return in the MindNode keymap preset, see <code>FR-EDT-23</code>).</p>
+      <p class="req-meta"><b>Accept when:</b> Create three main nodes in one document, give each its own children, and save and reopen. All three trees return as they were. <b>Why:</b> MindNode supports several main nodes and the reader uses this today (<a href="#mindnode">MindNode verdicts</a>, Adopt). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-09">
+      <div class="req-head"><code class="req-id">FR-CAN-09</code><span class="badge should">Should</span><h4>Floating nodes</h4></div>
+      <p>The user must be able to place a free text or image node that belongs to no tree, to hold annotations and loose ideas beside the map. Floating nodes must survive re-layout and appear in search and export.</p>
+      <p class="req-meta"><b>Accept when:</b> Create a floating label, run a layout on the map beside it, and confirm the label has not moved. Search finds its text. <b>Why:</b> Coggle and Scapple support free labels and images outside the tree (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-10">
+      <div class="req-head"><code class="req-id">FR-CAN-10</code><span class="badge must">Must</span><h4>Level of detail the user can see</h4></div>
+      <p>As the user zooms out, the app must keep the structure readable: labels that would be too small to read must give way to a simplified form, and a collapsed subtree must show its title. Nothing may turn blank, and full detail must return as the user zooms in.</p>
+      <p class="req-meta"><b>Accept when:</b> Zoom a large reference map out to the whole-map view and back. At every step each branch is still visible as a shape and every visible label is legible or replaced by a title. The frame budget in <a href="#quality">the quality requirements</a> still holds. <b>Why:</b> Heptabase shows section titles when zoomed out (<a href="#desktop-tools">desktop tools</a>) and the geometry stays constant across levels of detail (<a href="#engine">engine</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-11">
+      <div class="req-head"><code class="req-id">FR-CAN-11</code><span class="badge must">Must</span><h4>Single and multiple selection</h4></div>
+      <p>Clicking a node must select it. Shift-click or Command-click must add or remove nodes from the selection, and the selection must be visible at every zoom level.</p>
+      <p class="req-meta"><b>Accept when:</b> Select two unrelated nodes with Command-click, then deselect one. Delete, move and style commands apply to exactly the selected set. <b>Why:</b> Basic selection is needed for every editing command (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-12">
+      <div class="req-head"><code class="req-id">FR-CAN-12</code><span class="badge must">Must</span><h4>Marquee selection</h4></div>
+      <p>Dragging on empty canvas must draw a rectangle that selects every node it touches. Holding Shift must add to the existing selection.</p>
+      <p class="req-meta"><b>Accept when:</b> Drag a rectangle across five nodes and all five are selected. Holding Shift while dragging keeps the earlier selection. <b>Why:</b> Marquee selection is the usual way to move or style many nodes at once on a canvas tool. <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-13">
+      <div class="req-head"><code class="req-id">FR-CAN-13</code><span class="badge could">Could</span><h4>Subtree and sibling selection</h4></div>
+      <p>Radiant should provide commands to select the current node with all its descendants, all siblings of the current node, and all nodes at the same level, plus Shift+arrow to extend the selection in a direction.</p>
+      <p class="req-meta"><b>Accept when:</b> Select a node, run Select subtree, and every descendant (and nothing else) is selected. Copying then copies the whole subtree. <b>Why:</b> MindNode offers "select next in a direction" with Shift+arrow (<a href="#mindnode">MindNode shortcuts</a>); subtree selection supports subtree representation changes in <a href="#art-subtrees">art subtrees</a>. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-14">
+      <div class="req-head"><code class="req-id">FR-CAN-14</code><span class="badge should">Should</span><h4>Smooth animated transitions</h4></div>
+      <p>Fold, unfold, re-layout, zoom to fit and pan-to-node must animate over a short, fixed time so the user can follow what moved. The animation must be skipped when the system setting Reduce Motion is on.</p>
+      <p class="req-meta"><b>Accept when:</b> Fold a branch and the siblings below glide into place. With Reduce Motion enabled the same action completes with no intermediate frames. <b>Why:</b> Brief animation preserves the user's mental map (<a href="#science">evidence, moderate</a>; <a href="#practice">practice</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-15">
+      <div class="req-head"><code class="req-id">FR-CAN-15</code><span class="badge should">Should</span><h4>Selection stays in view</h4></div>
+      <p>When the selection changes by keyboard (arrows, new node, undo), the app must scroll the canvas just enough to keep the selected node inside the window without changing the zoom.</p>
+      <p class="req-meta"><b>Accept when:</b> Press the arrow key repeatedly towards the screen edge. The selected node never leaves the window. <b>Why:</b> Keyboard-first use needs the view to follow the cursor of the keyboard (<a href="#community">community, rank 2</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-CAN-16">
+      <div class="req-head"><code class="req-id">FR-CAN-16</code><span class="badge could">Could</span><h4>Presentation mode</h4></div>
+      <p>Radiant could walk through chosen branches in order, zooming to each, with a full-screen view that hides panels.</p>
+      <p class="req-meta"><b>Accept when:</b> Pick three branches, start the walk-through, and each Space press moves to the next branch with a zoom transition. <b>Why:</b> Xmind turns a map into slides and has a full-screen mode (<a href="#desktop-tools">desktop tools</a>); lower priority than the core. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Editing and keyboard</h2>
+  <p>Radiant copies the keyboard model that MindNode and most other mappers share, so a user moving from MindNode keeps their habits. The few places where tools disagree are configurable.</p>
+  <div class="req-list">
+    <div class="req" id="FR-EDT-01">
+      <div class="req-head"><code class="req-id">FR-EDT-01</code><span class="badge must">Must</span><h4>Create a child node</h4></div>
+      <p>Tab must create a child of the selected node, place it in edit mode and select it. The command must also exist in the menu.</p>
+      <p class="req-meta"><b>Accept when:</b> Select a node, press Tab, type text and press Escape. A new child with that text exists under the selected node. <b>Why:</b> Tab for child is the de facto convention across MindNode, Xmind, SimpleMind and Whimsical (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-02">
+      <div class="req-head"><code class="req-id">FR-EDT-02</code><span class="badge must">Must</span><h4>Create a sibling after</h4></div>
+      <p>Return must create a sibling after the selected node and begin editing it. On a main node it must create a new main node, never a sibling.</p>
+      <p class="req-meta"><b>Accept when:</b> Select a child, press Return, type and press Return again. Two new siblings follow in order. <b>Why:</b> Return or Enter for a sibling is the cross-tool standard (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-03">
+      <div class="req-head"><code class="req-id">FR-EDT-03</code><span class="badge must">Must</span><h4>Create a sibling before</h4></div>
+      <p>Shift+Return must create a sibling before the selected node. Option+Return must do the same, as an alias for MindNode users.</p>
+      <p class="req-meta"><b>Accept when:</b> Select the second child and press Shift+Return. The new node is placed between the first and second child. <b>Why:</b> Shift+Return is the shared convention of Xmind, MindMup and Freeplane (<a href="#desktop-tools">desktop tools</a>). MindNode uses Option+Return, so both are bound. <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-04">
+      <div class="req-head"><code class="req-id">FR-EDT-04</code><span class="badge should">Should</span><h4>Insert a parent</h4></div>
+      <p>Option+Tab should insert a new node between the selected node and its parent, so that the selected node becomes its child. This key is configurable.</p>
+      <p class="req-meta"><b>Accept when:</b> Select a child and press Option+Tab. A new node appears between it and its former parent and enters edit mode. <b>Why:</b> MindNode binds Option+Tab; the other tools have no standard (<a href="#mindnode">MindNode</a>, <a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-05">
+      <div class="req-head"><code class="req-id">FR-EDT-05</code><span class="badge must">Must</span><h4>Navigate with arrow keys</h4></div>
+      <p>Arrow keys must move the selection to the nearest node in that direction, and must follow the branch structure (left or right to parent or child on a horizontal layout).</p>
+      <p class="req-meta"><b>Accept when:</b> From any node, the four arrows reach its parent, first child and neighbouring siblings on a two-sided map without using the mouse. <b>Why:</b> Arrows are the universal navigation key (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-06">
+      <div class="req-head"><code class="req-id">FR-EDT-06</code><span class="badge must">Must</span><h4>Inline editing</h4></div>
+      <p>F2 and Command+Return must start editing the selected node, as must typing a printable character, which replaces the text. While editing, Return must commit the text and create the next sibling, Escape must commit and stop, and Shift+Return must insert a line break in the label. Text input must work with input methods.</p>
+      <p class="req-meta"><b>Accept when:</b> Edit a node with each key. Enter Japanese text using the system input method and the committed text appears correctly. <b>Why:</b> F2 and Space or Return are the two competing edit conventions (<a href="#desktop-tools">desktop tools</a>); ordinary HTML text editing gives input-method support (<a href="#stack">stack decision</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-07">
+      <div class="req-head"><code class="req-id">FR-EDT-07</code><span class="badge must">Must</span><h4>Rapid entry of many nodes</h4></div>
+      <p>A new node created with Tab or Return must already be in edit mode, so a user can type an entire tree by keyboard alone. Typing, Tab and Return must never drop characters while the layout animates.</p>
+      <p class="req-meta"><b>Accept when:</b> Type a 20-node tree using only Tab, Return and letters. The result has the expected shape and no lost characters. <b>Why:</b> Keyboard-first flow is rank 2 among the ranked needs on the <a href="#community">community page</a>. <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-08">
+      <div class="req-head"><code class="req-id">FR-EDT-08</code><span class="badge must">Must</span><h4>Delete a node</h4></div>
+      <p>Delete must remove the selected node and its subtree. Option+Delete must remove only the node and promote its children to its parent. A confirmation must be needed only when the deletion cannot be undone.</p>
+      <p class="req-meta"><b>Accept when:</b> Delete a branch of five nodes, then undo. All five return in place. Option+Delete on a node with three children leaves the three under its parent. <b>Why:</b> These are the MindNode and cross-tool defaults (<a href="#mindnode">MindNode shortcuts</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-09">
+      <div class="req-head"><code class="req-id">FR-EDT-09</code><span class="badge must">Must</span><h4>Undo and redo of everything</h4></div>
+      <p>Cmd+Z and Shift+Cmd+Z must undo and redo every change to the document: text, structure, moves, folds, styles, representation switches, imports and AI changes. An AI generation must undo as a single step, and the undo stack must hold unlimited steps within a session.</p>
+      <p class="req-meta"><b>Accept when:</b> Make ten different kinds of edit, including a generation, and undo them all in order. The document equals its starting state. <b>Why:</b> Reliable undo is expected of any editor, and a revertible AI step supports the draft-then-rework approach (<a href="#science">evidence</a>; <a href="#ai-engine">AI engine</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-10">
+      <div class="req-head"><code class="req-id">FR-EDT-10</code><span class="badge could">Could</span><h4>Undo survives restart</h4></div>
+      <p>The undo history should be kept in the operation log so that closing and reopening a document does not discard it.</p>
+      <p class="req-meta"><b>Accept when:</b> Edit, quit, reopen, and undo. The last edit is reverted. <b>Why:</b> The file format keeps an operation log for undo and crash safety (decision D-14; <a href="#engine">engine</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-11">
+      <div class="req-head"><code class="req-id">FR-EDT-11</code><span class="badge must">Must</span><h4>Drag to re-parent</h4></div>
+      <p>Dragging a node onto another node must make it that node's child, with its subtree. A visible drop target must show where it will land, and dropping a node onto its own descendant must be impossible.</p>
+      <p class="req-meta"><b>Accept when:</b> Drag a branch onto another node and it becomes the last child. Dragging onto its own child is refused with no change. <b>Why:</b> Drag-and-drop restructuring is basic to mapping tools (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-12">
+      <div class="req-head"><code class="req-id">FR-EDT-12</code><span class="badge must">Must</span><h4>Reorder siblings</h4></div>
+      <p>Command+Up and Command+Down (and Command+Left and Right on a vertical layout) must move the selected node among its siblings, and dragging between two siblings must insert there.</p>
+      <p class="req-meta"><b>Accept when:</b> Press Cmd+Up on the third child. It becomes second and the other siblings keep their relative order. <b>Why:</b> Cmd or Ctrl plus arrows is the cross-tool convention (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-13">
+      <div class="req-head"><code class="req-id">FR-EDT-13</code><span class="badge should">Should</span><h4>Detach and reattach</h4></div>
+      <p>Shift+Cmd+D must detach the selected node into a new main node, keeping its subtree. Dragging a main node onto another node must attach it as a child. Holding the D key while dragging must detach during a drag.</p>
+      <p class="req-meta"><b>Accept when:</b> Detach a child, check it is a main node with its subtree, then drag it back onto its old parent. The structure matches the original. <b>Why:</b> MindNode documents both gestures (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-14">
+      <div class="req-head"><code class="req-id">FR-EDT-14</code><span class="badge must">Must</span><h4>Fold and unfold</h4></div>
+      <p>Option+period must fold or unfold the selected node. A folded node must show an indicator with the number of hidden descendants. Folding must work on every representation of a subtree.</p>
+      <p class="req-meta"><b>Accept when:</b> Fold a branch. The indicator shows the right count and hidden nodes are neither drawn nor selectable. Search still finds them. <b>Why:</b> Collapse is a core interaction (<a href="#community">community</a>) and a requirement for picture and SVG subtrees to stay collapsible (<a href="#art-subtrees">art subtrees</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-15">
+      <div class="req-head"><code class="req-id">FR-EDT-15</code><span class="badge should">Should</span><h4>Fold with siblings and unfold one level</h4></div>
+      <p>Radiant should offer fold with siblings, unfold one level, fold all to level n, and unfold all, from the menu and keys (Option+Cmd+period for fold with siblings, Ctrl+Option+period for unfold one level).</p>
+      <p class="req-meta"><b>Accept when:</b> Run unfold one level on a folded root. Exactly its next level appears and no deeper node. <b>Why:</b> MindNode documents these actions (<a href="#mindnode">MindNode</a>, Adopt). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-16">
+      <div class="req-head"><code class="req-id">FR-EDT-16</code><span class="badge must">Must</span><h4>Cut, copy, paste and duplicate subtrees</h4></div>
+      <p>Cut, copy and paste must work on a selection of nodes with their subtrees, preserving styles, notes, links and images. Cmd+D must duplicate the selection beside the original. Paste must place the copy as a child of the selected node.</p>
+      <p class="req-meta"><b>Accept when:</b> Copy a styled branch with an image and paste it under another node. Text, style, note and image are identical, and the original is unchanged. <b>Why:</b> Standard editing behaviour (<a href="#mindnode">MindNode shortcuts</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-17">
+      <div class="req-head"><code class="req-id">FR-EDT-17</code><span class="badge should">Should</span><h4>Paste between documents and as text</h4></div>
+      <p>Copied subtrees must paste between open documents with their styles and assets, and the clipboard must also carry an indented plain-text outline so that pasting into a text editor produces a readable list.</p>
+      <p class="req-meta"><b>Accept when:</b> Copy a branch in one document and paste in another. Assets arrive. Paste into a text editor and an indented list appears. <b>Why:</b> Moving material between maps is the basis of splitting large subjects (<a href="#community">community</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-18">
+      <div class="req-head"><code class="req-id">FR-EDT-18</code><span class="badge should">Should</span><h4>Paste an outline to make a subtree</h4></div>
+      <p>Pasting indented text, a Markdown list or OPML text onto a node must create a subtree whose shape follows the indentation, as one undo step.</p>
+      <p class="req-meta"><b>Accept when:</b> Paste a ten-line indented list onto a node. Ten nodes appear with the indentation as structure. One undo removes them all. <b>Why:</b> The top Hacker News mind-map story was "Convert Markdown to a Mind Map" (<a href="#community">community</a>), and the outline is the interchange form with the AI (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-19">
+      <div class="req-head"><code class="req-id">FR-EDT-19</code><span class="badge should">Should</span><h4>Multi-line notes</h4></div>
+      <p>Each node should hold a multi-line note in plain text or Markdown, opened with Shift+Cmd+K in a notes panel. A node with a note must show a small indicator.</p>
+      <p class="req-meta"><b>Accept when:</b> Add a three-line note, close the panel, and see the indicator. The note is saved, searchable and exported. <b>Why:</b> MindNode has notes with a sidebar (<a href="#mindnode">MindNode verdicts</a>, Adapt: start with plain text or Markdown). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-20">
+      <div class="req-head"><code class="req-id">FR-EDT-20</code><span class="badge should">Should</span><h4>Links on nodes</h4></div>
+      <p>Cmd+K must attach a web link or file link to a node, shown with an indicator. Cmd-clicking the indicator must open it.</p>
+      <p class="req-meta"><b>Accept when:</b> Attach a URL to a node and open it with Cmd-click in the default browser. <b>Why:</b> Cmd+K for link is the MindNode default (<a href="#mindnode">MindNode shortcuts</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-21">
+      <div class="req-head"><code class="req-id">FR-EDT-21</code><span class="badge should">Should</span><h4>Paste or drop an image onto a node</h4></div>
+      <p>Pasting or dropping an image file on a node must attach it to the node as a resizable picture, stored as an asset. Dropping on empty canvas must create a floating image node.</p>
+      <p class="req-meta"><b>Accept when:</b> Drop a PNG onto a node. It appears at a sensible size, can be resized with handles, and is saved in the document. <b>Why:</b> MindNode attaches stickers and photos with resize knobs (<a href="#mindnode">MindNode verdicts</a>, Adapt). The picture representation of a whole subtree is covered on <a href="#art-subtrees">art subtrees</a>. <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-22">
+      <div class="req-head"><code class="req-id">FR-EDT-22</code><span class="badge could">Could</span><h4>Command palette</h4></div>
+      <p>Shift+Cmd+P must open a searchable list of every command with its shortcut. Choosing a command must run it.</p>
+      <p class="req-meta"><b>Accept when:</b> Open the palette, type "fold" and run Fold. Every menu command is reachable here. <b>Why:</b> A command palette makes a large keyboard model discoverable and supports the keyboard-first goal (<a href="#community">community</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-23">
+      <div class="req-head"><code class="req-id">FR-EDT-23</code><span class="badge should">Should</span><h4>Configurable shortcuts and presets</h4></div>
+      <p>Every shortcut must be remappable, with conflict detection. A "MindNode" keymap preset must be offered in which Shift+Return creates a new main node and Option+Return a sibling above.</p>
+      <p class="req-meta"><b>Accept when:</b> Remap fold to another key, see a conflict warning when reusing a bound key, and switch to the MindNode preset. <b>Why:</b> No standard exists for parent, fold, note and link, so they must be configurable (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-24">
+      <div class="req-head"><code class="req-id">FR-EDT-24</code><span class="badge must">Must</span><h4>Commands on a multiple selection</h4></div>
+      <p>Delete, move, fold, style, tag and representation commands must apply to every node in a multiple selection in one undo step.</p>
+      <p class="req-meta"><b>Accept when:</b> Select four siblings, apply a colour, and one undo reverts all four. <b>Why:</b> Multiple selection is only useful if commands honour it. <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-25">
+      <div class="req-head"><code class="req-id">FR-EDT-25</code><span class="badge could">Could</span><h4>Sort children</h4></div>
+      <p>Radiant could sort the children of a node alphabetically or by task state from a menu command.</p>
+      <p class="req-meta"><b>Accept when:</b> Sort three children alphabetically. They are reordered and one undo restores the old order. <b>Why:</b> MindNode has this as a menu command (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-26">
+      <div class="req-head"><code class="req-id">FR-EDT-26</code><span class="badge could">Could</span><h4>Emoji and symbols</h4></div>
+      <p>Radiant could insert an emoji or symbol into a label or beside a node from a picker.</p>
+      <p class="req-meta"><b>Accept when:</b> Insert an emoji from the picker and it renders in the label and in exports. <b>Why:</b> MindNode supports emojis and stickers (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-27">
+      <div class="req-head"><code class="req-id">FR-EDT-27</code><span class="badge later">Later</span><h4>LaTeX equations in notes</h4></div>
+      <p>Radiant could render LaTeX equations in notes, after notes are done.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when a note containing an equation shows the typeset result. <b>Why:</b> MindNode added LaTeX in July 2026; the verdict is to adapt it in a later phase (<a href="#mindnode">MindNode verdicts</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-28">
+      <div class="req-head"><code class="req-id">FR-EDT-28</code><span class="badge later">Later</span><h4>Menu-bar quick capture</h4></div>
+      <p>Radiant could provide a menu-bar capture window that adds a node to a chosen document.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when text typed into the capture window lands in the chosen map without opening it. <b>Why:</b> The behaviour of MindNode's Quick Entry is unverified, so it would be specified from scratch (<a href="#mindnode">MindNode verdicts</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-EDT-29">
+      <div class="req-head"><code class="req-id">FR-EDT-29</code><span class="badge later">Later</span><h4>Pen and sketch input</h4></div>
+      <p>Radiant could let the user draw on or beside a node with a pen or finger and keep the strokes editable.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when a stroke drawn on a node survives save, reopen and export. <b>Why:</b> Sketching helps memory (<a href="#science">evidence, moderate to strong</a>) and the ink-plus-structure combination is an open gap (<a href="#community">community, rank 10</a>), though the evidence is weak. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Layout</h2>
+  <p>Layout is automatic but never surprising. The core rule is that the app does not move anything the user has already seen, unless asked. How the layout algorithm works is described on the <a href="#engine">engine page</a>.</p>
+  <div class="req-list">
+    <div class="req" id="FR-LAY-01">
+      <div class="req-head"><code class="req-id">FR-LAY-01</code><span class="badge must">Must</span><h4>Automatic layout without overlap</h4></div>
+      <p>New and edited nodes must be placed by an automatic layout that handles nodes of different sizes and never lets two nodes overlap.</p>
+      <p class="req-meta"><b>Accept when:</b> Add 50 nodes of varied label length. No node box intersects another. <b>Why:</b> Automatic layout is the baseline expectation (<a href="#mindnode">MindNode</a>); the algorithm is chosen in <a href="#engine">engine</a>. <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-02">
+      <div class="req-head"><code class="req-id">FR-LAY-02</code><span class="badge must">Must</span><h4>Unrelated branches never move</h4></div>
+      <p>An edit inside one branch must not change the position of any node outside its main branch, and the node being edited must keep its position on screen.</p>
+      <p class="req-meta"><b>Accept when:</b> Add, delete and fold nodes in one main branch and compare every position in the others before and after. All are identical. <b>Why:</b> Layout instability is the most repeated layout complaint (<a href="#community">community, rank 1</a>); stable positions are moderately supported (<a href="#science">evidence</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-03">
+      <div class="req-head"><code class="req-id">FR-LAY-03</code><span class="badge must">Must</span><h4>Never re-lay out a map the user has seen</h4></div>
+      <p>Opening a document must reproduce the stored positions exactly. The app must re-run layout on existing nodes only when the user asks or when a local edit requires room.</p>
+      <p class="req-meta"><b>Accept when:</b> Open a saved map three times. Positions are identical each time and no layout runs over untouched branches. <b>Why:</b> Same rank-1 need as above; positions are stored so that maps stay recognisable (<a href="#practice">practice</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-04">
+      <div class="req-head"><code class="req-id">FR-LAY-04</code><span class="badge must">Must</span><h4>Manual moves stored as offsets</h4></div>
+      <p>Dragging a node must store an offset from its automatic position, so that the node and its subtree follow when the parent moves.</p>
+      <p class="req-meta"><b>Accept when:</b> Drag a child away, then move its parent. The child moves with the parent and keeps the same relative offset. <b>Why:</b> This is how MindNode behaves and the engine page specifies the storage (<a href="#mindnode">MindNode</a>; <a href="#engine">engine</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-05">
+      <div class="req-head"><code class="req-id">FR-LAY-05</code><span class="badge should">Should</span><h4>Snap-back preview and reset position</h4></div>
+      <p>While dragging, a shadow must show the automatic position. Ctrl+Cmd+R must clear the offset of the selected nodes, and a menu command must clear all offsets in a subtree or document.</p>
+      <p class="req-meta"><b>Accept when:</b> Drag a node, see the shadow, release, then reset. The node returns to the shadow position. <b>Why:</b> MindNode shows this shadow and has Reset Position (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-06">
+      <div class="req-head"><code class="req-id">FR-LAY-06</code><span class="badge must">Must</span><h4>Two-sided and one-sided layouts</h4></div>
+      <p>Each main node must have a layout choice of two-sided horizontal and one-sided horizontal, stored per main node.</p>
+      <p class="req-meta"><b>Accept when:</b> Set one main node to two-sided and another to right only, in the same document. Both persist after reopening. <b>Why:</b> MindNode sets layout per main node (<a href="#mindnode">MindNode</a>, Adapt). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-07">
+      <div class="req-head"><code class="req-id">FR-LAY-07</code><span class="badge should">Should</span><h4>Radial, vertical, compact and outline-like layouts</h4></div>
+      <p>Each main node should also offer radial, top-down, bottom-up, compact (organisation chart) and outline-like variants.</p>
+      <p class="req-meta"><b>Accept when:</b> Switch a main node through every variant. No variant produces overlaps and each is undoable. <b>Why:</b> MindNode offers horizontal, vertical, compact and radial; the decision brief adds outline-like (<a href="#mindnode">MindNode</a>, decision D-13). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-08">
+      <div class="req-head"><code class="req-id">FR-LAY-08</code><span class="badge could">Could</span><h4>Layout variant per subtree</h4></div>
+      <p>Radiant could let any subtree use a different layout variant from its parent, so that a picture or SVG subtree can use the layout that suits its art.</p>
+      <p class="req-meta"><b>Accept when:</b> Set one branch to radial inside a horizontal map. Its parent connects to it cleanly and the rest is undisturbed. <b>Why:</b> MindNode applies layout per main node and the verdict is to extend it per subtree (<a href="#mindnode">MindNode verdicts</a>, Adapt). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-09">
+      <div class="req-head"><code class="req-id">FR-LAY-09</code><span class="badge should">Should</span><h4>Organic layout</h4></div>
+      <p>An organic layout option should apply a seeded geometric variation on top of the automatic layout. The seed must be stored in the document so that a file always draws the same picture.</p>
+      <p class="req-meta"><b>Accept when:</b> Open the same file on two machines. The picture is pixel-identical at the same zoom. A "new variation" command changes the seed and is undoable. <b>Why:</b> Organic look is a core differentiator and the seed keeps layout reproducible (decision D-13; <a href="#engine">engine</a>). No published algorithm exists, so the design is proposed. <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-10">
+      <div class="req-head"><code class="req-id">FR-LAY-10</code><span class="badge should">Should</span><h4>Balance a main node</h4></div>
+      <p>A Balance command (Option+Cmd+B) should rebalance children between the two sides of a main node by subtree size. It must run only when asked and must not change the sides of unrelated branches otherwise.</p>
+      <p class="req-meta"><b>Accept when:</b> On a lopsided map, Balance evens both sides. Without running it, adding a node never flips an existing branch to the other side. <b>Why:</b> MindNode has Balance in its Organize menu (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-11">
+      <div class="req-head"><code class="req-id">FR-LAY-11</code><span class="badge should">Should</span><h4>Spacing control</h4></div>
+      <p>Spacing must be selectable as narrow, default or wide per main node, and the setting must be stored with it.</p>
+      <p class="req-meta"><b>Accept when:</b> Switch spacing to wide on one main node. Distances between its nodes grow and the other main nodes are untouched. <b>Why:</b> MindNode has narrow, default and wide spacing, and spacing is part of design in Buzan's Law 10 (<a href="#mindnode">MindNode</a>; <a href="#buzan">Buzan</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-12">
+      <div class="req-head"><code class="req-id">FR-LAY-12</code><span class="badge should">Should</span><h4>Re-layout on demand</h4></div>
+      <p>A Tidy command should re-run automatic layout for the selection or whole document, animated and undoable, with a warning that manual offsets will be cleared if the user chooses that option.</p>
+      <p class="req-meta"><b>Accept when:</b> Run Tidy on a map with manual offsets and choose to keep them. Offsets are kept and overlaps are resolved. Undo restores the earlier picture. <b>Why:</b> The user needs an explicit control since layout never changes by itself (<a href="#community">community</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-13">
+      <div class="req-head"><code class="req-id">FR-LAY-13</code><span class="badge must">Must</span><h4>Layout on fold and unfold</h4></div>
+      <p>Folding or unfolding a node must move only the nodes that need to give or take room in the same main branch, with the node under the pointer staying still, and the change must animate.</p>
+      <p class="req-meta"><b>Accept when:</b> Unfold a node in the middle of a map. The node does not jump on screen, other main branches do not move, and later siblings make room. <b>Why:</b> Same stability rule as <code>FR-LAY-02</code>, applied to the most frequent edit (<a href="#engine">engine</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-14">
+      <div class="req-head"><code class="req-id">FR-LAY-14</code><span class="badge could">Could</span><h4>Pin a node</h4></div>
+      <p>Radiant could let a node be pinned at an absolute position that ignores its parent's movement.</p>
+      <p class="req-meta"><b>Accept when:</b> Pin a node, move its parent, and the pinned node stays where it was. <b>Why:</b> Practice sources recommend a pin option beside stable layout (<a href="#practice">practice</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-LAY-15">
+      <div class="req-head"><code class="req-id">FR-LAY-15</code><span class="badge later">Later</span><h4>Layouts beyond trees</h4></div>
+      <p>Radiant could add timeline or path, columns, grid and popcorn layouts for sequential or categorised material.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when a main node can be switched to a timeline and keeps its content. <b>Why:</b> Weak support from a secondary guide (<a href="#practice">practice</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Styles and themes</h2>
+  <p>Looks are views of the tree. This area covers theme, branch and node style, Tony Buzan's laws as an optional preset with its own switches, and the tools for emphasis. Picture and SVG representations of a subtree are covered on <a href="#art-subtrees">art subtrees</a>.</p>
+  <div class="req-list">
+    <div class="req" id="FR-STY-01">
+      <div class="req-head"><code class="req-id">FR-STY-01</code><span class="badge must">Must</span><h4>Document theme</h4></div>
+      <p>A document must have one theme that defines canvas colour, main node style, child node style, branch style, branch colouring, connection style and fonts. Changing the theme must restyle the whole document in one undo step.</p>
+      <p class="req-meta"><b>Accept when:</b> Switch theme on a styled map. Every node, branch and connection takes the new look and one undo restores the old look. <b>Why:</b> MindNode themes cover exactly these properties (<a href="#mindnode">MindNode</a>, Adopt). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-02">
+      <div class="req-head"><code class="req-id">FR-STY-02</code><span class="badge must">Must</span><h4>One colour per main branch</h4></div>
+      <p>Each main branch must receive its own colour from the theme palette, inherited by all its descendants and its branches, and the user must be able to override it for a branch or a node.</p>
+      <p class="req-meta"><b>Accept when:</b> Create five main branches. Each gets a different colour and its descendants share it. Overriding one subtree changes only that subtree. <b>Why:</b> Colour as a code is strongly supported for cueing (<a href="#science">evidence</a>) and is Buzan's Law 8 (<a href="#buzan">Buzan</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-03">
+      <div class="req-head"><code class="req-id">FR-STY-03</code><span class="badge must">Must</span><h4>Text formatting</h4></div>
+      <p>The user must be able to set font family, size, bold, italic, colour and alignment on selected nodes. Default sizes must fall with depth. Default fonts must be plain and readable at the default zoom.</p>
+      <p class="req-meta"><b>Accept when:</b> Select three nodes and apply bold and a size. Only those nodes change, and the defaults for new nodes are unchanged. <b>Why:</b> Size variation expresses hierarchy (<a href="#buzan">Buzan</a>); deliberately hard-to-read fonts do not aid memory (<a href="#science">evidence, strong against</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-04">
+      <div class="req-head"><code class="req-id">FR-STY-04</code><span class="badge must">Must</span><h4>Branch shapes</h4></div>
+      <p>Branches must be available as rounded, angular and tapered organic curves, selectable per document and per main branch, so that more than one style can appear in one map.</p>
+      <p class="req-meta"><b>Accept when:</b> Set one main branch to angular and another to tapered. Both render and persist. <b>Why:</b> MindNode has rounded, angular and (since July 2026) tapered branches, and reviewers asked for both in one map (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-05">
+      <div class="req-head"><code class="req-id">FR-STY-05</code><span class="badge should">Should</span><h4>Tapered organic branches at every level</h4></div>
+      <p>Organic branches must be drawn as one filled outline with the width falling from thick at the centre to thin at the tip, at every level of the tree. A child branch must start inside the parent branch outline with no visible seam, and the user must be able to thicken an outer branch.</p>
+      <p class="req-meta"><b>Accept when:</b> Zoom to maximum on a joint between a parent and a child branch. No gap or step is visible. Thicken an outer branch and its width increases without affecting siblings. <b>Why:</b> Buzan's Law 6 and 7 (<a href="#buzan">Buzan</a>); MindNode tapers only first-level branches (<a href="#mindnode">MindNode verdicts</a>, Adapt). Curves carry a preference benefit but no memory benefit in the evidence (<a href="#science">science</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-06">
+      <div class="req-head"><code class="req-id">FR-STY-06</code><span class="badge should">Should</span><h4>Text on or beside the branch</h4></div>
+      <p>The theme must offer a mode in which a node's label sits on its branch, with the branch drawn as an underline whose length equals the label length, and a mode in which the label sits in a node shape. Labels must stay horizontal.</p>
+      <p class="req-meta"><b>Accept when:</b> Switch a map between the two modes. In the first, no box surrounds a label and each branch ends where its label ends. Labels are never rotated. <b>Why:</b> Buzan's Laws 7 and 16 prefer branches the length of the word and upright text (<a href="#buzan">Buzan</a>). Text along curved branches is untried, so it is a later prototype, not a requirement (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-07">
+      <div class="req-head"><code class="req-id">FR-STY-07</code><span class="badge should">Should</span><h4>Node shapes</h4></div>
+      <p>Nodes must offer at least rounded rectangle, rectangle, circle, square, underline and none (text only), set per node, per level or in the theme.</p>
+      <p class="req-meta"><b>Accept when:</b> Apply each shape to a node. Text is never clipped and the branch attaches to the shape edge. <b>Why:</b> MindNode offers eight node shapes (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-08">
+      <div class="req-head"><code class="req-id">FR-STY-08</code><span class="badge should">Should</span><h4>Central image</h4></div>
+      <p>The main node must be able to hold a large central image that replaces its box, with the label beside it. The image can be an attached picture or a generated one.</p>
+      <p class="req-meta"><b>Accept when:</b> Attach an image to the main node. Branches radiate from its edge and the label remains live text. <b>Why:</b> Buzan's Law 2 asks for a central image (<a href="#buzan">Buzan</a>); generation is covered on <a href="#art-subtrees">art subtrees</a>. <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-09">
+      <div class="req-head"><code class="req-id">FR-STY-09</code><span class="badge should">Should</span><h4>Style presets</h4></div>
+      <p>Radiant should ship named presets for the whole look: a restrained default, Buzan strict, Buzan relaxed, hand-drawn and plain outline. Applying a preset must be one undo step and must not change text or structure.</p>
+      <p class="req-meta"><b>Accept when:</b> Apply each preset and undo. Text and tree are identical before and after. <b>Why:</b> Practice sources describe presets covering central image, tapered branches, containers and white space (<a href="#practice">practice</a>). The preset names here are proposed. <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-10">
+      <div class="req-head"><code class="req-id">FR-STY-10</code><span class="badge should">Should</span><h4>Buzan preset</h4></div>
+      <p>The Buzan strict preset must apply his laws as defaults: blank canvas with no grid or lines, a landscape export frame, uppercase keyword text, one colour per main branch, curved tapered branches, branch length equal to label length, a central image of at least three colours, upright text, and no boxed phrases, optional colour or multiple centres.</p>
+      <p class="req-meta"><b>Accept when:</b> Apply the preset to a new map. Each default listed is visible in settings as an individual switch that is on. <b>Why:</b> Buzan's rules 1 to 16 and 23 (<a href="#buzan">Buzan</a>). Software that allows boxed phrases and optional colour produces concept maps, he says (<a href="#history">history</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-11">
+      <div class="req-head"><code class="req-id">FR-STY-11</code><span class="badge should">Should</span><h4>Every Buzan default is a switch</h4></div>
+      <p>Each rule in the Buzan preset must be a separate switch with a short note saying what the evidence says about it. Where the evidence disagrees with Buzan, the rule must be a default that the user can turn off. This applies to one word per branch (no support found), curved branches (preference only) and uppercase keywords.</p>
+      <p class="req-meta"><b>Accept when:</b> Open the preset settings. The one-word rule, curved branches and capitals can each be turned off, and the note on one word per branch states that no supporting evidence was found. <b>Why:</b> The science and practice pages class one word per branch as folklore and curves as a preference effect (<a href="#science">evidence</a>; <a href="#practice">practice</a>); Buzan's own 1984 text says "key word or phrase" (<a href="#buzan">Buzan</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-12">
+      <div class="req-head"><code class="req-id">FR-STY-12</code><span class="badge could">Could</span><h4>Gentle style hints</h4></div>
+      <p>Radiant should show optional, dismissible hints in a side list when a map departs from the active preset, for example no central image, fewer than three colours in the centre, a phrase where the strict preset wants one word, crowded or overlapping branches, or text on a branch that rotates. Hints must never block an action or change the map, and one switch must turn them all off.</p>
+      <p class="req-meta"><b>Accept when:</b> Remove the central image and a hint appears. Dismiss it and it stays dismissed. Turn hints off and the list is empty. <b>Why:</b> Buzan's checklist and spacing law (<a href="#buzan">Buzan</a>); hints are proposed so that the user, not the tool, decides. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-13">
+      <div class="req-head"><code class="req-id">FR-STY-13</code><span class="badge could">Could</span><h4>Buzan check report</h4></div>
+      <p>Radiant could provide a report based on Buzan's nine-question test of a true mind map, with automatic answers for central image, radiating branches, one word per branch, images, colour throughout, clarity and organic form, and the final question about visual appeal left to the user. The report must name the source of each rule and offer no score for visual appeal.</p>
+      <p class="req-meta"><b>Accept when:</b> Run the report on a plain boxed-phrase map. The questions about colour and one word per branch show "no". <b>Why:</b> The test is in Buzan's 2018 text (<a href="#buzan">Buzan</a>); automation is a proposed design. Making it optional respects the disagreement with the evidence. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-14">
+      <div class="req-head"><code class="req-id">FR-STY-14</code><span class="badge could">Could</span><h4>Emphasis for key nodes</h4></div>
+      <p>The user must be able to mark a node as a key node, which applies a richer treatment (larger size, stronger colour, thicker branch, optional shadow). The app must show a count of key nodes and suggest reconsidering when most siblings are marked.</p>
+      <p class="req-meta"><b>Accept when:</b> Mark one node as key and it stands out against its siblings. Mark every sibling and a hint appears. <b>Why:</b> Distinctiveness works only by contrast, so the richest treatment is reserved for a few nodes (<a href="#science">evidence, moderate</a>; <a href="#practice">practice</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-15">
+      <div class="req-head"><code class="req-id">FR-STY-15</code><span class="badge should">Should</span><h4>Decoration toggle and lean mode</h4></div>
+      <p>A single toggle must hide decorative elements (pictures, ornaments, shadows) and show the plain vector form of every subtree, without changing the stored representation. The setting must be per document, with a user default.</p>
+      <p class="req-meta"><b>Accept when:</b> Switch on lean mode on a map with picture subtrees. All nodes show as plain text and branches. Switch off and the pictures return unchanged. <b>Why:</b> Decoration can hurt experts and add seductive detail (<a href="#science">evidence, moderate</a>); the tree is the source and pictures are views (decision D-09). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-16">
+      <div class="req-head"><code class="req-id">FR-STY-16</code><span class="badge must">Must</span><h4>Light and dark canvases</h4></div>
+      <p>The app and each theme must work on light and dark canvases and follow the system appearance by default. A theme may define both variants.</p>
+      <p class="req-meta"><b>Accept when:</b> Switch the system appearance. The canvas and chrome change without restarting and text keeps readable contrast. <b>Why:</b> MindNode themes follow light and dark mode (<a href="#mindnode">MindNode</a>, Adopt). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-17">
+      <div class="req-head"><code class="req-id">FR-STY-17</code><span class="badge should">Should</span><h4>Extract and reuse themes</h4></div>
+      <p>The user must be able to save the theme of a document or of one main node to a personal library, apply it to another document, and import or export it as a file.</p>
+      <p class="req-meta"><b>Accept when:</b> Extract the theme from a styled map, apply it to a new map, and the look matches. <b>Why:</b> MindNode personal themes extract style from a document (<a href="#mindnode">MindNode</a>, Adopt). A theme can also be the requested style for AI generation (<a href="#ai-engine">AI engine</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-STY-18">
+      <div class="req-head"><code class="req-id">FR-STY-18</code><span class="badge should">Should</span><h4>Copy and paste style</h4></div>
+      <p>Option+Cmd+C must copy the style of the selected node and Option+Cmd+V must apply it to the selection, as one undo step.</p>
+      <p class="req-meta"><b>Accept when:</b> Copy a bold red style and paste it onto three nodes. Text is unchanged. <b>Why:</b> Cheap and useful (<a href="#mindnode">MindNode verdicts</a>, Adopt). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-19">
+      <div class="req-head"><code class="req-id">FR-STY-19</code><span class="badge could">Could</span><h4>Palette presets and colour-blind safety</h4></div>
+      <p>Radiant should offer palette presets (vivid, light, low saturation) and a colour-blind-safe palette. In that palette, each main branch must carry a second cue besides colour, such as a small icon or label initial.</p>
+      <p class="req-meta"><b>Accept when:</b> Choose the colour-blind-safe palette. Main branches are distinguishable in a greyscale screenshot because of the second cue. <b>Why:</b> Sources disagree on how saturated colour should be, and colour alone is not accessible (<a href="#practice">practice</a>; <a href="#science">science</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-20">
+      <div class="req-head"><code class="req-id">FR-STY-20</code><span class="badge could">Could</span><h4>Hand-drawn style</h4></div>
+      <p>A hand-drawn preset could add a deterministic wobble to lines and shapes using a stored seed, so the look stays stable between redraws.</p>
+      <p class="req-meta"><b>Accept when:</b> Apply the preset. Two renders of the same file are identical. <b>Why:</b> Xmind's hand-drawn option is a one-click on-ramp (<a href="#desktop-tools">desktop tools</a>); people report that hand drawing aids memory but there is no controlled evidence (<a href="#practice">practice</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-21">
+      <div class="req-head"><code class="req-id">FR-STY-21</code><span class="badge could">Could</span><h4>Markers and code library</h4></div>
+      <p>Radiant could provide a library of markers (ticks, stars, arrows, numbers, shapes) that can be placed on nodes as codes and listed in a legend.</p>
+      <p class="req-meta"><b>Accept when:</b> Place a tick marker on three nodes and the legend lists it. <b>Why:</b> Buzan recommends codes and symbols for linking areas (<a href="#buzan">Buzan</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-22">
+      <div class="req-head"><code class="req-id">FR-STY-22</code><span class="badge could">Could</span><h4>Boundary shapes</h4></div>
+      <p>Radiant could draw a soft boundary shape around a branch, and advise against adding boundaries while the branch is still growing.</p>
+      <p class="req-meta"><b>Accept when:</b> Draw a boundary around a branch. It follows when the branch moves or folds. <b>Why:</b> Buzan recommends boundaries once a branch is finished, not too early (<a href="#buzan">Buzan</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-23">
+      <div class="req-head"><code class="req-id">FR-STY-23</code><span class="badge could">Could</span><h4>Highlight repeated words</h4></div>
+      <p>Radiant could highlight words that appear in several branches and offer to start a new map from one of them.</p>
+      <p class="req-meta"><b>Accept when:</b> Use a word in three branches and a highlight appears. Starting a new map creates a main node with that word. <b>Why:</b> Buzan's repetition rule (<a href="#buzan">Buzan</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-STY-24">
+      <div class="req-head"><code class="req-id">FR-STY-24</code><span class="badge later">Later</span><h4>Three-dimensional emphasis</h4></div>
+      <p>Radiant could render important words with a three-dimensional style.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when the style can be applied and exported. <b>Why:</b> Buzan asks for dimension, but evidence for a memory effect is absent (<a href="#buzan">Buzan</a>; <a href="#science">science</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Outline</h2>
+  <p>The outline is a second view of the same tree, and also the text format in which the AI and the clipboard exchange structure.</p>
+  <div class="req-list">
+    <div class="req" id="FR-OUT-01">
+      <div class="req-head"><code class="req-id">FR-OUT-01</code><span class="badge must">Must</span><h4>Outline panel</h4></div>
+      <p>The app must show the map as an outline in a panel beside the canvas, toggled with Cmd+2 (map only with Cmd+1), with main nodes in creation order and children in map order.</p>
+      <p class="req-meta"><b>Accept when:</b> Open the panel on a map. Every visible node appears once, indented by depth, in the stated order. <b>Why:</b> MindNode's outline is always in sync and it is rated a strong feature (<a href="#mindnode">MindNode</a>, Adopt); an outline answers the "just an outline with a different layout" and dense-screen objections (<a href="#community">community, rank 2</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-OUT-02">
+      <div class="req-head"><code class="req-id">FR-OUT-02</code><span class="badge must">Must</span><h4>Two-way synchronisation</h4></div>
+      <p>A change in the outline must appear on the canvas, and the reverse, within the same frame. Selection and fold state must follow in both directions, and scrolling the outline must keep the selected node visible.</p>
+      <p class="req-meta"><b>Accept when:</b> Type in the outline and watch the label change on the map. Select a node on the map and it highlights in the outline. <b>Why:</b> Live two-way sync is what makes the outline useful (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-OUT-03">
+      <div class="req-head"><code class="req-id">FR-OUT-03</code><span class="badge should">Should</span><h4>Outline keyboard editing</h4></div>
+      <p>In the outline, Tab must indent, Shift+Tab must outdent, Return must split a node at the cursor, and Backspace at the start of a node must merge it with the previous one. Cmd+Up and Down must move the node.</p>
+      <p class="req-meta"><b>Accept when:</b> Press Return in the middle of a label. Two nodes result, with the text split at the cursor. Backspace joins them. <b>Why:</b> MindNode documents these behaviours (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-OUT-04">
+      <div class="req-head"><code class="req-id">FR-OUT-04</code><span class="badge should">Should</span><h4>Reorder in the outline</h4></div>
+      <p>Dragging a line in the outline must move it, and dragging left or right must change its level. Dropping on a line must make it a child.</p>
+      <p class="req-meta"><b>Accept when:</b> Drag a line two levels up. The map shows the same restructure. <b>Why:</b> MindNode changes hierarchy by dragging (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-OUT-05">
+      <div class="req-head"><code class="req-id">FR-OUT-05</code><span class="badge should">Should</span><h4>Outline filter</h4></div>
+      <p>A filter field above the outline must show only nodes whose text, note or tags match, together with their ancestors. Clearing it must restore the full outline.</p>
+      <p class="req-meta"><b>Accept when:</b> Filter by a word. Only matching branches and their ancestors remain visible. <b>Why:</b> Needed for dense maps (<a href="#community">community</a>); see also <code>FR-ORG-01</code>. <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-OUT-06">
+      <div class="req-head"><code class="req-id">FR-OUT-06</code><span class="badge could">Could</span><h4>Outline-first editing</h4></div>
+      <p>A new document must be startable from the outline alone, so that the user can type an outline with the canvas hidden and then show the map. Pasting a Markdown list into the outline must build the tree.</p>
+      <p class="req-meta"><b>Accept when:</b> Open a new document, hide the map, type a nested list, then show the map. The tree is drawn. <b>Why:</b> Text-first entry is faster for some users and is the Markdown-to-map route (<a href="#community">community</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-OUT-07">
+      <div class="req-head"><code class="req-id">FR-OUT-07</code><span class="badge should">Should</span><h4>Copy and export from the outline</h4></div>
+      <p>The outline must offer Copy as Markdown, Copy as plain indented text and Export as OPML for the selected lines or whole map.</p>
+      <p class="req-meta"><b>Accept when:</b> Select three lines and Copy as Markdown. The pasted text is a nested list with the same hierarchy. <b>Why:</b> Plain-text export is a baseline expectation (<a href="#community">community, rank 3</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-OUT-08">
+      <div class="req-head"><code class="req-id">FR-OUT-08</code><span class="badge could">Could</span><h4>Notes, tasks and tags in the outline</h4></div>
+      <p>The outline could show notes, task state and tags on each line, switchable by option.</p>
+      <p class="req-meta"><b>Accept when:</b> Switch on tasks. Checkboxes appear on the right of task lines. <b>Why:</b> MindNode shows tasks on the right and has options for tags and content (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Organising and finding</h2>
+  <p>These requirements keep large maps usable: search, tags, cross-connections, tasks and links between maps.</p>
+  <div class="req-list">
+    <div class="req" id="FR-ORG-01">
+      <div class="req-head"><code class="req-id">FR-ORG-01</code><span class="badge must">Must</span><h4>Search the map</h4></div>
+      <p>Cmd+F must search the text of every node in the document, including picture nodes and SVG nodes by their text and including nodes that are folded. Results must be listed, the first match selected and its branch revealed.</p>
+      <p class="req-meta"><b>Accept when:</b> Search for a word that occurs in a folded picture node. The branch unfolds and the node is selected. <b>Why:</b> The tree keeps every node's text, so search always works (decision D-09; <a href="#art-subtrees">art subtrees</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-02">
+      <div class="req-head"><code class="req-id">FR-ORG-02</code><span class="badge could">Could</span><h4>Search notes, tags and replace</h4></div>
+      <p>Search must also cover notes, link titles and tags and offer filters by node type. Option+Cmd+F must open find and replace across the document, with a preview of changes.</p>
+      <p class="req-meta"><b>Accept when:</b> Replace a word across a document. A list shows each change before applying, and one undo reverses all. <b>Why:</b> MindNode added search and replace in notes (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-03">
+      <div class="req-head"><code class="req-id">FR-ORG-03</code><span class="badge should">Should</span><h4>Tags</h4></div>
+      <p>Nodes must be taggable with free-text tags that can be coloured, listed in a tag panel and used as filters.</p>
+      <p class="req-meta"><b>Accept when:</b> Tag three nodes, click the tag in the panel and only the tagged nodes are shown at full strength. <b>Why:</b> MindNode has tag filters and visual tags with undocumented behaviour, so the design is from scratch (<a href="#mindnode">MindNode verdicts</a>, Adapt). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-04">
+      <div class="req-head"><code class="req-id">FR-ORG-04</code><span class="badge should">Should</span><h4>Filter and dim</h4></div>
+      <p>The user must be able to dim every node that does not match a tag, task state, marker or search, without moving anything.</p>
+      <p class="req-meta"><b>Accept when:</b> Apply a tag filter and non-matching nodes dim. Clearing it restores the view and no node has moved. <b>Why:</b> Cheap to build and answers dense maps (<a href="#mindnode">MindNode</a>, Focus Mode and Visual Tags rows). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-05">
+      <div class="req-head"><code class="req-id">FR-ORG-05</code><span class="badge must">Must</span><h4>Cross-connections</h4></div>
+      <p>The user must be able to connect any two nodes with a cross-connection by choosing the command (Cmd+L) and clicking the target, or by Shift-dragging from one node to another. Connections must be curved, have a draggable midpoint, and survive layout changes by following their nodes.</p>
+      <p class="req-meta"><b>Accept when:</b> Link two nodes in different branches. Drag the midpoint to bend the curve. Move a node and the line follows. <b>Why:</b> The community ranks graph-capable cross-links first (<a href="#community">community, rank 1</a>); MindNode adopts them (<a href="#mindnode">MindNode</a>); Buzan uses arrows for association (<a href="#buzan">Buzan</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-06">
+      <div class="req-head"><code class="req-id">FR-ORG-06</code><span class="badge should">Should</span><h4>Labelled and styled connections</h4></div>
+      <p>A connection must carry an optional label (double-click), arrowheads at either or both ends, a colour and a line style. Deleting either node must remove the connection, and undo must restore it.</p>
+      <p class="req-meta"><b>Accept when:</b> Label a connection "causes", set arrowheads at both ends, and see them in PNG and SVG export. <b>Why:</b> Labelled relations carry the strongest evidence from concept maps (<a href="#science">evidence</a>); Buzan describes multi-headed arrows (<a href="#buzan">Buzan</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-07">
+      <div class="req-head"><code class="req-id">FR-ORG-07</code><span class="badge should">Should</span><h4>Tasks with progress</h4></div>
+      <p>A node must be able to carry a checkbox (Shift+Cmd+T) and a parent of tasks must show a progress percentage. Completing a parent through its indicator must complete all subtasks, as one undo step.</p>
+      <p class="req-meta"><b>Accept when:</b> Add three checkbox children, complete two, and the parent reads two thirds. Complete the parent and all three complete. <b>Why:</b> MindNode adapts tasks with a roll-up; reminder sync is skipped as platform-specific (<a href="#mindnode">MindNode verdicts</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-08">
+      <div class="req-head"><code class="req-id">FR-ORG-08</code><span class="badge should">Should</span><h4>Links between maps</h4></div>
+      <p>A node must be able to link to another document, or to a node inside it, and Cmd-click must open it. A missing target must show as a broken link and must not crash.</p>
+      <p class="req-meta"><b>Accept when:</b> Link to a second document, open it, and come back. Rename the target and the link is flagged as broken. <b>Why:</b> Splitting large subjects into linked maps is the survival tactic users report (<a href="#community">community, rank 4</a>); MindNode added document linking in 2026.2 (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-09">
+      <div class="req-head"><code class="req-id">FR-ORG-09</code><span class="badge could">Could</span><h4>Move a branch into its own map</h4></div>
+      <p>A command could move a branch into a new document and leave a link node in its place.</p>
+      <p class="req-meta"><b>Accept when:</b> Run it on a large branch. The new document contains the branch and the old map has one link node where it stood. <b>Why:</b> Buzan describes mini maps from a main map and a master overview map (<a href="#buzan">Buzan</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-10">
+      <div class="req-head"><code class="req-id">FR-ORG-10</code><span class="badge must">Must</span><h4>Recent documents</h4></div>
+      <p>File, Open Recent must list the last documents opened, and launching the app must offer to reopen the last session.</p>
+      <p class="req-meta"><b>Accept when:</b> Open three documents, quit, relaunch and see them in Open Recent. <b>Why:</b> Basic file handling. <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-11">
+      <div class="req-head"><code class="req-id">FR-ORG-11</code><span class="badge could">Could</span><h4>Document browser</h4></div>
+      <p>A browser window should list the documents in a chosen folder with name, modified date and a thumbnail, with search by name.</p>
+      <p class="req-meta"><b>Accept when:</b> Choose a folder with ten maps. Thumbnails show the whole map and double-click opens it. <b>Why:</b> MindNode hides documents inside iCloud and users complain about it (<a href="#mindnode">MindNode</a>); visible files are a stated need (<a href="#community">community, rank 3</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-12">
+      <div class="req-head"><code class="req-id">FR-ORG-12</code><span class="badge later">Later</span><h4>One node in several places</h4></div>
+      <p>Radiant could let a node appear in several places and stay in sync.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when editing one occurrence changes all. <b>Why:</b> One request on Hacker News, the fit with graph-style thinking is inferred (<a href="#community">community, rank 11</a>); MindNode has a similar Alias (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-ORG-13">
+      <div class="req-head"><code class="req-id">FR-ORG-13</code><span class="badge later">Later</span><h4>Reminders and to-do app sync</h4></div>
+      <p>Radiant could sync tasks with Apple Reminders, Things or OmniFocus.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when completing a task in Reminders completes it in the map. <b>Why:</b> Platform-specific and outside the stated goals (<a href="#mindnode">MindNode verdicts</a>, Skip at first). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Recall and review</h2>
+  <p>Making or reworking a map helps memory more than viewing one, and retrieval and spacing are the best-supported techniques. This area is where the app acts on that finding. Each requirement states the strength of the supporting evidence on the <a href="#science">evidence page</a>. AI gap-checking is a generation task and sits on the <a href="#ai-engine">AI engine page</a>.</p>
+  <div class="req-list">
+    <div class="req" id="FR-MEM-01">
+      <div class="req-head"><code class="req-id">FR-MEM-01</code><span class="badge should">Should</span><h4>Collapse-and-recall mode</h4></div>
+      <p>The user must be able to start a recall session on a branch or whole map: the children (or labels) are hidden, the user is asked to recall them first (typed or silent), and then reveals one level at a time, marking each item as recalled, partly or missed. The results must be stored.</p>
+      <p class="req-meta"><b>Accept when:</b> Start a session on a branch of three children. Children are hidden. After revealing, mark one missed. The result appears in the review history. <b>Why:</b> Retrieval practice is strongly supported and beat elaborative concept mapping (<a href="#science">evidence, strong</a>); users already practise this by hand (<a href="#community">community, rank 8</a>; <a href="#practice">practice</a>). <b>Milestone:</b> M6.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-02">
+      <div class="req-head"><code class="req-id">FR-MEM-02</code><span class="badge should">Should</span><h4>Hidden-label mode for picture nodes</h4></div>
+      <p>A recall session must be able to hide labels while the pictures stay, so the user names each concept from its picture, then reveals the label. It must work on picture and SVG subtrees because the label is always stored as text.</p>
+      <p class="req-meta"><b>Accept when:</b> Start a session on a picture subtree with labels hidden. Pictures show without labels and each reveal restores the live text label. <b>Why:</b> Pictures are cues and retrieval is the strong effect (<a href="#science">evidence</a>); text always stays in the tree (decision D-09; <a href="#art-subtrees">art subtrees</a>). <b>Milestone:</b> M6.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-03">
+      <div class="req-head"><code class="req-id">FR-MEM-03</code><span class="badge could">Could</span><h4>Blanked-node study mode</h4></div>
+      <p>A study mode should blank a share of nodes or connection labels that the user can set (the default being roughly 30 to 40 per cent) and let the user fill them in. The share should fall automatically as the user gets items right.</p>
+      <p class="req-meta"><b>Accept when:</b> Start the mode. About a third of nodes are blank. After two sessions with all correct, the blanked share is lower. <b>Why:</b> Completion of partly filled maps shows a benefit in one study (<a href="#science">evidence, weak to moderate, Chang 2002</a>). The default share and the fading rule are proposed. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-04">
+      <div class="req-head"><code class="req-id">FR-MEM-04</code><span class="badge should">Should</span><h4>Spaced review scheduling</h4></div>
+      <p>The user must be able to put a branch or map on a review schedule by giving a target date. The default schedule must be expanding, with gaps of roughly 10 to 20 per cent of the time left to the target date, and every interval must be editable.</p>
+      <p class="req-meta"><b>Accept when:</b> Set a target date and the app proposes dates for the reviews. Edit one interval and the rest adapt. The schedule persists. <b>Why:</b> Spaced practice has strong support, and the best gap depends on the material and target date (<a href="#science">evidence, strong</a>, Cepeda 2008). <b>Milestone:</b> M6.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-05">
+      <div class="req-head"><code class="req-id">FR-MEM-05</code><span class="badge could">Could</span><h4>Buzan review schedule preset</h4></div>
+      <p>A preset must offer Buzan's reviews at about 10 minutes, 1 day, 1 week and 1 month, each using a recall from memory, with no six-month step. The interface must say that it is Buzan's schedule from Use Your Head and that the evidence supports spacing in general, not these particular intervals.</p>
+      <p class="req-meta"><b>Accept when:</b> Choose the preset and the four reviews are scheduled at those intervals. The help text states the limit of the evidence. <b>Why:</b> Rule 25 of the Buzan table (<a href="#buzan">Buzan</a>); the science page supports spacing but not this exact schedule (<a href="#science">evidence</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-06">
+      <div class="req-head"><code class="req-id">FR-MEM-06</code><span class="badge should">Should</span><h4>Review queue</h4></div>
+      <p>A "Due" view must list the branches and maps due for review today and overdue, and each entry must open directly in recall mode. An optional macOS notification should remind the user.</p>
+      <p class="req-meta"><b>Accept when:</b> With two branches due, the view lists them. Choosing one opens its recall session. <b>Why:</b> Scheduling is useless without a surface that asks for the review (<a href="#practice">practice</a>). <b>Milestone:</b> M6.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-07">
+      <div class="req-head"><code class="req-id">FR-MEM-07</code><span class="badge should">Should</span><h4>Review history</h4></div>
+      <p>Each recall session must be recorded with the date, branch, outcome per node and time taken, shown as a list, and optionally as a strength colour on the map.</p>
+      <p class="req-meta"><b>Accept when:</b> After three sessions the branch history lists three entries. Turn on strength colour and weak nodes are tinted. <b>Why:</b> Users should see their own results, and the app must show only these (no predicted retention percentage), since no evidence supports a percentage claim (<a href="#science">evidence</a>). <b>Milestone:</b> M6.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-08">
+      <div class="req-head"><code class="req-id">FR-MEM-08</code><span class="badge could">Could</span><h4>Rebuild from memory</h4></div>
+      <p>The user could start a session in which the map is hidden, build a fresh map from memory on a blank canvas, and then see the attempt overlaid on the saved map showing matched, missing, extra and misplaced nodes. Matching must at least use text comparison, and an AI judgement could be added through the AI engine.</p>
+      <p class="req-meta"><b>Accept when:</b> Rebuild a five-node branch with one node missing. The overlay marks the missing node. <b>Why:</b> Rebuilding from memory was better than studying in one retrieval experiment (<a href="#science">evidence, moderate</a>, Blunt and Karpicke 2014); gap-check with AI belongs to <a href="#ai-engine">the AI engine</a>. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-09">
+      <div class="req-head"><code class="req-id">FR-MEM-09</code><span class="badge could">Could</span><h4>Explain-in-your-own-words prompts</h4></div>
+      <p>The app could show a prompt on a chosen branch asking the user to explain it, store the answer in the node's note, and offer it again at review.</p>
+      <p class="req-meta"><b>Accept when:</b> Request a prompt on a branch. A text box opens and the answer is saved as a note. <b>Why:</b> Weak, indirect evidence only (<a href="#science">evidence, weak</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-10">
+      <div class="req-head"><code class="req-id">FR-MEM-10</code><span class="badge could">Could</span><h4>Recall as the default way back</h4></div>
+      <p>When the user reopens a map marked as learned, the app could offer a recall session first and could say that rereading has low utility.</p>
+      <p class="req-meta"><b>Accept when:</b> Mark a map as learned, reopen it and see the offer. The user can dismiss it and choose never to see it again. <b>Why:</b> Recall, not rereading, is the best-supported default (<a href="#science">evidence, strong</a>, Dunlosky 2013). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-11">
+      <div class="req-head"><code class="req-id">FR-MEM-11</code><span class="badge could">Could</span><h4>Session timer</h4></div>
+      <p>The app could offer an optional timer for mapping sessions of about 20 minutes with a gentle end signal.</p>
+      <p class="req-meta"><b>Accept when:</b> Start a timer and see a signal at the end. It never interrupts typing. <b>Why:</b> Buzan advises mapping in short, playful bursts (<a href="#buzan">Buzan</a>); the optional status mirrors the lack of testing. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-MEM-12">
+      <div class="req-head"><code class="req-id">FR-MEM-12</code><span class="badge later">Later</span><h4>Flashcards from nodes</h4></div>
+      <p>Radiant could generate flashcards from nodes and export them.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when selected nodes export as a flashcard file. <b>Why:</b> Traverse and RemNote do this (<a href="#desktop-tools">desktop tools</a>); evidence for maps as a replacement for card review is not established. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Files, import and export</h2>
+  <p>One visible file per map, never lost, and open formats in and out. What each format can carry is stated per requirement, and the app tells the user what an export drops.</p>
+  <div class="req-list">
+    <div class="req" id="FR-IO-01">
+      <div class="req-head"><code class="req-id">FR-IO-01</code><span class="badge must">Must</span><h4>One document file per map</h4></div>
+      <p>Each map must be one file the user can see, move, copy and back up in Finder, with its own icon and extension. Opening it by double-click must launch the app.</p>
+      <p class="req-meta"><b>Accept when:</b> Create a map, find the file in Finder, copy it to another folder and open the copy. <b>Why:</b> Hidden documents are a known MindNode complaint (<a href="#mindnode">MindNode</a>); the format is a single SQLite file (decision D-14; <a href="#engine">engine</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-IO-02">
+      <div class="req-head"><code class="req-id">FR-IO-02</code><span class="badge must">Must</span><h4>Lossless save and load</h4></div>
+      <p>Saving and reopening must reproduce the document exactly: structure, text, notes, styles, offsets, layout seed, assets and representation choices. The large reference map must show its first frame in under 500 ms.</p>
+      <p class="req-meta"><b>Accept when:</b> Save and reopen the 5,000-node reference map. A structural comparison finds no difference and the first frame appears within 500 ms (a target proposed by this report). <b>Why:</b> The budget comes from the performance targets (<a href="#quality">quality</a>); a lossless round trip is the basis of trust in the file (decision D-14). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-IO-03">
+      <div class="req-head"><code class="req-id">FR-IO-03</code><span class="badge must">Must</span><h4>Autosave</h4></div>
+      <p>Every change must be written durably without the user pressing Save, and the title bar must show the saved state. Cmd+S must create a named checkpoint (see <code>FR-IO-05</code>).</p>
+      <p class="req-meta"><b>Accept when:</b> Make an edit, kill the process within a moment and reopen. The edit is present. <b>Why:</b> Local-first reliability (<a href="#quality">quality</a>; decision D-14). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-IO-04">
+      <div class="req-head"><code class="req-id">FR-IO-04</code><span class="badge must">Must</span><h4>Crash recovery</h4></div>
+      <p>After a crash or forced quit, including during a generation, the document must open with all committed edits and no corruption, and the user must be told what was recovered.</p>
+      <p class="req-meta"><b>Accept when:</b> Force-quit during editing and during a generation. Reopen shows a consistent document. <b>Why:</b> The operation log is designed for this (decision D-14; <a href="#engine">engine</a>). <b>Milestone:</b> M1.</p>
+    </div>
+
+    <div class="req" id="FR-IO-05">
+      <div class="req-head"><code class="req-id">FR-IO-05</code><span class="badge should">Should</span><h4>Snapshots and history</h4></div>
+      <p>The user should be able to name snapshots, the app should take them automatically at intervals, and the user should be able to browse history and restore a snapshot as a new document or in place. Each change in the history must show whether the user, an AI generation or an agent made it.</p>
+      <p class="req-meta"><b>Accept when:</b> Restore an hour-old snapshot as a new document. The history marks the changes made by an AI generation. <b>Why:</b> MindNode adapts document history that marks AI and agent changes (<a href="#mindnode">MindNode verdicts</a>); every generated asset records prompt and model (decision D-19). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-06">
+      <div class="req-head"><code class="req-id">FR-IO-06</code><span class="badge must">Must</span><h4>Markdown outline import and export</h4></div>
+      <p>Radiant must import and export a Markdown outline (headings and nested lists), carrying text and notes as paragraph text. The export must state in a short note that styles, pictures and cross-connections are not carried.</p>
+      <p class="req-meta"><b>Accept when:</b> Export a map, import the file as a new document, and the tree is identical in text and structure. <b>Why:</b> Markdown is on every importer list and was the top mind-map story on Hacker News (<a href="#desktop-tools">desktop tools</a>; <a href="#community">community</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-07">
+      <div class="req-head"><code class="req-id">FR-IO-07</code><span class="badge should">Should</span><h4>OPML import and export</h4></div>
+      <p>Radiant must import and export OPML, carrying text and notes, and must preserve unknown attributes it can read.</p>
+      <p class="req-meta"><b>Accept when:</b> Round-trip a map through OPML. Text, notes and structure are unchanged. <b>Why:</b> OPML is supported by MindNode, Minder and the community asks for it (<a href="#mindnode">MindNode</a>; <a href="#community">community, rank 3</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-08">
+      <div class="req-head"><code class="req-id">FR-IO-08</code><span class="badge should">Should</span><h4>FreeMind import and export</h4></div>
+      <p>Radiant should import and export FreeMind .mm files, carrying text, notes, links, folds and icons where the format has them, and skipping the rest with a listing.</p>
+      <p class="req-meta"><b>Accept when:</b> Open a FreeMind file made elsewhere. The tree appears and a note lists any skipped attributes. <b>Why:</b> FreeMind is a widely supported interchange format (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-09">
+      <div class="req-head"><code class="req-id">FR-IO-09</code><span class="badge could">Could</span><h4>JSON Canvas export</h4></div>
+      <p>Radiant could export a map as JSON Canvas with nodes as text cards and the tree as edges, so it can be opened in Obsidian and similar tools.</p>
+      <p class="req-meta"><b>Accept when:</b> Export a map and open the file in a JSON Canvas reader. Text and structure are present. <b>Why:</b> JSON Canvas is the open format named in the desktop tools notes (<a href="#desktop-tools">desktop tools</a>); the mapping is inferred. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-IO-10">
+      <div class="req-head"><code class="req-id">FR-IO-10</code><span class="badge could">Could</span><h4>Xmind import</h4></div>
+      <p>Radiant could import Xmind files as far as the format is documented, carrying the topic tree, text and notes and skipping what is unknown.</p>
+      <p class="req-meta"><b>Accept when:</b> Import an Xmind file and the tree appears. Skipped items are listed. <b>Why:</b> Xmind import was the lowest priority in the desktop tools notes (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-IO-11">
+      <div class="req-head"><code class="req-id">FR-IO-11</code><span class="badge later">Later</span><h4>MindNode file import</h4></div>
+      <p>Radiant could import MindNode documents once the format is verified. Until then, users can use MindNode's own OPML and Markdown export.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when a MindNode document opens with its tree intact. <b>Why:</b> The rebuilt app's format is undocumented and the Classic format claim is third-party and unchecked (<a href="#mindnode">MindNode</a>, unverified). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-IO-12">
+      <div class="req-head"><code class="req-id">FR-IO-12</code><span class="badge must">Must</span><h4>PNG export</h4></div>
+      <p>Radiant must export the whole map, the visible area or the selection as PNG at a chosen scale, with transparent or solid background.</p>
+      <p class="req-meta"><b>Accept when:</b> Export the selection at two scales. Both open correctly and the transparent version has no background. <b>Why:</b> MindNode exports PNG with transparent or solid background (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-13">
+      <div class="req-head"><code class="req-id">FR-IO-13</code><span class="badge should">Should</span><h4>SVG export</h4></div>
+      <p>Radiant must export a map as SVG with live text, in which picture nodes are embedded images and SVG subtrees are embedded groups.</p>
+      <p class="req-meta"><b>Accept when:</b> Export a map with a picture subtree and open the SVG in a browser. Text is selectable and the picture shows. <b>Why:</b> Strong vector export is ranked third among user needs (<a href="#community">community</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-14">
+      <div class="req-head"><code class="req-id">FR-IO-14</code><span class="badge should">Should</span><h4>PDF export</h4></div>
+      <p>Radiant must export a vector PDF with live text, with a choice between one page that fits the whole map and tiled pages.</p>
+      <p class="req-meta"><b>Accept when:</b> Export a large map. Text can be selected and searched in a PDF reader. <b>Why:</b> Vector PDF with live text for large maps is a stated need (<a href="#community">community, rank 3</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-15">
+      <div class="req-head"><code class="req-id">FR-IO-15</code><span class="badge should">Should</span><h4>Documented JSON export</h4></div>
+      <p>Radiant must export and import the whole document as JSON with a schema version, a published schema, nodes, connections, styles, asset references and generation prompts, and must offer an export as a folder with the JSON and an assets directory.</p>
+      <p class="req-meta"><b>Accept when:</b> Export, import into a new document and compare. The tree, text and styles match. The schema file validates the export. <b>Why:</b> A documented JSON map file is itself the agent interface and answers lock-in (<a href="#desktop-tools">desktop tools</a>; see the agent interface section below). Revisit with decision D-14. <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-16">
+      <div class="req-head"><code class="req-id">FR-IO-16</code><span class="badge should">Should</span><h4>Export a selection</h4></div>
+      <p>Every export format must be able to export only the selected subtree.</p>
+      <p class="req-meta"><b>Accept when:</b> Select a branch and export it as Markdown. Only that branch is in the file. <b>Why:</b> Practical for sharing part of a map. <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-17">
+      <div class="req-head"><code class="req-id">FR-IO-17</code><span class="badge could">Could</span><h4>Copy as image</h4></div>
+      <p>Radiant must be able to copy the selection to the clipboard as an image, with a vector form where the receiving app accepts one.</p>
+      <p class="req-meta"><b>Accept when:</b> Copy a branch and paste into a document editor. A sharp image appears. <b>Why:</b> Common sharing path. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-IO-18">
+      <div class="req-head"><code class="req-id">FR-IO-18</code><span class="badge should">Should</span><h4>Say what an export loses</h4></div>
+      <p>Before and after an export or import, the app must list what the format cannot carry, such as representation, styles, pictures or connections, so the user is never surprised.</p>
+      <p class="req-meta"><b>Accept when:</b> Export a map with pictures to Markdown. A short note lists the pictures as not carried. <b>Why:</b> Import and export always lose features between tools (<a href="#mindnode">MindNode</a>). <b>Milestone:</b> M3.</p>
+    </div>
+
+    <div class="req" id="FR-IO-19">
+      <div class="req-head"><code class="req-id">FR-IO-19</code><span class="badge could">Could</span><h4>Print layout</h4></div>
+      <p>Radiant could offer printing with page size, margins, fit and tile options.</p>
+      <p class="req-meta"><b>Accept when:</b> Print a large map to PDF with tiling. <b>Why:</b> MindNode added printing in 2026.5 but the verdict was to cover it with PDF first (<a href="#mindnode">MindNode verdicts</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Agent interface</h2>
+  <p>A coding agent should be able to read the user's maps, and write to them only when allowed. Following decision D-20, the whole area comes after version 1.</p>
+  <div class="req-list">
+    <div class="req" id="FR-AGT-01">
+      <div class="req-head"><code class="req-id">FR-AGT-01</code><span class="badge could">Could</span><h4>Command-line tool</h4></div>
+      <p>Radiant could ship a command-line tool that lists documents, prints a map as Markdown or JSON, searches it, and validates a file. Its default must be read-only.</p>
+      <p class="req-meta"><b>Accept when:</b> Run the tool on a document while the app is closed. The tree prints as Markdown and no file changes. <b>Why:</b> Xmind's command-line tool lets agents read and edit local files (<a href="#desktop-tools">desktop tools</a>). The decision brief puts the agent interface after version 1 (decision D-20). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-AGT-02">
+      <div class="req-head"><code class="req-id">FR-AGT-02</code><span class="badge could">Could</span><h4>MCP server</h4></div>
+      <p>Radiant could provide an MCP server (Model Context Protocol, a standard way for an assistant to call an app's tools) offering read tools for listing, reading and searching maps. It must be read-only by default.</p>
+      <p class="req-meta"><b>Accept when:</b> Connect a coding agent. It lists a map and reads a subtree but any write call is refused. <b>Why:</b> MindNode's MCP server is read-only by default on the Mac (<a href="#mindnode">MindNode</a>, Adapt). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-AGT-03">
+      <div class="req-head"><code class="req-id">FR-AGT-03</code><span class="badge could">Could</span><h4>Granted write access</h4></div>
+      <p>Write tools must be enabled by the user per document, on a switch that is off by default. Writes must be applied as one undoable batch marked as made by an agent, and must preserve all branches the agent did not touch.</p>
+      <p class="req-meta"><b>Accept when:</b> Enable write for one document, let an agent add a branch, and undo it in one step. Unrelated branches are unchanged. <b>Why:</b> MindNode asks the user to grant write access and marks changes in its history (<a href="#mindnode">MindNode</a>); Xmind validates and preserves unrelated branches (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-AGT-04">
+      <div class="req-head"><code class="req-id">FR-AGT-04</code><span class="badge could">Could</span><h4>Explain MCP on first use</h4></div>
+      <p>The first time the user turns on the agent interface, a plain-language dialog must say what MCP is, which maps are exposed, whether agents can write, and how to turn it off.</p>
+      <p class="req-meta"><b>Accept when:</b> Turn on the interface for the first time and see the dialog. It is not shown again unless requested. <b>Why:</b> Informed consent for access to private notes. <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-AGT-05">
+      <div class="req-head"><code class="req-id">FR-AGT-05</code><span class="badge could">Could</span><h4>Local access only</h4></div>
+      <p>The server must be reachable only from the same machine, over standard input and output or a local socket, with no network port and no stored credentials. When the app has a document open, the tool must go through the app and never write the file directly.</p>
+      <p class="req-meta"><b>Accept when:</b> Scan open ports while the interface is on. None belongs to Radiant. Edit through the tool while the app has the file open and no corruption results. <b>Why:</b> Documents stay local (decision D-19; <a href="#quality">quality</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+    <div class="req" id="FR-AGT-06">
+      <div class="req-head"><code class="req-id">FR-AGT-06</code><span class="badge later">Later</span><h4>Agent skill and schema pack</h4></div>
+      <p>Radiant could publish a skill file for coding agents that describes the document schema and the safe edit workflow.</p>
+      <p class="req-meta"><b>Accept when:</b> Deferred. Accept when a coding agent can follow the skill to add a branch and validate. <b>Why:</b> Xmind installs a skill with its command-line tool (<a href="#desktop-tools">desktop tools</a>). <b>Milestone:</b> after version 1.</p>
+    </div>
+
+  </div>
+  <h2>Traceability</h2>
+  <p>Every row of the MindNode verdict table that is marked Adopt or Adapt, and every ranked need from the community page, appears below with the requirements that answer it. A row that says "Deferred" names the requirement that records the deferral, or the page where the matter is settled. Rows marked Skip in the MindNode table are not listed here; the reasons are on the <a href="#mindnode">MindNode page</a> and in the scope table on the <a href="#vision">vision page</a>.</p>
+  <div class="table-wrap"><table class="dense">
+<caption>MindNode Adopt and Adapt rows and the requirements that answer them</caption>
+<thead><tr><th>MindNode feature</th><th>Verdict</th><th>Answered by</th><th>Note</th></tr></thead>
+<tbody><tr><th>Infinite canvas, multiple main nodes</th><td><span class="badge adopt">Adopt</span></td><td><code>FR-CAN-01</code>, <code>FR-CAN-08</code>, <code>FR-CAN-09</code></td><td></td></tr><tr><th>Tab and Return keyboard model</th><td><span class="badge adopt">Adopt</span></td><td><code>FR-EDT-01</code>, <code>FR-EDT-02</code>, <code>FR-EDT-03</code>, <code>FR-EDT-04</code>, <code>FR-EDT-05</code>, <code>FR-EDT-23</code></td><td></td></tr><tr><th>Auto layout with relative-offset manual moves</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-LAY-01</code>, <code>FR-LAY-04</code>, <code>FR-LAY-05</code>, <code>FR-LAY-02</code>, <code>FR-LAY-03</code>, <code>FR-LAY-12</code></td><td>Incremental layout is an engine property (see the engine page).</td></tr><tr><th>Per-main-node layout</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-LAY-06</code>, <code>FR-LAY-07</code>, <code>FR-LAY-08</code></td><td></td></tr><tr><th>Rounded, angular and tapered branches</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-STY-04</code>, <code>FR-STY-05</code>, <code>FR-STY-06</code></td><td></td></tr><tr><th>Folding, unfold one level</th><td><span class="badge adopt">Adopt</span></td><td><code>FR-EDT-14</code>, <code>FR-EDT-15</code>, <code>FR-LAY-13</code></td><td></td></tr><tr><th>Cross connections</th><td><span class="badge adopt">Adopt</span></td><td><code>FR-ORG-05</code>, <code>FR-ORG-06</code></td><td></td></tr><tr><th>Task checkbox with progress roll-up</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-ORG-07</code></td><td>Reminders sync is deferred: <code>FR-ORG-13</code>.</td></tr><tr><th>Notes</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-EDT-19</code></td><td></td></tr><tr><th>LaTeX equations</th><td><span class="badge adapt">Adapt</span></td><td>Deferred: <code>FR-EDT-27</code></td><td>Later phase, after notes.</td></tr><tr><th>Stickers, photos, emojis</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-EDT-21</code>, <code>FR-EDT-26</code></td><td>Generalisation to picture and SVG subtrees is on the art subtrees page.</td></tr><tr><th>Background removal</th><td><span class="badge adapt">Adapt</span></td><td>Not on this page</td><td>Answered on the art subtrees page (picture subtrees need transparent images).</td></tr><tr><th>Outline view synced to map</th><td><span class="badge adopt">Adopt</span></td><td><code>FR-OUT-01</code>, <code>FR-OUT-02</code>, <code>FR-OUT-03</code>, <code>FR-OUT-04</code>, <code>FR-OUT-06</code></td><td></td></tr><tr><th>Focus Mode</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-CAN-06</code></td><td></td></tr><tr><th>Visual tags</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-ORG-03</code>, <code>FR-ORG-04</code></td><td></td></tr><tr><th>Themes and personal themes</th><td><span class="badge adopt">Adopt</span></td><td><code>FR-STY-01</code>, <code>FR-STY-17</code>, <code>FR-STY-16</code></td><td></td></tr><tr><th>Style copy and paste</th><td><span class="badge adopt">Adopt</span></td><td><code>FR-STY-18</code></td><td></td></tr><tr><th>Quick Entry menu-bar capture</th><td><span class="badge adapt">Adapt</span></td><td>Deferred: <code>FR-EDT-28</code></td><td>Later phase; behaviour unverified.</td></tr><tr><th>Import and export</th><td><span class="badge adopt">Adopt</span></td><td><code>FR-IO-06</code>, <code>FR-IO-07</code>, <code>FR-IO-08</code>, <code>FR-IO-12</code>, <code>FR-IO-13</code>, <code>FR-IO-14</code>, <code>FR-IO-15</code>, <code>FR-IO-10</code></td><td>TaskPaper, Things and OmniFocus are skipped at first.</td></tr><tr><th>MCP agent interface</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-AGT-01</code>, <code>FR-AGT-02</code>, <code>FR-AGT-03</code>, <code>FR-AGT-04</code>, <code>FR-AGT-05</code></td><td>After version 1.</td></tr><tr><th>Document history</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-IO-05</code></td><td></td></tr><tr><th>Document linking</th><td><span class="badge adapt">Adapt</span></td><td><code>FR-ORG-08</code>, <code>FR-ORG-09</code></td><td></td></tr></tbody>
+</table></div>
+  <div class="table-wrap"><table class="dense">
+<caption>Ranked community needs and the requirements that answer them</caption>
+<thead><tr><th class="num">Rank</th><th>Need</th><th>Answered by</th><th>Note</th></tr></thead>
+<tbody><tr><th class="num">1</th><td>Stable, user-controllable layout and graph-capable cross-links</td><td><code>FR-LAY-02</code>, <code>FR-LAY-03</code>, <code>FR-LAY-04</code>, <code>FR-LAY-05</code>, <code>FR-ORG-05</code>, <code>FR-ORG-06</code></td><td></td></tr><tr><th class="num">2</th><td>Keyboard-first flow with a synced outline</td><td><code>FR-EDT-01</code>, <code>FR-EDT-07</code>, <code>FR-EDT-05</code>, <code>FR-EDT-23</code>, <code>FR-EDT-22</code>, <code>FR-OUT-01</code>, <code>FR-OUT-02</code></td><td></td></tr><tr><th class="num">3</th><td>Open plain-text storage and strong vector export</td><td><code>FR-IO-01</code>, <code>FR-IO-15</code>, <code>FR-IO-06</code>, <code>FR-IO-07</code>, <code>FR-IO-13</code>, <code>FR-IO-14</code></td><td>The document itself is a SQLite file (decision D-14), so the plain-text promise is met by the JSON export and the open formats. The format is to be revisited after milestone M1.</td></tr><tr><th class="num">4</th><td>Scale: collapse, linked sub-maps, density, speed</td><td><code>FR-EDT-14</code>, <code>FR-ORG-08</code>, <code>FR-ORG-09</code>, <code>FR-CAN-10</code>, <code>FR-CAN-07</code>, <code>FR-ORG-04</code></td><td>Speed targets are on the quality page.</td></tr><tr><th class="num">5</th><td>AI that scaffolds while the user builds: editable output, gap-check, quizzing</td><td><code>FR-EDT-09</code>, <code>FR-MEM-01</code>, <code>FR-MEM-03</code>, <code>FR-MEM-08</code>, <code>FR-MEM-09</code></td><td>Generation, editability of drafts and AI gap-check are on the AI engine page.</td></tr><tr><th class="num">6</th><td>Local or offline operation and local AI</td><td><code>FR-IO-01</code>, <code>FR-AGT-05</code>, <code>FR-IO-05</code></td><td>Local-model support is an open question for the AI engine page and the vision page.</td></tr><tr><th class="num">7</th><td>Fair pricing, no subscription</td><td>Deferred</td><td>Not a feature. The pricing choice is listed as an open decision on the vision page.</td></tr><tr><th class="num">8</th><td>Retrieval support: hide and reveal, self-test</td><td><code>FR-MEM-01</code>, <code>FR-MEM-02</code>, <code>FR-MEM-03</code>, <code>FR-MEM-04</code></td><td></td></tr><tr><th class="num">9</th><td>Memorability through images, colour and hand-drawn feel</td><td><code>FR-STY-02</code>, <code>FR-STY-05</code>, <code>FR-STY-09</code>, <code>FR-STY-10</code>, <code>FR-STY-20</code>, <code>FR-STY-08</code></td><td>Picture and SVG subtrees are on the art subtrees page.</td></tr><tr><th class="num">10</th><td>Pen or ink input</td><td>Deferred: <code>FR-EDT-29</code></td><td>Weak evidence of demand.</td></tr><tr><th class="num">11</th><td>One node in several places, in sync</td><td>Deferred: <code>FR-ORG-12</code></td><td>One-off request.</td></tr><tr><th class="num">12</th><td>Visually consistent generated imagery</td><td>Not on this page</td><td>Answered on the art subtrees page.</td></tr></tbody>
+</table></div>
+</section>

@@ -1,0 +1,438 @@
+<section class="page" id="p-quality" data-g="product" data-title="Performance and quality requirements" data-nav="Performance and quality">
+  <h1>Performance and quality requirements</h1>
+  <p class="lead">You asked for an application that is "very very performant". This page turns that wish into budgets and tests: a frame budget for each display mode, a fixed set of reference maps, a repeatable way of measuring, and a gate that fails the build when a number is missed. It then adds the other qualities a desktop app needs: reliability, privacy and security, accessibility, platform behaviour and maintainability.</p>
+  <p>Every requirement here has a priority and an "Accept when" check. Functional requirements are on <a href="#features">the features page</a>, <a href="#ai-engine">the AI engine page</a> and <a href="#art-subtrees">the picture and SVG subtrees page</a>. The design requirements that make the budgets reachable (renderer, layout, memory, file format) are on <a href="#engine">the engine page</a> with the prefix <code>ENG-</code>; this page links to them and does not repeat them. The choice of Tauri 2 and a WebGL2 renderer is argued on <a href="#stack">the stack page</a>.</p>
+  <div class="callout decision wide"><span class="tag">Decision</span><p>Performance is treated as a requirement with a number and an automated test, not as a quality adjective. Where the research supports a number, the page uses it and says so. Where it does not (input latency, memory, SVG rasterisation cost, real content), the requirement says the figure must be measured in the first spike and then fixed. No figure on this page has been invented to fill a gap.</p></div>
+
+  <h2>What was measured</h2>
+  <p>All budgets on this page rest on one set of measurements made on your own Mac: an Apple M4 Pro running macOS 26.5.1 with the built-in 120 Hz display. The full table is on <a href="#other-stacks">the other stacks page</a>. The recap below states what was found and under what conditions.</p>
+  <div class="stats">
+    <div class="stat"><b>60 fps</b><span>Default system WebView frame rate on a 120 Hz screen, in every test</span><small>Spike on M4 Pro, macOS 26.5.1</small></div>
+    <div class="stat"><b>120 fps</b><span>Same tests with the private WebKit flag switched off at creation (mean interval 8.33 ms)</span><small>Spike on M4 Pro, macOS 26.5.1</small></div>
+    <div class="stat"><b>3.5 ms</b><span>Script time per frame for 5,000 tapered branches, 2,000 labels and 300 images in Canvas2D at 120 fps, no culling</span><small>Spike on M4 Pro</small></div>
+    <div class="stat"><b>100,000</b><span>Branches (2.4 million triangles) held at 120 fps by batched WebGL2; 200,000 ran at about 102 fps</span><small>Spike on M4 Pro</small></div>
+    <div class="stat"><b>2.8 to 3.7 s</b><span>Time from starting a turn to the first streamed text from Codex</span><small>Codex hands-on pass 2, three runs</small></div>
+    <div class="stat"><b>about 2 ms</b><span>Time for an interrupted Codex turn to finish after the interrupt request</span><small>Codex hands-on pass 2, one run</small></div>
+  </div>
+  <p><span class="badge verified">Verified hands-on</span> A default WKWebView, the system web view that Tauri uses on macOS, is capped at 60 frames per second on this machine even on a 120 Hz screen. Switching off the private WebKit feature <code>PreferPageRenderingUpdatesNear60FPSEnabled</code> when the WebView is created gives 120 frames per second. No public interface raises the rate; the WebKit request is bug 294338 <a class="src" href="https://bugs.webkit.org/show_bug.cgi?id=294338" title="WebKit Bugzilla: Bug 294338, WKWebView 120 Hz support">WebKit bug</a> and is still open.</p>
+  <p><span class="badge verified">Verified hands-on</span> The batched WebGL2 scene had a knee between 100,000 and 200,000 branches at the 8.33 ms budget. Each configuration was run once, the 100,000 to 400,000 rows came from a different process than the 10,000 to 50,000 rows, and the scene was synthetic: thin branches, no editing, no text shaping, no SVG. A second caveat is that the test window sat on the built-in 120 Hz panel, while the Mac's main screen was a 60 Hz external monitor. The frame rate follows whichever display the window is on.</p>
+  <p><span class="badge verified">Verified hands-on</span> Frame timestamps from the WebView are rounded to whole milliseconds, so the median prints as 8 or 17 ms. Only the mean interval (8.33 ms at 120 Hz, 16.67 ms at 60 Hz) is reliable. Script time excludes the GPU and compositing work that WebKit does in another process, and no GPU timer was available, so a passing script time does not prove a passing frame.</p>
+  <div class="callout gap wide"><span class="tag">Not verified</span><p>Not measured: Electron or Chromium, input latency, SVG rasterisation, memory, thermal behaviour over minutes, real (non-synthetic) maps, and any Mac other than the M4 Pro.</p></div>
+  <p>The report separates three kinds of number. A <strong>measured</strong> number was observed on your Mac. A number <strong>derived from a measurement</strong> follows by arithmetic (for example 1000 ms divided by 120 Hz is 8.3 ms). A <strong>proposed target</strong> is a figure the report suggests, carrying the <span class="badge proposed">Proposed design</span> label, that the first spike must confirm or change. The <a href="#quality">budget summary</a> at the end of this page lists every number with its kind.</p>
+
+  <h2>Reference maps and test rig</h2>
+  <p>Every performance test uses the same three reference documents, so that results are comparable across builds and across the spikes on <a href="#roadmap">the roadmap</a>.</p>
+  <div class="table-wrap"><table>
+    <caption>The reference maps used by every performance test. Sizes come from the decisions brief.</caption>
+    <thead><tr><th>Name</th><th class="num">Nodes</th><th class="num">Pictures</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><th>Small</th><td class="num">200</td><td class="num">0</td><td>Everyday map; start-up, editing latency and idle behaviour</td></tr>
+      <tr><th>Large</th><td class="num">5,000</td><td class="num">300</td><td>The budget map: frame rate, script time, open time, layout time</td></tr>
+      <tr><th>Stress</th><td class="num">50,000</td><td class="num">not fixed</td><td>Headroom and graceful degradation; not an everyday target</td></tr>
+    </tbody>
+  </table></div>
+  <p>The maps must be generated by a script from a seed, with realistic text lengths, a depth and branching profile like the maps the developer makes, and a mixture of vector, picture and SVG subtrees once those exist. A fixed seed makes every run build the same document. The synthetic spike scene is a stand-in until real content exists, and the first spike must replace it with maps of this kind.</p>
+  <h3>Reference machine and display</h3>
+  <p>The reference machine is your Apple M4 Pro MacBook running macOS 26.5.1 on its built-in 120 Hz display. A 60 Hz display halves the target frame rate: the frame budget becomes 16.7 ms instead of 8.3 ms and everything else on this page stays the same. A test run records which display the window was on, because the spike showed that the main screen and the window's screen can differ.</p>
+  <h3>How measurements are taken</h3>
+  <ol class="flow">
+    <li><b>Script the interaction.</b> A scripted camera path pans and zooms across the map for a fixed duration, with no human input, so runs are repeatable.</li>
+    <li><b>Record frame intervals.</b> The harness stores every interval between animation callbacks and reports the mean and the 95th and 99th percentiles. Because timestamps are rounded to whole milliseconds, the mean is the figure that is compared with the budget; percentiles are used for hitch detection only.</li>
+    <li><b>Record script time.</b> The harness times the application's own work per frame and reports the mean and 95th percentile.</li>
+    <li><b>Record the context.</b> Display refresh rate, window screen, build version, map name and operating system version are stored with each result.</li>
+    <li><b>Run in the build.</b> The same harness runs automatically on every change and fails the build on a regression (<code>NFR-PERF-15</code>). The permanent harness itself is specified in <a href="#engine">ENG-24</a>.</li>
+  </ol>
+
+  <h2>Performance</h2>
+  <p>Frame rate and frame time first, then start-up and responsiveness, then generation, memory and scaling. The budgets in <a href="#engine">ENG-05</a> (layout time), <a href="#engine">ENG-23</a> (render on demand), <a href="#engine">ENG-27</a> (GPU memory) and <a href="#engine">ENG-38</a> (opening the large map) are owned by the engine page; <code>NFR-PERF-06</code> makes this test rig responsible for checking them.</p>
+  <div class="req-list">
+    <div class="req" id="NFR-PERF-01">
+      <div class="req-head"><code class="req-id">NFR-PERF-01</code><span class="badge must">Must</span><h4>120 frames per second on a 120 Hz display</h4></div>
+      <p>On a 120 Hz display, panning and zooming the large reference map must run at a mean frame interval of 8.3 ms (120 frames per second). The app must request this by switching off the private WebKit flag when the WebView is created.</p>
+      <p class="req-meta"><b>Accept when:</b> the scripted pan and zoom of the large map on the built-in display reports a mean interval between 8.3 and 8.4 ms, as the spike did for the synthetic scene (8.33 ms). <b>Why:</b> measured as achievable with the flag off; see <a href="#other-stacks">the other stacks page</a>. Decision D-02.</p>
+    </div>
+    <div class="req" id="NFR-PERF-02">
+      <div class="req-head"><code class="req-id">NFR-PERF-02</code><span class="badge must">Must</span><h4>60 frames per second floor and automatic fallback</h4></div>
+      <p>The app must meet the same scripted tests at a mean interval of 16.7 ms on 60 Hz displays, and must fall back to 60 frames per second without an error when the private flag call fails or the flag no longer exists. It must measure the real refresh interval rather than assume one, and follow the window when it moves between displays. It must never promise 120 fps on a 60 Hz screen.</p>
+      <p class="req-meta"><b>Accept when:</b> a build run with the flag call forced to fail starts normally, logs the fallback once, and passes the large-map test at 16.7 ms; a window dragged from the built-in screen to a 60 Hz monitor changes the frame budget used by the harness. <b>Why:</b> the flag is private and may vanish (spike result); the 60 Hz monitor capped at 60 regardless of the flag.</p>
+    </div>
+    <div class="req" id="NFR-PERF-03">
+      <div class="req-head"><code class="req-id">NFR-PERF-03</code><span class="badge should">Should</span><h4>Frame-time tail</h4></div>
+      <p>During the scripted pan and zoom, no frame interval should exceed 1.5 times the display interval, and the 95th and 99th percentile intervals must be reported with every run. <span class="badge proposed">Proposed design</span></p>
+      <p class="req-meta"><b>Accept when:</b> the count of intervals above 1.5 times the mean is zero on the large map in both display modes, and the percentiles appear in the harness report. <b>Why:</b> the spike used the same count (zero in every test) as its hitch detector; whole-millisecond rounding makes small hitches invisible, so the threshold is deliberately coarse.</p>
+    </div>
+    <div class="req" id="NFR-PERF-04">
+      <div class="req-head"><code class="req-id">NFR-PERF-04</code><span class="badge must">Must</span><h4>Script time per frame at most 4 ms</h4></div>
+      <p>The application's script time per frame must stay at or below 4 ms on the large map during pan and zoom, so that at least half of the 8.3 ms budget remains for the GPU and compositing. The harness must also record GPU time wherever the platform exposes it.</p>
+      <p class="req-meta"><b>Accept when:</b> the mean script time is at most 4 ms and the 95th percentile is reported. The spike's synthetic scene used 3.45 ms in Canvas2D without culling and 0.30 ms in WebGL2. <b>Why:</b> a budget proposed by the report. Script time excludes GPU-process work, and the first spike must add a GPU measurement (WebGPU advertises timestamp queries; WebGL2 timer queries were not available in the WebView).</p>
+    </div>
+    <div class="req" id="NFR-PERF-05">
+      <div class="req-head"><code class="req-id">NFR-PERF-05</code><span class="badge must">Must</span><h4>Cold start under 1 second</h4></div>
+      <p>From launching the app to an interactive window (a window that accepts a click and shows the last or a blank map) must take less than 1 second on the reference machine. <span class="badge proposed">Proposed design</span></p>
+      <p class="req-meta"><b>Accept when:</b> the automated launch test, run after a restart of the app process with a warm disk cache, reports under 1 second; a launch after a reboot is measured and recorded but not gated. <b>Why:</b> proposed budget. Published Tauri start-up figures (311 ms to 380 ms in two third-party tests) were not measured by this project and are not relied on.</p>
+    </div>
+    <div class="req" id="NFR-PERF-06">
+      <div class="req-head"><code class="req-id">NFR-PERF-06</code><span class="badge must">Must</span><h4>Engine budgets are tested in the same rig</h4></div>
+      <p>The test rig must also verify the budgets owned by the engine: first frame of the large map in under 500 ms (<a href="#engine">ENG-38</a>), layout of 5,000 nodes in under 50 ms off the main thread (<a href="#engine">ENG-05</a>, <a href="#engine">ENG-03</a>), and zero drawn frames while the map is idle (<a href="#engine">ENG-23</a>).</p>
+      <p class="req-meta"><b>Accept when:</b> the harness report lists these three numbers for the large map on every run and the gate in <code>NFR-PERF-15</code> fails if any is missed. <b>Why:</b> one gate, one report; the budgets are proposed targets from the decisions brief.</p>
+    </div>
+    <div class="req" id="NFR-PERF-07">
+      <div class="req-head"><code class="req-id">NFR-PERF-07</code><span class="badge must">Must</span><h4>Input-to-pixel latency under two frames</h4></div>
+      <p>The delay from a pointer or key event to the first frame that reflects it must be measured in the first spike, then fixed as a number. The proposed target for panning is under two frames (16.7 ms at 120 Hz). <span class="badge proposed">Proposed design</span></p>
+      <p class="req-meta"><b>Accept when:</b> the first spike reports pointer-to-pixel latency for pan, zoom, node drag and typing on the large map, using an external method such as a high-speed camera or a screen recorder where the WebView offers no timestamp, and the roadmap records the measured figure as the new budget. <b>Why:</b> input latency was not measured and is one trigger for the native-shell escape hatch (decision D-17).</p>
+    </div>
+    <div class="req" id="NFR-PERF-08">
+      <div class="req-head"><code class="req-id">NFR-PERF-08</code><span class="badge should">Should</span><h4>Edits do not stall the frame</h4></div>
+      <p>Creating, deleting, moving, collapsing and re-styling nodes on the large map must not produce a frame longer than 1.5 times the display interval. Layout and tessellation after an edit must run in the worker and be applied between frames.</p>
+      <p class="req-meta"><b>Accept when:</b> a scripted edit session (adding 100 nodes, collapsing and expanding a branch with 1,000 descendants, moving a subtree) shows no interval above the threshold in <code>NFR-PERF-03</code>. <b>Why:</b> the spike did not measure edit-time rebuilds of the branch geometry; this requirement forces the measurement. The cost of rebuilding the branch meshes appeared only as build time in the spike (7 ms at 10,000 branches to 168 ms at 400,000).</p>
+    </div>
+    <div class="req" id="NFR-PERF-09">
+      <div class="req-head"><code class="req-id">NFR-PERF-09</code><span class="badge must">Must</span><h4>Streaming generation never drops frames</h4></div>
+      <p>While a map is streaming in from the AI engine, panning, zooming, selecting and typing must hold the same frame budgets as an idle map. The app must batch incoming nodes and apply them at most once per frame, because the Codex app-server delivers text in bursts about every 110 to 150 ms.</p>
+      <p class="req-meta"><b>Accept when:</b> a replayed recorded session (see <code>NFR-MAINT-04</code>) that adds 1,000 nodes while the harness pans the large map shows a mean interval at the budget and no interval above the tail threshold. <b>Why:</b> the delivery cadence is <span class="badge verified">Verified hands-on</span> (hands-on pass 2); streaming is the signature interaction of <a href="#ai-engine">the AI engine</a>.</p>
+    </div>
+    <div class="req" id="NFR-PERF-10">
+      <div class="req-head"><code class="req-id">NFR-PERF-10</code><span class="badge should">Should</span><h4>Time to first streamed node</h4></div>
+      <p>The interface must show that a generation has started within one frame of the request, and must draw each node within one frame of receiving its complete line. The wait before the first node is dominated by the model: 2.8 to 3.7 seconds from starting a turn to the first text. The app's own overhead before and after that wait must be measured in the first spike and then fixed as a number.</p>
+      <p class="req-meta"><b>Accept when:</b> a harness run with a stubbed model that replies instantly shows the first node on screen within one frame; with the real engine the log shows the delay split into model wait and application time. <b>Why:</b> first delta at 2.8 to 3.7 s in three runs <span class="badge verified">Verified hands-on</span>; complete node lines then arrived about every 290 ms in the line-oriented format.</p>
+    </div>
+    <div class="req" id="NFR-PERF-11">
+      <div class="req-head"><code class="req-id">NFR-PERF-11</code><span class="badge should">Should</span><h4>Memory budgets set by measurement</h4></div>
+      <p>Resident memory of the app (host process, WebView and renderer worker) must be measured for the small, large and stress maps in the first spike, and a budget for each fixed from the result. Until then no memory figure is promised. Opening and closing the large map repeatedly must return memory to within a tolerance fixed in the same spike, with no growth that continues across cycles.</p>
+      <p class="req-meta"><b>Accept when:</b> the spike report states resident memory per reference map and per process, a leak test over repeated open, edit and close cycles is part of the nightly run, and the figures are copied into the budget summary. <b>Why:</b> no memory measurement exists; published Tauri and Electron memory figures disagree and are third-party (<a href="#other-stacks">other stacks</a>). Method: images stay external with thumbnails (<a href="#engine">ENG-26</a>), textures are budgeted (<a href="#engine">ENG-27</a>), and only the visible set is resident.</p>
+    </div>
+    <div class="req" id="NFR-PERF-12">
+      <div class="req-head"><code class="req-id">NFR-PERF-12</code><span class="badge must">Must</span><h4>Picture memory on the GPU stays bounded</h4></div>
+      <p>The large map with 300 pictures must hold the frame budget while the texture cache is limited by the budget described in <a href="#engine">ENG-27</a>. Scrolling to pictures that were evicted must show a placeholder and then the picture, with no frame longer than the tail threshold.</p>
+      <p class="req-meta"><b>Accept when:</b> a run with the texture budget set to a fraction of the map's total picture size completes the scripted path within <code>NFR-PERF-03</code>, and a second run on a map of 3,000 pictures does not exceed the configured budget. <b>Why:</b> 300 images from one 4096 by 2048 atlas ran at 120 fps in the spike (<span class="badge verified">Verified hands-on</span>); real generated images are about 1254 by 1254 pixels and about 0.5 to 1.1 MB each as files.</p>
+    </div>
+    <div class="req" id="NFR-PERF-13">
+      <div class="req-head"><code class="req-id">NFR-PERF-13</code><span class="badge should">Should</span><h4>Near-zero idle use and low energy cost</h4></div>
+      <p>An idle open map must draw no frames and keep no timer running except autosave and the Codex supervisor, so processor use rounds to zero and the app does not stop the Mac from sleeping. Energy impact during pan and zoom on a laptop battery should be measured and compared with MindNode on the same map. <span class="badge proposed">Proposed design</span></p>
+      <p class="req-meta"><b>Accept when:</b> a counter of animation callbacks reads zero over 60 seconds of idle; the processor figure from the system's activity tools is recorded and a budget fixed in the first spike; the comparison with MindNode is recorded. <b>Why:</b> render on demand is <a href="#engine">ENG-23</a>; no energy measurement exists.</p>
+    </div>
+    <div class="req" id="NFR-PERF-14">
+      <div class="req-head"><code class="req-id">NFR-PERF-14</code><span class="badge should">Should</span><h4>Scaling and graceful degradation on the stress map</h4></div>
+      <p>The stress map of 50,000 nodes must open and stay usable. Culling and level of detail (<a href="#engine">ENG-21</a>, <a href="#engine">ENG-22</a>) must keep the frame rate at or above the 60 frames per second floor, and the frame rate it reaches at 120 Hz must be measured and recorded. When a frame cannot be met the app must reduce detail, not stutter.</p>
+      <p class="req-meta"><b>Accept when:</b> the scripted run on the stress map reports a mean interval of at most 16.7 ms on the reference machine and the 120 Hz result is stored in the budget summary. <b>Why:</b> the 60 fps floor is a proposed target. For headroom, the batched WebGL2 scene with all branches drawn and no culling held 120 fps up to 100,000 branches, so real maps with culling should sit well below the knee between 100,000 and 200,000 (<span class="badge verified">Verified hands-on</span>, synthetic).</p>
+    </div>
+    <div class="req" id="NFR-PERF-15">
+      <div class="req-head"><code class="req-id">NFR-PERF-15</code><span class="badge must">Must</span><h4>Performance regression gate</h4></div>
+      <p>The build must run the harness on the small, large and stress maps and fail when the mean interval, script time, open time or layout time exceeds its budget, or when a result is more than a set tolerance worse than the stored baseline. The tolerance is chosen once the run-to-run variance has been measured, because the spike measured each configuration only once.</p>
+      <p class="req-meta"><b>Accept when:</b> a deliberate slowdown (an added busy loop in the draw path) turns the build red, and a clean run stores its results as an artefact with date, commit and display mode. <b>Why:</b> regressions are caught the day they happen; the harness itself is <a href="#engine">ENG-24</a>. Runs on a machine without a 120 Hz display must be labelled as such and compared only with runs of the same kind.</p>
+    </div>
+  </div>
+
+  <h2>Reliability</h2>
+  <p>A mind map is thinking work, so losing it is the worst failure. The reliability requirements rest on the operation log and SQLite file described in <a href="#engine">ENG-33</a>, <a href="#engine">ENG-34</a> and <a href="#engine">ENG-36</a>, and on how the Codex app-server behaved in the hands-on passes.</p>
+  <div class="req-list">
+    <div class="req" id="NFR-REL-01">
+      <div class="req-head"><code class="req-id">NFR-REL-01</code><span class="badge must">Must</span><h4>Autosave and crash recovery through the operation log</h4></div>
+      <p>Every committed edit must be written to the document file in a transaction before the next edit is accepted. After a crash, the next launch must reopen the map with every committed operation present and offer no recovery dialog unless something was actually lost.</p>
+      <p class="req-meta"><b>Accept when:</b> a test that kills the app process at random points during a scripted edit session reopens to a state equal to the last committed operation in every one of at least 1,000 trials. <b>Why:</b> <a href="#engine">ENG-34</a> specifies the mechanism; this requirement is the test.</p>
+    </div>
+    <div class="req" id="NFR-REL-02">
+      <div class="req-head"><code class="req-id">NFR-REL-02</code><span class="badge must">Must</span><h4>No data loss on quit, crash or power loss</h4></div>
+      <p>Quitting, force-quitting, a crash of the WebView process, a crash of the host process and loss of power must each lose at most the operation in progress. Quitting must wait for pending writes, and the document must never be left in a half-written state.</p>
+      <p class="req-meta"><b>Accept when:</b> the kill test of <code>NFR-REL-01</code> is repeated with the WebView process killed alone, and a power-loss simulation (a forced unmount of a test volume, or an equivalent file-system fault injection) leaves a file that opens. <b>Why:</b> SQLite transactions are atomic by design (see <a href="#engine">ENG-34</a>); durability depends on the write settings, which the test must confirm.</p>
+    </div>
+    <div class="req" id="NFR-REL-03">
+      <div class="req-head"><code class="req-id">NFR-REL-03</code><span class="badge must">Must</span><h4>A failed generation never leaves a map unusable</h4></div>
+      <p>If generation fails, times out, returns invalid output or is cancelled, the map must remain editable and consistent. Nodes applied so far must stay as one undo group, and a failed picture or SVG job for one node must not stop the others or change the subtree's vector form, which always exists (decision D-09). Time-outs for picture and SVG jobs must be fixed from measurement; the first measured times were about 12 s for a 1254 by 1254 image and 28.7 s for a five-node SVG.</p>
+      <p class="req-meta"><b>Accept when:</b> fault-injection tests (malformed line, dropped connection, killed Codex process, invalid SVG, one failing image in a batch of ten) each leave a document that opens, saves and passes a structural check, and show the failure on the affected node only. <b>Why:</b> the vector form is the fallback (D-11); generation times are <span class="badge verified">Verified hands-on</span> from single samples (see <a href="#ai-engine">the AI engine page</a>).</p>
+    </div>
+    <div class="req" id="NFR-REL-04">
+      <div class="req-head"><code class="req-id">NFR-REL-04</code><span class="badge must">Must</span><h4>Codex process supervision and restart</h4></div>
+      <p>The host must start the long-lived Codex app-server child process when first needed, detect its exit or silence, restart it, and re-initialise the connection, without the user restarting the app. In-flight jobs on a dead process must be marked failed and be retryable. The host must never leave an orphaned child after the app quits.</p>
+      <p class="req-meta"><b>Accept when:</b> killing the child during a stream produces a visible, retryable failure and a working next generation; after quitting the app no Codex process started by it remains. <b>Why:</b> D-07 chooses one long-lived app-server; the process list showed other Codex processes on the machine belong to the ChatGPT desktop app, so the host must track only its own child.</p>
+    </div>
+    <div class="req" id="NFR-REL-05">
+      <div class="req-head"><code class="req-id">NFR-REL-05</code><span class="badge must">Must</span><h4>Rate limits and plan exhaustion are handled in the interface</h4></div>
+      <p>The app must read the account's rate-limit state at start-up and after each turn, show remaining allowance, and disable new jobs with a plain explanation when a limit or the plan's usage is exhausted, without losing the map. Jobs refused by Codex must map to named errors (rate limit, usage limit, credits depleted) rather than a generic failure.</p>
+      <p class="req-meta"><b>Accept when:</b> recorded and simulated error notifications for each limit type produce the matching message and leave the map editable. <b>Why:</b> <code>account/rateLimits/read</code> and the updated notification <span class="badge verified">Verified hands-on</span>; the error shapes for exhaustion were read from the generated schema and not triggered live (<span class="badge documented">Documented</span>), so the first test must be built on schema-shaped fixtures and then checked against a real limit when one occurs.</p>
+    </div>
+    <div class="req" id="NFR-REL-06">
+      <div class="req-head"><code class="req-id">NFR-REL-06</code><span class="badge must">Must</span><h4>Expired login and network loss</h4></div>
+      <p>When Codex reports that the login is missing or expired, the app must tell the user to sign in through the Codex CLI and must not touch credentials itself. When the network drops during a stream, the app must keep the nodes received, show the job as interrupted and offer a retry. Offline, every non-AI function must keep working.</p>
+      <p class="req-meta"><b>Accept when:</b> with the network disabled, the app opens, edits and saves a map and reports AI as unavailable; with a stream cut mid-way, the received nodes remain and retry resumes from a new job. <b>Why:</b> failure types (<code>unauthorized</code>, connection failures) are <span class="badge documented">Documented</span> in the generated schema, not triggered live; local-first storage is D-19.</p>
+    </div>
+    <div class="req" id="NFR-REL-07">
+      <div class="req-head"><code class="req-id">NFR-REL-07</code><span class="badge must">Must</span><h4>Cancellation always works</h4></div>
+      <p>A visible cancel control must stop a running job at any point, including before the first token arrives and during a picture job. After cancelling, no further nodes may be applied from that job and the interface must return to normal editing at once.</p>
+      <p class="req-meta"><b>Accept when:</b> cancelling at ten randomly chosen moments of a replayed stream leaves no late-arriving nodes and a usable map; the time from the click to the interface being editable is recorded and shown in the harness. <b>Why:</b> the interrupt request ended a turn in about 2 ms and then no further text arrived (<span class="badge verified">Verified hands-on</span>, one run).</p>
+    </div>
+    <div class="req" id="NFR-REL-08">
+      <div class="req-head"><code class="req-id">NFR-REL-08</code><span class="badge must">Must</span><h4>Keep a local copy of streamed text</h4></div>
+      <p>The host must accumulate every streamed delta itself and apply complete lines from its own buffer. A trailing incomplete line must be discarded on cancel. The app must not depend on the final message that Codex returns.</p>
+      <p class="req-meta"><b>Accept when:</b> a replay of an interrupted turn applies the nodes received before the interrupt and discards the partial last line. <b>Why:</b> after an interrupt, the turn's items came back empty, so the client's copy is the only record (<span class="badge verified">Verified hands-on</span>).</p>
+    </div>
+    <div class="req" id="NFR-REL-09">
+      <div class="req-head"><code class="req-id">NFR-REL-09</code><span class="badge must">Must</span><h4>Document format versioning and migration</h4></div>
+      <p>The document file must carry an application identifier and a schema version. The app must open every older version by migrating a copy, never in place, keep the original, and refuse to open a newer version with a clear message instead of corrupting it.</p>
+      <p class="req-meta"><b>Accept when:</b> a corpus of documents from every released schema version opens, migrates and round-trips; a document with a higher version opens read-only or is refused without modification (checked by file hash). <b>Why:</b> <a href="#engine">ENG-36</a> sets the file; the format will change during the first milestones (decision D-14).</p>
+    </div>
+    <div class="req" id="NFR-REL-10">
+      <div class="req-head"><code class="req-id">NFR-REL-10</code><span class="badge should">Should</span><h4>Snapshots and backups</h4></div>
+      <p>The app should keep automatic snapshots of each document (on open, before a migration and before a large AI change is applied) and let the user restore one. Snapshots must not be taken while a transaction is open.</p>
+      <p class="req-meta"><b>Accept when:</b> restoring a snapshot taken before an AI generation returns the map to exactly its earlier state, and the number of retained snapshots is configurable. <b>Why:</b> grouped undo exists (<a href="#engine">ENG-33</a>) but is lost when the log is compacted; a snapshot is the long-range undo.</p>
+    </div>
+    <div class="req" id="NFR-REL-11">
+      <div class="req-head"><code class="req-id">NFR-REL-11</code><span class="badge must">Must</span><h4>Corrupt or hostile files are handled safely</h4></div>
+      <p>On open, the app must check the file's identifier, schema version and database integrity, and refuse a damaged or malicious file with an explanation and a path to the latest snapshot. It must never execute content from a file and never crash on malformed input.</p>
+      <p class="req-meta"><b>Accept when:</b> a fuzzing run over the file format and over each importer (Markdown, OPML, FreeMind, JSON Canvas) produces no crash and no hang, and truncated files give the corrupt-file message. <b>Why:</b> malicious SQLite databases exist (<a href="#engine">ENG-36</a>).</p>
+    </div>
+  </div>
+
+  <h2>Privacy and security</h2>
+  <p>The app keeps documents on the local disk and uses the network only through the user's own Codex command-line tool (decision D-19). Most of the risk comes from two sources: model output, which is untrusted input, and the Codex process, which has more tools than the app needs.</p>
+  <div class="callout risk wide"><span class="tag">Risk</span><p>Isolation from the user's Codex setup is partial. <span class="badge verified">Verified hands-on</span> Disabling apps and plugins removes connectors, and per-server disables remove the user's own MCP servers, which the app must discover at run time. A shell-like execution tool and sub-agent tools survived every feature flag tried, and the app-server has no switch that ignores the user's configuration. The read-only sandbox and the approval policy <code>never</code> are therefore the real guard, not the tool list. Whether a sub-agent can actually act inside such a thread was not tested.</p></div>
+  <div class="req-list">
+    <div class="req" id="NFR-SEC-01">
+      <div class="req-head"><code class="req-id">NFR-SEC-01</code><span class="badge must">Must</span><h4>Local-first storage</h4></div>
+      <p>Documents, assets, logs and settings must be stored on the local disk. The app must have no account, no cloud copy and no telemetry in version 1.</p>
+      <p class="req-meta"><b>Accept when:</b> a network monitor during a full session without AI use shows no outgoing connection from the app's processes other than those allowed in <code>NFR-SEC-02</code>. <b>Why:</b> decision D-19; each user signs in to Codex separately, which matters if the app is shared later.</p>
+    </div>
+    <div class="req" id="NFR-SEC-02">
+      <div class="req-head"><code class="req-id">NFR-SEC-02</code><span class="badge must">Must</span><h4>The only network use is the user's own Codex CLI</h4></div>
+      <p>The app's own code must make no network request, except the signed update check in <code>NFR-SEC-13</code>, which can be switched off. The WebView must run with a content security policy that blocks every external origin, so a generated map, note or SVG can never trigger a request.</p>
+      <p class="req-meta"><b>Accept when:</b> opening a document whose notes and SVG contain external URLs produces zero network requests (checked in the test harness by a blocking proxy). <b>Why:</b> D-19 and D-07; the app reaches OpenAI only through the Codex child process.</p>
+    </div>
+    <div class="req" id="NFR-SEC-03">
+      <div class="req-head"><code class="req-id">NFR-SEC-03</code><span class="badge must">Must</span><h4>Never read or copy Codex credentials</h4></div>
+      <p>The app must not read, copy, log or transmit the Codex credential files or keychain entries. It must learn the login state only from the app-server's own account messages.</p>
+      <p class="req-meta"><b>Accept when:</b> a code search finds no access to the Codex credential files, and a file-access trace of a full session shows none. <b>Why:</b> D-07. Both hands-on passes learned the plan type and limits from the app-server without touching credentials.</p>
+    </div>
+    <div class="req" id="NFR-SEC-04">
+      <div class="req-head"><code class="req-id">NFR-SEC-04</code><span class="badge must">Must</span><h4>Isolate AI calls from the user's Codex configuration</h4></div>
+      <p>Every Codex process must be started with apps and plugins disabled and web search disabled. The host must read the user's configured MCP server names at run time and disable each one by name for the thread. On the one-shot fallback it must also use the flag that ignores user configuration, and must always redirect standard input from the null device.</p>
+      <p class="req-meta"><b>Accept when:</b> a test that starts the app-server with a user configuration containing a dummy MCP server reports zero MCP servers started for the app's threads. <b>Why:</b> <span class="badge verified">Verified hands-on</span> the combination of disabled apps, plugins, computer use and browser features plus per-server disables gave zero servers; an empty server table did not work. <b>What could not be removed:</b> a shell-like execution tool and the sub-agent tools. Disabling the code-mode host adds an error item without removing the tool, so it is left on. The flag names may change between Codex versions, so <code>NFR-MAINT-07</code> checks them at start-up.</p>
+    </div>
+    <div class="req" id="NFR-SEC-05">
+      <div class="req-head"><code class="req-id">NFR-SEC-05</code><span class="badge must">Must</span><h4>Read-only sandbox and approval policy never</h4></div>
+      <p>Every thread must be started with a read-only sandbox and the approval policy <code>never</code>, except an image job that needs a writable working directory, which gets workspace-write limited to its own job directory. The app must refuse any approval request that arrives.</p>
+      <p class="req-meta"><b>Accept when:</b> a test prompt that asks the model to write a file outside the job directory fails or is refused, and any server request for approval is declined and logged. <b>Why:</b> this is the real guard (see the risk above); no approval request arrived in any hands-on run with the policy <code>never</code>.</p>
+    </div>
+    <div class="req" id="NFR-SEC-06">
+      <div class="req-head"><code class="req-id">NFR-SEC-06</code><span class="badge must">Must</span><h4>A working directory per job</h4></div>
+      <p>Each generation job must run in its own empty directory under the app's data folder, and the directory must be removed when the job ends. Generated images must be copied into the document's asset store at once, and the app should delete Codex's own copy under its generated-images folder.</p>
+      <p class="req-meta"><b>Accept when:</b> after a run of ten image jobs the job directories are gone, every image is in the asset store, and the Codex generated-images folder holds none of them. <b>Why:</b> <span class="badge verified">Verified hands-on</span> Codex saves generated images outside the sandbox under its own folder, as a host-side side effect.</p>
+    </div>
+    <div class="req" id="NFR-SEC-07">
+      <div class="req-head"><code class="req-id">NFR-SEC-07</code><span class="badge must">Must</span><h4>All model output is untrusted: SVG</h4></div>
+      <p>Generated SVG must pass the allowlist sanitiser of <a href="#engine">ENG-29</a> before storage and again before display: no scripts, no external references, no event attributes, no foreign objects, no text, a capped element count. Invalid output must be repaired, regenerated or dropped, and the subtree must show its vector form meanwhile.</p>
+      <p class="req-meta"><b>Accept when:</b> a corpus of hostile SVG files (script, external image, remote stylesheet, event attribute, an enormous element count) is rejected or cleaned, renders with zero network requests, and every rejection is logged with its reason. <b>Why:</b> the one generated SVG that was checked passed every mechanical rule, but model output varies and one sample proves nothing. The contract is D-11 and <a href="#art-subtrees">the art subtrees page</a>.</p>
+    </div>
+    <div class="req" id="NFR-SEC-08">
+      <div class="req-head"><code class="req-id">NFR-SEC-08</code><span class="badge must">Must</span><h4>All model output is untrusted: Markdown and links</h4></div>
+      <p>Notes and labels that the model produced must be rendered through a sanitising Markdown renderer with raw HTML disabled. Links must open only after a user click, only for web addresses and mail links, and in the default browser, never inside the app's WebView. Labels and notes are never evaluated as code or as a template.</p>
+      <p class="req-meta"><b>Accept when:</b> a note containing a script tag, a <code>javascript:</code> link, an image reference to a remote address and a link whose text differs from its target renders as inert text, makes no request and shows the real target before a click opens it. <b>Why:</b> model text reaches the interface as notes, labels and prompts, and the WebView must not become a place where it can act.</p>
+    </div>
+    <div class="req" id="NFR-SEC-09">
+      <div class="req-head"><code class="req-id">NFR-SEC-09</code><span class="badge must">Must</span><h4>Provenance for every generated asset</h4></div>
+      <p>Every generated image and SVG must store the prompt that was sent, the revised prompt the engine returned, the model and effort, the date and the style sheet used, and must be traceable from the asset to the node. The record must travel with exports in the whole-document JSON export.</p>
+      <p class="req-meta"><b>Accept when:</b> selecting any generated node shows its prompt, model and date, and the JSON export contains the same fields for every asset. <b>Why:</b> decision D-19; the revised prompt is returned with each image item (<span class="badge verified">Verified hands-on</span>); the store is <a href="#engine">ENG-37</a>. Generated images also carry content-provenance metadata inside the file; the app must not strip it.</p>
+    </div>
+    <div class="req" id="NFR-SEC-10">
+      <div class="req-head"><code class="req-id">NFR-SEC-10</code><span class="badge should">Should</span><h4>Show what is sent to the model</h4></div>
+      <p>The app should let the user inspect exactly what a job will send (the instructions, the map content included as context and any reference image) before and after it runs, and should keep the scope of context (node, subtree or whole map) visible.</p>
+      <p class="req-meta"><b>Accept when:</b> a "show what will be sent" view lists the full text and the attached images for any pending job and matches the recorded prompt afterwards. <b>Why:</b> a personal map may hold private notes; the user should decide what leaves the machine. Context scope as a user choice follows Heptabase's pattern (<a href="#ai-tools">AI tools page</a>).</p>
+    </div>
+    <div class="req" id="NFR-SEC-11">
+      <div class="req-head"><code class="req-id">NFR-SEC-11</code><span class="badge must">Must</span><h4>Disclose the private WebKit flag</h4></div>
+      <p>The documentation and the about screen must state that the app calls one private WebKit feature switch to reach 120 frames per second, that no other private interface is used, that the call is guarded so its failure only lowers the frame rate, and that the 120 fps build is distributed outside the App Store. The call must be isolated in one function in the host.</p>
+      <p class="req-meta"><b>Accept when:</b> the disclosure text exists in the repository and the app, the call sits in one named function, and the build option that removes it produces a working 60 fps app. <b>Why:</b> the route uses private selectors and is unsuitable for App Store review (spike notes); decision D-02.</p>
+    </div>
+    <div class="req" id="NFR-SEC-12">
+      <div class="req-head"><code class="req-id">NFR-SEC-12</code><span class="badge must">Must</span><h4>Signing and notarisation</h4></div>
+      <p>Every distributed build must be signed with a Developer ID certificate, hardened, notarised and stapled, so that it opens without a security warning. The Codex child process and any bundled helper must be covered.</p>
+      <p class="req-meta"><b>Accept when:</b> a clean machine that has never seen the build opens it from a download with no override, and the system's assessment tool reports it as accepted. <b>Why:</b> distribution outside the App Store (D-02) needs this; Tauri's build handles notarisation, and any embedded runtime would need signing of its own (<a href="#other-stacks">other stacks</a>).</p>
+    </div>
+    <div class="req" id="NFR-SEC-13">
+      <div class="req-head"><code class="req-id">NFR-SEC-13</code><span class="badge should">Should</span><h4>Update integrity</h4></div>
+      <p>Automatic updates must be fetched over an encrypted connection, verified against a signature made with a key held outside the update server, refuse downgrades, and be switchable off. A failed or interrupted update must leave the installed version working.</p>
+      <p class="req-meta"><b>Accept when:</b> an update package with a wrong signature, an older version number or a truncated download is rejected and the app keeps running; the update check is the only network request the app makes by itself. <b>Why:</b> an updater is the highest-trust path into your machine; the exact mechanism was not researched.</p>
+    </div>
+  </div>
+
+  <h2>Accessibility</h2>
+  <p>Every node keeps its text in all three representations (decision D-09), so the outline, which is a list of those texts, is a complete and accessible representation of the canvas. The canvas itself is a bitmap drawn by the GPU, which assistive technology cannot read. The requirements below make the interface usable without it. None of them has been tested on the developer's machine.</p>
+  <div class="req-list">
+    <div class="req" id="NFR-A11Y-01">
+      <div class="req-head"><code class="req-id">NFR-A11Y-01</code><span class="badge must">Must</span><h4>The outline is the accessible form of the map</h4></div>
+      <p>The outline view must expose every node, its depth, its collapsed or expanded state and its text, and must stay in step with the canvas: selecting a node in one selects it in the other. Every function available on the canvas must be possible from the outline.</p>
+      <p class="req-meta"><b>Accept when:</b> a user can read, navigate, add, move, collapse and delete nodes using only the outline and a screen reader, and the outline contains the same node count as the canvas on all three reference maps. <b>Why:</b> D-09 and D-03; see the outline requirements (<code>FR-OUT</code>) on <a href="#features">the features page</a>.</p>
+    </div>
+    <div class="req" id="NFR-A11Y-02">
+      <div class="req-head"><code class="req-id">NFR-A11Y-02</code><span class="badge must">Must</span><h4>Every function is reachable from the keyboard</h4></div>
+      <p>Every command must have a keyboard route that does not need a pointer, including navigating between nodes, editing, collapsing, changing representation, starting and cancelling generation, and operating dialogs. Focus must always be visible and must not be trapped.</p>
+      <p class="req-meta"><b>Accept when:</b> an automated check lists every menu command and verifies a keyboard path for each; a manual run completes a full create, generate, edit and export workflow without a pointer. <b>Why:</b> keyboard editing is a core feature (<code>FR-EDT</code> on <a href="#features">the features page</a>).</p>
+    </div>
+    <div class="req" id="NFR-A11Y-03">
+      <div class="req-head"><code class="req-id">NFR-A11Y-03</code><span class="badge should">Should</span><h4>Screen readers get node text and picture labels</h4></div>
+      <p>The outline, panels and dialogs must be built from standard interface elements with correct roles and names, so VoiceOver reads them. Picture and SVG nodes must have a text label that is the node's text, plus an optional description the user can edit. The app must announce state changes such as generation progress and failure in a polite live region.</p>
+      <p class="req-meta"><b>Accept when:</b> a VoiceOver walkthrough of the outline reads each node's text, level and state, every picture node has a name, and a streamed generation is announced without stealing focus. <b>Why:</b> standard HTML provides this for the non-canvas interface (D-03); the picture's description is the node's own text, so no image analysis is needed.</p>
+    </div>
+    <div class="req" id="NFR-A11Y-04">
+      <div class="req-head"><code class="req-id">NFR-A11Y-04</code><span class="badge must">Must</span><h4>Contrast, colour-blind-safe palettes, never colour alone</h4></div>
+      <p>Interface text and labels on the canvas must meet at least the WCAG 2.2 AA contrast ratio against their background in light and dark modes. Meaning must never be carried by colour alone: status, selection, task state and branch identity need a second cue such as shape, an icon, a pattern or text. The built-in palettes must remain distinguishable under the common forms of colour-blindness, and the AI style sheet must be checked against a minimum contrast for labels.</p>
+      <p class="req-meta"><b>Accept when:</b> an automated contrast check passes for the built-in themes, a simulation of three colour-vision types leaves branches and states distinguishable, and every colour-coded state in the interface has a second cue. <b>Why:</b> branch colour is a memory aid on <a href="#buzan">the Buzan page</a> and must not become the only signal. WCAG is a named standard; its numeric threshold is not restated here because it was not part of the research notes.</p>
+    </div>
+    <div class="req" id="NFR-A11Y-05">
+      <div class="req-head"><code class="req-id">NFR-A11Y-05</code><span class="badge must">Must</span><h4>Respect reduced motion</h4></div>
+      <p>When the system's reduced-motion setting is on, animated layout changes, zoom transitions, streaming growth and any decorative effect must be replaced by instant changes or short cross-fades.</p>
+      <p class="req-meta"><b>Accept when:</b> with the setting on, an edit that would animate for about 200 to 300 ms (<a href="#engine">ENG-07</a>) completes in the next frame, and a screenshot comparison shows the same final layout. <b>Why:</b> animation is a design feature of stable layout; it must be optional.</p>
+    </div>
+    <div class="req" id="NFR-A11Y-06">
+      <div class="req-head"><code class="req-id">NFR-A11Y-06</code><span class="badge should">Should</span><h4>Text scaling</h4></div>
+      <p>The user must be able to scale interface text and the default node text size independently of canvas zoom, and panels must stay usable at the largest setting without clipped or overlapping text.</p>
+      <p class="req-meta"><b>Accept when:</b> at the largest text setting every panel and dialog remains operable, and the node label size changes without altering the layout rules. <b>Why:</b> glyph quality is an engine requirement (<a href="#engine">ENG-16</a>); this requirement adds the user control.</p>
+    </div>
+    <div class="req" id="NFR-A11Y-07">
+      <div class="req-head"><code class="req-id">NFR-A11Y-07</code><span class="badge must">Must</span><h4>Input methods in every text field</h4></div>
+      <p>Every field where the user types, including labels, notes, search and prompts, must work with input methods for composed text (for example Japanese, Chinese, Korean and accent entry), with the composition shown in place. Labels must be edited in a real text field laid over the node.</p>
+      <p class="req-meta"><b>Accept when:</b> composing text with an input method in a node label, a note and the search field shows the in-progress text, commits correctly and survives undo. <b>Why:</b> this is the reason for the HTML text field over the canvas (<a href="#engine">ENG-18</a>, decision D-03); a canvas-drawn editor would have to reimplement it.</p>
+    </div>
+  </div>
+
+  <h2>Platform</h2>
+  <p>macOS comes first and must feel like a Mac application. Windows and Linux must remain reachable without a rewrite, which the stack decision secures by keeping the front end independent of the shell (D-01).</p>
+  <div class="req-list">
+    <div class="req" id="NFR-PLAT-01">
+      <div class="req-head"><code class="req-id">NFR-PLAT-01</code><span class="badge must">Must</span><h4>Supported macOS versions</h4></div>
+      <p>The supported minimum macOS version must be decided after testing and stated in the release notes. The only version on which anything has been measured is macOS 26.5.1; the app must be tested on the oldest version it claims to support, including the private-flag fallback.</p>
+      <p class="req-meta"><b>Accept when:</b> the build runs the full test suite on each supported version in a virtual machine or on hardware, and the release notes list the versions. <b>Why:</b> the private flag's behaviour differs by version. The plugin README and the spike disagree about whether macOS 26 removes the 60 fps cap (the spike measured 60 fps by default on 26.5.1), so each version must be measured.</p>
+    </div>
+    <div class="req" id="NFR-PLAT-02">
+      <div class="req-head"><code class="req-id">NFR-PLAT-02</code><span class="badge must">Must</span><h4>Apple Silicon first and the hardware range</h4></div>
+      <p>The app must ship as a native build for Apple Silicon. The budgets must be re-measured on the oldest and the lowest-powered Apple Silicon Mac that the developer can obtain, and on an Intel Mac if Intel support is claimed. The 120 fps budget applies only to machines with a 120 Hz display; the 60 fps floor applies everywhere.</p>
+      <p class="req-meta"><b>Accept when:</b> the benchmark report exists for each tested machine and the support statement matches it. <b>Why:</b> only an M4 Pro was measured. Intel support is a Could requirement until a machine is available.</p>
+    </div>
+    <div class="req" id="NFR-PLAT-03">
+      <div class="req-head"><code class="req-id">NFR-PLAT-03</code><span class="badge must">Must</span><h4>Native menus, shortcuts, dialogs and drag and drop</h4></div>
+      <p>The app must use the native menu bar, standard keyboard shortcuts (copy, paste, undo, quit, preferences), native open and save dialogs, the system recent-documents list and native drag and drop for files and images in and out of the canvas. Standard text editing behaviour (such as option-arrow word movement) must work in every text field.</p>
+      <p class="req-meta"><b>Accept when:</b> a checklist of the platform's standard commands passes, images dropped from Finder and the browser become nodes or assets, and a node's picture can be dragged out. <b>Why:</b> the tool replaces MindNode (<a href="#mindnode">the MindNode page</a>), which is a native Mac app.</p>
+    </div>
+    <div class="req" id="NFR-PLAT-04">
+      <div class="req-head"><code class="req-id">NFR-PLAT-04</code><span class="badge should">Should</span><h4>Dark mode, multiple windows and full screen</h4></div>
+      <p>The interface and the canvas must follow the system appearance and change it without restarting. The app should support several documents in separate windows, native tabs and full screen, and must keep each window's frame budget independent.</p>
+      <p class="req-meta"><b>Accept when:</b> switching the system appearance restyles an open document within a second, and three windows open on different displays each report the budget for their own display. <b>Why:</b> the rate follows the window's display (spike result).</p>
+    </div>
+    <div class="req" id="NFR-PLAT-05">
+      <div class="req-head"><code class="req-id">NFR-PLAT-05</code><span class="badge could">Could</span><h4>File icon and Quick Look preview</h4></div>
+      <p>If feasible, the document type should have its own icon, and Quick Look in Finder should show a preview image of the map.</p>
+      <p class="req-meta"><b>Accept when:</b> pressing space on a map file in Finder shows an image of the root area, generated without launching the app window. <b>Why:</b> a convenience that depends on the file format storing a thumbnail; feasibility was not researched.</p>
+    </div>
+    <div class="req" id="NFR-PLAT-06">
+      <div class="req-head"><code class="req-id">NFR-PLAT-06</code><span class="badge should">Should</span><h4>Distribution outside the App Store with automatic updates</h4></div>
+      <p>The app must be distributed as a signed download (<code>NFR-SEC-12</code>) and should update itself, telling the user what changed and never updating while a document has unsaved operations in flight. A version that cannot set the private flag must still be a complete release.</p>
+      <p class="req-meta"><b>Accept when:</b> an installed older build offers, downloads and applies an update, and relaunches with all documents intact. <b>Why:</b> D-02 limits the 120 fps route to directly distributed builds (<span class="badge documented">Documented</span>: private API is a review risk for the App Store).</p>
+    </div>
+    <div class="req" id="NFR-PLAT-07">
+      <div class="req-head"><code class="req-id">NFR-PLAT-07</code><span class="badge must">Must</span><h4>Keep the front end independent of the shell</h4></div>
+      <p>The web front end must call the host only through the single <code>host</code> interface (<a href="#engine">ENG-02</a>) and must contain no Tauri-specific import elsewhere. A second implementation of the interface, for example a stub that runs the front end in a plain browser, must exist for tests.</p>
+      <p class="req-meta"><b>Accept when:</b> a lint rule bans the shell's package outside one directory, and the full front-end test suite runs against the stub. <b>Why:</b> D-01: the shell must be swappable for Electron in days. This is also the path to Windows and Linux.</p>
+    </div>
+    <div class="req" id="NFR-PLAT-08">
+      <div class="req-head"><code class="req-id">NFR-PLAT-08</code><span class="badge should">Should</span><h4>Plan for per-platform WebViews and the Electron route</h4></div>
+      <p>Before any public release, the spike page must be run unchanged in an Electron host to learn whether Chromium reaches 120 fps without a private flag. Before a Windows or Linux release, the same harness must be run on WebView2 (Windows) and WebKitGTK (Linux), and an Electron build must be offered where the system WebView misses the budgets.</p>
+      <p class="req-meta"><b>Accept when:</b> the benchmark report exists for each shell and platform that is released, and the support statement is limited to the ones that pass. <b>Why:</b> Windows uses a Chromium-based WebView; Linux WebKitGTK behaviour is unverified; no Electron measurement exists (<a href="#other-stacks">other stacks</a>). The release gate in decision D-02 requires the Electron measurement.</p>
+    </div>
+  </div>
+
+  <h2>Maintainability</h2>
+  <p>A solo developer needs a codebase that stays understandable and a test suite that catches regressions without manual checking. The module boundaries are those of the decisions: a pure engine core, a narrow renderer interface, one host interface and a provider interface for AI. The Codex app-server interface is marked experimental, which makes the protocol tests and the start-up check below the main defence against breaking changes.</p>
+  <div class="req-list">
+    <div class="req" id="NFR-MAINT-01">
+      <div class="req-head"><code class="req-id">NFR-MAINT-01</code><span class="badge must">Must</span><h4>Module boundaries enforced by tooling</h4></div>
+      <p>The build must enforce the boundaries from <a href="#engine">ENG-01</a> and <a href="#engine">ENG-02</a>: the engine core imports nothing from the DOM, the GPU, the shell or the file system; only the renderer imports WebGL; only the host module imports the shell; the AI provider interface is the only route to Codex.</p>
+      <p class="req-meta"><b>Accept when:</b> a dependency-rule check fails the build on a deliberate violation of each rule. <b>Why:</b> decisions D-01, D-04, D-05 and D-07; these boundaries keep the Rust or WebAssembly ports and the native-shell fallback open (D-17).</p>
+    </div>
+    <div class="req" id="NFR-MAINT-02">
+      <div class="req-head"><code class="req-id">NFR-MAINT-02</code><span class="badge must">Must</span><h4>Unit tests for layout and geometry with golden files</h4></div>
+      <p>Layout and branch geometry must have unit tests that compare their output with stored golden files for a set of fixed documents, run in plain Node without a browser. A changed golden file must appear as a reviewed change.</p>
+      <p class="req-meta"><b>Accept when:</b> the suite runs in under a minute without a display, covers every layout variant, and a one-pixel change to a branch outline fails a test. <b>Why:</b> deterministic layout (<a href="#engine">ENG-06</a>) makes golden files possible.</p>
+    </div>
+    <div class="req" id="NFR-MAINT-03">
+      <div class="req-head"><code class="req-id">NFR-MAINT-03</code><span class="badge should">Should</span><h4>Visual regression images for rendering</h4></div>
+      <p>The renderer must have image-comparison tests for a fixed set of scenes (each layout variant, each branch style, pictures, SVG subtrees, selection, collapsed branches) captured in the real WebView, with a tolerance for GPU differences and a reviewed update step.</p>
+      <p class="req-meta"><b>Accept when:</b> an unintended colour or shape change in a branch is caught, and the images are stored with the macOS version that produced them. <b>Why:</b> geometry tests cannot see shader or texture mistakes.</p>
+    </div>
+    <div class="req" id="NFR-MAINT-04">
+      <div class="req-head"><code class="req-id">NFR-MAINT-04</code><span class="badge must">Must</span><h4>Protocol tests against recorded Codex sessions</h4></div>
+      <p>The Codex integration must be tested by replaying recorded JSON-RPC sessions, each message with its time offset: a normal stream, an interrupted stream, a schema-constrained stream, an image job, an SVG job, and each failure type. The recordings must be captured by a tool that runs against the real installed Codex.</p>
+      <p class="req-meta"><b>Accept when:</b> the replay suite runs without network or login, the interrupted-stream recording reproduces the empty-items behaviour, and a new Codex version can be re-recorded with one command. <b>Why:</b> the hands-on probe already logs every message with timestamps; limits and billing make live tests in the build inappropriate.</p>
+    </div>
+    <div class="req" id="NFR-MAINT-05">
+      <div class="req-head"><code class="req-id">NFR-MAINT-05</code><span class="badge must">Must</span><h4>Contract tests for generated SVG</h4></div>
+      <p>The SVG contract of D-11 must exist as an executable checker: well-formed, one group per node with in and out anchors inside the node's box, no forbidden elements, no external references, only palette colours, element count under the limit. Anchor semantics must be tested too: the in and out points must differ unless the prompt allows otherwise.</p>
+      <p class="req-meta"><b>Accept when:</b> the checker passes a stored good sample, fails each stored bad sample for the right reason, and runs on every generated SVG in the app before it is accepted. <b>Why:</b> in the one real sample, four of five nodes had identical in and out anchors and the model drew its own connectors, which the contract must forbid (<span class="badge verified">Verified hands-on</span>).</p>
+    </div>
+    <div class="req" id="NFR-MAINT-06">
+      <div class="req-head"><code class="req-id">NFR-MAINT-06</code><span class="badge must">Must</span><h4>Regenerate protocol types for each Codex version</h4></div>
+      <p>The Rust and TypeScript types for the app-server protocol must be generated from the installed Codex version by a script, never written by hand, and the generated files must be committed with the Codex version that produced them.</p>
+      <p class="req-meta"><b>Accept when:</b> running the script on a new Codex version produces a diff, and a compile failure or a failing replay test shows exactly what changed. <b>Why:</b> the installed Codex 0.167.0 can emit both schemas offline (<span class="badge verified">Verified hands-on</span>); decision D-07.</p>
+    </div>
+    <div class="req" id="NFR-MAINT-07">
+      <div class="req-head"><code class="req-id">NFR-MAINT-07</code><span class="badge must">Must</span><h4>Start-up compatibility check</h4></div>
+      <p>At start-up, and before any job, the host must read the Codex version, compare it with the versions it was tested against, and check that the flags and methods it needs exist. On a mismatch the app must say what is wrong and fall back to the one-shot mode or disable AI features, while everything else keeps working.</p>
+      <p class="req-meta"><b>Accept when:</b> a fake Codex binary that lacks a required flag, reports an older version or answers with a changed message shape produces a clear message and no crash. <b>Why:</b> the app-server interface is marked experimental, and the isolation flags in <code>NFR-SEC-04</code> are what the hands-on pass found for version 0.167.0 only.</p>
+    </div>
+    <div class="req" id="NFR-MAINT-08">
+      <div class="req-head"><code class="req-id">NFR-MAINT-08</code><span class="badge should">Should</span><h4>Logging and a diagnostics bundle</h4></div>
+      <p>The app should write structured logs locally with levels, rotation and no document content or credentials, and offer a diagnostics bundle (versions, display and frame-rate mode, recent errors, the Codex version and a harness summary) that the user can inspect before sharing.</p>
+      <p class="req-meta"><b>Accept when:</b> a deliberate failure produces a log entry and a bundle, a search of the bundle finds no map text and no credential, and the user sees the bundle contents first. <b>Why:</b> a personal tool still needs a way to explain a failure; privacy follows <code>NFR-SEC-01</code>.</p>
+    </div>
+    <div class="req" id="NFR-MAINT-09">
+      <div class="req-head"><code class="req-id">NFR-MAINT-09</code><span class="badge should">Should</span><h4>Dependency policy</h4></div>
+      <p>Each dependency must be recorded with its purpose, licence and a reason it is not written in-house; versions must be pinned and audited for known vulnerabilities in the build; and every dependency must be replaceable behind one of the module interfaces. Packages that are pre-1.0 or that change interface frequently may only be used behind an interface.</p>
+      <p class="req-meta"><b>Accept when:</b> a dependency list with these fields exists, the audit runs in the build, and licences are checked before anything is bundled. <b>Why:</b> the research found licence issues in candidate libraries (see <a href="#other-stacks">other stacks</a>) and toolchain churn in Zig (<a href="#zig">the Zig page</a>).</p>
+    </div>
+    <div class="req" id="NFR-MAINT-10">
+      <div class="req-head"><code class="req-id">NFR-MAINT-10</code><span class="badge should">Should</span><h4>Documented file format</h4></div>
+      <p>The document format (tables, fields, operation log, asset records and the whole-document JSON export) must be documented in the repository and kept in step with the schema version, so that another program or a coding agent can read it.</p>
+      <p class="req-meta"><b>Accept when:</b> the documentation is checked by a test that builds a document from it alone and opens it in the app. <b>Why:</b> decision D-14; agent access (D-20) depends on a readable format.</p>
+    </div>
+  </div>
+
+  <h2>Budgets and open measurements</h2>
+  <h3>Budget summary</h3>
+  <p>The table lists every number on this page. "Measured" means observed on the developer's M4 Pro. "Derived" means calculated from a measured or display figure. "Proposed" means a target set by the report that the spikes must confirm.</p>
+  <div class="table-wrap"><table class="dense">
+    <caption>Every numeric budget and reference figure on the page, with its status and the requirement that holds it.</caption>
+    <thead><tr><th>Metric</th><th>Target or value</th><th>Status</th><th>Held by</th></tr></thead>
+    <tbody>
+      <tr><th>Default WebView frame rate</th><td>60 fps (16.67 ms mean)</td><td>Measured</td><td><code>NFR-PERF-02</code></td></tr>
+      <tr><th>Frame interval at 120 Hz</th><td>8.3 ms mean (120 fps)</td><td>Measured (synthetic scene); derived as target</td><td><code>NFR-PERF-01</code></td></tr>
+      <tr><th>Frame interval at 60 Hz</th><td>16.7 ms mean</td><td>Derived</td><td><code>NFR-PERF-02</code></td></tr>
+      <tr><th>Interval tail</th><td>No interval above 1.5 times the display interval</td><td>Proposed</td><td><code>NFR-PERF-03</code></td></tr>
+      <tr><th>Script time per frame, large map</th><td>At most 4 ms (spike: 3.45 ms Canvas2D, 0.30 ms WebGL2)</td><td>Proposed; spike figures measured</td><td><code>NFR-PERF-04</code></td></tr>
+      <tr><th>Cold start to interactive window</th><td>Under 1 s</td><td>Proposed</td><td><code>NFR-PERF-05</code></td></tr>
+      <tr><th>Large map to first frame</th><td>Under 500 ms</td><td>Proposed</td><td><a href="#engine">ENG-38</a>, <code>NFR-PERF-06</code></td></tr>
+      <tr><th>Layout of 5,000 nodes, off main thread</th><td>Under 50 ms</td><td>Proposed</td><td><a href="#engine">ENG-05</a>, <code>NFR-PERF-06</code></td></tr>
+      <tr><th>Idle drawn frames</th><td>Zero</td><td>Proposed</td><td><a href="#engine">ENG-23</a>, <code>NFR-PERF-13</code></td></tr>
+      <tr><th>Input-to-pixel latency for pan</th><td>Under two frames (16.7 ms at 120 Hz); to be measured and fixed</td><td>Proposed</td><td><code>NFR-PERF-07</code></td></tr>
+      <tr><th>Stress map (50,000 nodes) frame rate</th><td>At least 60 fps; 120 Hz result to be measured</td><td>Proposed</td><td><code>NFR-PERF-14</code></td></tr>
+      <tr><th>Synthetic headroom</th><td>120 fps up to 100,000 branches; about 102 fps at 200,000; about 53 fps at 400,000</td><td>Measured (single run, synthetic)</td><td><code>NFR-PERF-14</code></td></tr>
+      <tr><th>Time to first streamed text</th><td>2.8 to 3.7 s (model wait; not a budget)</td><td>Measured</td><td><code>NFR-PERF-10</code></td></tr>
+      <tr><th>Delta bursts and node lines</th><td>Bursts every 110 to 150 ms; one node line about every 290 ms</td><td>Measured</td><td><code>NFR-PERF-09</code></td></tr>
+      <tr><th>Interrupt to turn end</th><td>About 2 ms (Codex side)</td><td>Measured</td><td><code>NFR-REL-07</code></td></tr>
+      <tr><th>Image generation time</th><td>About 12 s (first), about 29 s (with reference image)</td><td>Measured (single samples)</td><td><code>NFR-REL-03</code></td></tr>
+      <tr><th>SVG generation time</th><td>28.7 s for five nodes</td><td>Measured (single sample)</td><td><code>NFR-REL-03</code></td></tr>
+      <tr><th>Resident memory per reference map</th><td>200 / 5,000 / 50,000 nodes: 248 / 585 / 1,247 MiB observed, with limits of 325 / 700 / 1,500 MiB. Large-map post-close tolerance: +100 MiB above the empty baseline, +30 MiB between early and late medians, and +4 MiB per cycle.</td><td>Measured on macOS with synchronous stress layout. Nightly scheduling pending.</td><td><code>NFR-PERF-11</code></td></tr>
+      <tr><th>Reference map sizes</th><td>200; 5,000 with 300 pictures; 50,000 nodes</td><td>Defined</td><td>Test rig</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Open measurements</h3>
+  <p>These measurements must be done before the proposed numbers become final. The first four belong in the first spike (milestone M0 on <a href="#roadmap">the roadmap</a>).</p>
+  <ul>
+    <li><strong>Input latency.</strong> Pointer-to-pixel for pan, zoom, drag and typing on the real WebView (<code>NFR-PERF-07</code>).</li>
+    <li><strong>Real content.</strong> The large and stress maps built from realistic text and structure, with real text shaping, mipmapped images, edit-time rebuilds of branch geometry and several repeats per configuration to learn run-to-run variance (<code>NFR-PERF-08</code>, <code>NFR-PERF-15</code>).</li>
+    <li><strong>Memory.</strong> Resident memory per process and per reference map, and the leak test (<code>NFR-PERF-11</code>).</li>
+    <li><strong>GPU time.</strong> A measurement of GPU cost, through WebGPU timestamp queries or an external tool, because script time excludes it (<code>NFR-PERF-04</code>).</li>
+    <li><strong>Electron.</strong> The unchanged spike page in an Electron host, as the route to 120 fps that uses no private interface (<code>NFR-PLAT-08</code>).</li>
+    <li><strong>SVG rasterisation cost.</strong> Time to rasterise a subtree's SVG per zoom bucket in a worker, and the memory it adds (<a href="#engine">ENG-30</a>).</li>
+    <li><strong>Image batch throughput.</strong> How many pictures per minute the Codex login yields, how a batch behaves against the weekly limit, and the per-image cost, which the integer rate-limit meter could not show in the hands-on pass (<code>NFR-REL-05</code>).</li>
+    <li><strong>Other hardware and displays.</strong> An older Apple Silicon Mac, a 60 Hz-only display and, if claimed, an Intel Mac (<code>NFR-PLAT-02</code>).</li>
+    <li><strong>Live failure shapes.</strong> A real rate-limit exhaustion and an expired login, which were read from the schema and not triggered (<code>NFR-REL-05</code>, <code>NFR-REL-06</code>).</li>
+  </ul>
+</section>

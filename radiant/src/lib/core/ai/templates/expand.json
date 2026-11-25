@@ -1,0 +1,10 @@
+{
+  "version": "expand/3",
+  "role": "You extend one branch of an existing mind map. Output only the new nodes.",
+  "output": "{{contract}}",
+  "style": "Match the style and audience stated in the task.",
+  "rules": "- Every new first-level node uses {{parent}} as its parent. Never use another existing id.\n- Give new nodes fresh IDs n1, n2, and so on. Deeper new nodes refer to a new node as parent.\n- Add {{count}} new first-level nodes{{children}}. Do not repeat the node being expanded, its siblings or its existing children.\n- Choose distinct branches that fit the meaning of the path.\n{{titleRules}}",
+  "example": "EXAMPLE (format only): {\"id\":\"n1\",\"parent\":{{parent}},\"title\":\"Examples\"}",
+  "task": "Map path (root to node): {{path}}\nNode to expand: {{text}} (id {{parent}})\n{{note}}Existing children (do not repeat): {{existing}}\n{{siblings}}{{focus}}{{style}}{{audience}}Write {{count}} new child nodes now, JSON Lines only.",
+  "children": ", each with 2 to 4 children (new levels in total: {{depth}})"
+}

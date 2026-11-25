@@ -1,0 +1,40 @@
+<!doctype html><meta charset="utf-8"><script type="module">
+const q = new URLSearchParams(location.search);
+const n = q.get('n'), theme = q.get('theme'), reps = +(q.get('reps') || (n === '50000' ? 8 : 20));
+const ops = (q.get('ops') || 'tess,pack,miss,hit,edit').split(',');
+const A = await import('./' + q.get('a')), B = await import('./' + q.get('b'));
+const data = await (await fetch('data/specs-' + n + '-' + theme + '.json')).json();
+const relief = data.relief || undefined;
+const clone = () => JSON.parse(JSON.stringify(data.specs));
+const s1 = clone(), s2 = clone();
+// one-node edit: a new leaf spec inserted in the middle
+const mid = s2.length >> 1; const extra = JSON.parse(JSON.stringify(s2[mid])); extra.to = extra.to + '_x'; extra.p1 = { x: extra.p1.x + 3, y: extra.p1.y + 7 };
+const s3 = clone(); s3.splice(mid, 0, extra);
+const impls = { A, B };
+const run = {
+  tess: (M) => { const t = performance.now(); M.tessellateBranches(s1, { zoom: 4, relief }); return performance.now() - t; },
+  pack: (M, st) => { const mesh = st.mesh ??= M.tessellateBranches(s1, { zoom: 4, relief }); const t = performance.now(); M.packVertices(mesh); return performance.now() - t; },
+  miss: (M) => { const c = new M.BranchMeshCache(); const t = performance.now(); c.build(s1, relief); return performance.now() - t; },
+  hit: (M, st) => { const c = st.cache ??= (() => { const c = new M.BranchMeshCache(); c.build(s1, relief); return c; })(); st.flip = !st.flip; const t = performance.now(); c.build(st.flip ? s2 : s1, relief); return performance.now() - t; },
+  edit: (M, st) => { const c = new M.BranchMeshCache(); c.build(s1, relief); const t = performance.now(); c.build(s3, relief); return performance.now() - t; },
+};
+// correctness: compare outputs of A and B
+function eq(x, y) { if (!x || !y) return x === y; if (x.length !== y.length) return false; for (let i = 0; i < x.length; i++) if (x[i] !== y[i] && !(x[i] !== x[i] && y[i] !== y[i])) return false; return true; }
+function cmp(ma, mb) {
+  const pa = A.packVertices(ma), pb = B.packVertices(mb);
+  const r = { positions: eq(ma.positions, mb.positions), indices: eq(ma.indices, mb.indices), bounds: eq(ma.branchSpans.bounds, mb.branchSpans.bounds), ends: eq(ma.branchSpans.ends, mb.branchSpans.ends),
+    packed: eq(new Uint32Array(pa.buffer), new Uint32Array(pb.buffer)) && pa.ox === pb.ox && pa.oy === pb.oy && pa.wide === pb.wide };
+  return r;
+}
+const checks = {};
+checks.fresh = cmp(A.tessellateBranches(s1, { zoom: 4, relief }), B.tessellateBranches(s1, { zoom: 4, relief }));
+{ const ca = new A.BranchMeshCache(), cb = new B.BranchMeshCache(); ca.build(s1, relief); cb.build(s1, relief); checks.hit = cmp(ca.build(s2, relief), cb.build(s2, relief)); checks.edit = cmp(ca.build(s3, relief), cb.build(s3, relief)); checks.editFresh = cmp(cb.build(s3, relief), B.tessellateBranches(s3, { zoom: 4, relief })); }
+const times = {}; const state = { A: {}, B: {} };
+for (const op of ops) for (const k of ['A', 'B']) { times[op + '.' + k] = []; state[k][op] = {}; }
+const gc = self.gc || (() => {});
+for (let r = 0; r < reps + 2; r++) for (const op of ops) for (const k of (r & 1 ? ['B', 'A'] : ['A', 'B'])) { gc(); const ms = run[op](impls[k], state[k][op]); if (r >= 2) times[op + '.' + k].push(ms); }
+const st = (xs) => { const s = [...xs].sort((x, y) => x - y); return { med: +s[s.length >> 1].toFixed(2), min: +s[0].toFixed(2), max: +s[s.length - 1].toFixed(2) }; };
+const out = { n, theme, checks };
+for (const op of ops) { const a = st(times[op + '.A']), b = st(times[op + '.B']); out[op] = { A: a, B: b, ratio: +(b.med / a.med).toFixed(3) }; }
+window.__result = out;
+</script>

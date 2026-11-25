@@ -1,0 +1,118 @@
+{
+ "soft-clay-300-fit": {
+  "over": 5,
+  "pct": 0.0001,
+  "any": 33,
+  "max": 21,
+  "inst": true,
+  "tris": 29584,
+  "bbox": [
+   1692,
+   417,
+   1745,
+   1761
+  ]
+ },
+ "soft-clay-300-z2": {
+  "over": 11,
+  "pct": 0.0001,
+  "any": 397,
+  "max": 68,
+  "inst": true,
+  "tris": 3360,
+  "bbox": [
+   1568,
+   523,
+   2553,
+   1128
+  ]
+ },
+ "soft-clay-300-z0.5": {
+  "over": 2,
+  "pct": 0.0,
+  "any": 158,
+  "max": 35,
+  "inst": true,
+  "tris": 8512,
+  "bbox": [
+   1765,
+   298,
+   2068,
+   1119
+  ]
+ },
+ "rope-300-fit": {
+  "over": 1,
+  "pct": 0.0,
+  "any": 1,
+  "max": 36,
+  "inst": true,
+  "tris": 40848,
+  "bbox": [
+   1774,
+   874,
+   1774,
+   874
+  ]
+ },
+ "rope-300-z2": {
+  "over": 6,
+  "pct": 0.0001,
+  "any": 9738,
+  "max": 54,
+  "inst": true,
+  "tris": 4208,
+  "bbox": [
+   1884,
+   1349,
+   3419,
+   2141
+  ]
+ },
+ "rope-300-z0.5": {
+  "over": 1,
+  "pct": 0.0,
+  "any": 5755,
+  "max": 29,
+  "inst": true,
+  "tris": 12240,
+  "bbox": [
+   2203,
+   110,
+   2203,
+   110
+  ]
+ },
+ "clean-300-fit": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 1,
+  "max": 4,
+  "inst": true,
+  "tris": 22864,
+  "bbox": null
+ },
+ "clean-300-z2": {
+  "over": 9,
+  "pct": 0.0001,
+  "any": 71,
+  "max": 63,
+  "inst": true,
+  "tris": 2912,
+  "bbox": [
+   1609,
+   171,
+   3376,
+   2165
+  ]
+ },
+ "clean-300-z0.5": {
+  "over": 0,
+  "pct": 0.0,
+  "any": 0,
+  "max": 0,
+  "inst": true,
+  "tris": 7168,
+  "bbox": null
+ }
+}

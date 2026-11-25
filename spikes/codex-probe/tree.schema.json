@@ -1,0 +1,4 @@
+{"type":"object","additionalProperties":false,"required":["title","children"],
+ "properties":{"title":{"type":"string"},"children":{"type":"array","items":{"$ref":"#/$defs/node"}}},
+ "$defs":{"node":{"type":"object","additionalProperties":false,"required":["title","children"],
+   "properties":{"title":{"type":"string"},"children":{"type":"array","items":{"$ref":"#/$defs/node"}}}}}}

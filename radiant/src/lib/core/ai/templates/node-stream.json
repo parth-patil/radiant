@@ -1,0 +1,82 @@
+{
+  "version": "node-stream/1",
+  "fields": {
+    "id": "id",
+    "parent": "parent",
+    "title": "title",
+    "note": "note",
+    "imageHint": "image_hint",
+    "sourceHeading": "sourceHeading"
+  },
+  "aliases": {
+    "imageHint": "imageHint"
+  },
+  "limits": {
+    "title": 200,
+    "note": 2000,
+    "line": 20000,
+    "sourceHeading": 240,
+    "imageHint": 300
+  },
+  "ignoredGeometry": [
+    "x",
+    "y",
+    "w",
+    "h",
+    "width",
+    "height",
+    "position",
+    "offset",
+    "size",
+    "coords",
+    "coordinates"
+  ],
+  "format": [
+    "OUTPUT FORMAT ({{version}}):",
+    "- Output JSON Lines: exactly one compact JSON object per line, with no commentary, code fences, blank lines or trailing commas.",
+    "- Each node has a unique string \"{{id}}\", a \"{{parent}}\" identifying an earlier node (null for the root), and a nonempty string \"{{title}}\" of at most {{maxTitle}} characters.",
+    "- Write parents before children, depth first: a node, its descendants, then its next sibling.",
+    "- {{optional}}",
+    "- Never supply coordinates, sizes, per-node colours or other layout instructions.",
+    "- {{style}}"
+  ],
+  "optionalFields": {
+    "note": "one short sentence of detail, where it helps",
+    "imageHint": "3 to 8 words describing a picture, on main branches",
+    "sourceHeading": "the exact supporting source heading for a main branch, when known"
+  },
+  "withStyle": "The first line may be the style line described below. Every other line must be a node.",
+  "withoutStyle": "Every line must be a node. Omit the style line.",
+  "example": [
+    {
+      "id": "n1",
+      "parent": null,
+      "title": "Coffee"
+    },
+    {
+      "id": "n2",
+      "parent": "n1",
+      "title": "Origins",
+      "note": "Where coffee is grown."
+    },
+    {
+      "id": "n3",
+      "parent": "n2",
+      "title": "Ethiopia",
+      "image_hint": "hillside coffee plants"
+    },
+    {
+      "id": "n4",
+      "parent": "n2",
+      "title": "Colombia"
+    },
+    {
+      "id": "n5",
+      "parent": "n1",
+      "title": "Brewing"
+    }
+  ],
+  "titleRules": "TITLE RULES:\n- Each title is one key word or a short phrase of at most {{maxWords}} words (keywords, not sentences). Prefer nouns and strong verbs. No numbering, no bullet characters, no trailing punctuation.\n- Siblings must be distinct and should not overlap. Use the same language as the topic.",
+  "withOptional": "Allowed optional fields: {{fields}}.",
+  "withoutOptional": "Omit all optional fields."
+}

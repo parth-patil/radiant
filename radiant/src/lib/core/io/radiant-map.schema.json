@@ -1,0 +1,611 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Radiant Map",
+  "description": "Radiant's version 1 editable map data. Asset hashes refer to bytes in the Radiant asset store.",
+  "type": "object",
+  "required": ["version", "id", "title", "roots", "rootInfo", "nodes", "links", "themeId", "seed", "created", "modified"],
+  "properties": {
+    "version": { "const": 1 },
+    "id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string" },
+    "roots": { "$ref": "#/$defs/nodeIds" },
+    "rootInfo": { "type": "object", "additionalProperties": { "$ref": "#/$defs/rootInfo" } },
+    "layoutPlacements": { "$ref": "#/$defs/layoutPlacements" },
+    "nodes": { "type": "object", "additionalProperties": { "$ref": "#/$defs/node" } },
+    "aiJobs": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Za-z0-9][A-Za-z0-9:_-]{0,127}$", "not": { "enum": ["constructor", "prototype"] } },
+      "additionalProperties": { "$ref": "#/$defs/aiJob" }
+    },
+    "links": { "type": "array", "items": { "$ref": "#/$defs/connection" } },
+    "themeId": { "type": "string" },
+    "tagColors": { "type": "object", "additionalProperties": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" } },
+    "markerMeanings": {
+      "type": "object",
+      "propertyNames": { "minLength": 1, "maxLength": 64 },
+      "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 120 }
+    },
+    "themeSettings": {
+      "type": "object",
+      "properties": {
+        "background": { "type": "string" },
+        "textColor": { "type": "string" },
+        "canvasAppearance": { "enum": ["system", "light", "dark"] },
+        "rootColor": { "type": "string" },
+        "rootFillColor": { "type": "string" },
+        "nodeFillColor": { "type": "string" },
+        "connectionColor": { "type": "string" },
+        "connectionDash": { "enum": ["solid", "dashed"] },
+        "rootShape": { "enum": ["underline", "box", "rectangle", "circle", "square", "none"] },
+        "mainShape": { "enum": ["underline", "box", "rectangle", "circle", "square", "none"] },
+        "shape": { "enum": ["underline", "box", "rectangle", "circle", "square", "none"] },
+        "rootFontSize": { "type": "number" },
+        "mainFontSize": { "type": "number" },
+        "fontFamily": { "type": "string" },
+        "rootBranchWidth": { "type": "number" },
+        "minBranchWidth": { "type": "number" },
+        "colorMainBranches": { "type": "boolean" },
+        "branchMarkers": { "type": "boolean" },
+        "showGrid": { "type": "boolean" },
+        "lean": { "type": "boolean" },
+        "centralImage": { "type": "boolean" },
+        "centralPalette": { "type": "boolean" },
+        "singleCenter": { "type": "boolean" },
+        "keywordHints": { "type": "boolean" },
+        "landscapePrint": { "type": "boolean" },
+        "branchColors": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "levelGap": { "type": "number" },
+        "siblingGap": { "type": "number" },
+        "fontSize": { "type": "number" },
+        "uppercaseMainBranches": { "type": "boolean" },
+        "fitBranchToLabel": { "type": "boolean" },
+        "curvedLabels": { "type": "boolean" },
+        "branch": { "enum": ["tapered", "organic", "line", "rounded", "angular"] },
+        "branchMaterial": { "enum": ["flat", "clay", "arcs", "rope", "quilling"] }
+      }
+    },
+    "artStyleId": { "type": "string" },
+    "seed": { "type": "number" },
+    "created": { "type": "string", "format": "date-time" },
+    "modified": { "type": "string", "format": "date-time" },
+    "presentations": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Saved presentations (storylines), in list order. Absent when there are none.",
+      "items": { "$ref": "#/$defs/presentation" }
+    },
+    "canvas": { "$ref": "#/$defs/canvas" }
+  },
+  "$defs": {
+    "nodeIds": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "point": {
+      "type": "object",
+      "required": ["x", "y"],
+      "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+    },
+    "layoutPlacements": {
+      "type": "object",
+      "required": ["roots", "nodes"],
+      "properties": {
+        "roots": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["layout", "x", "y", "levelGap", "siblingGap"],
+            "properties": {
+              "layout": { "enum": ["mindmap", "right", "left", "down", "up", "compact", "radial", "outline", "timeline", "columns", "grid", "popcorn"] },
+              "x": { "type": "number" },
+              "y": { "type": "number" },
+              "levelGap": { "type": "number" },
+              "siblingGap": { "type": "number" },
+              "organicSeed": { "type": "number" }
+            }
+          }
+        },
+        "nodes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["root", "parent", "index", "siblingCount", "x", "y", "w", "h", "offsetX", "offsetY", "side", "flow"],
+            "properties": {
+              "root": { "type": "string" },
+              "parent": { "type": ["string", "null"] },
+              "index": { "type": "integer" },
+              "siblingCount": { "type": "integer" },
+              "x": { "type": "number" },
+              "y": { "type": "number" },
+              "w": { "type": "number" },
+              "h": { "type": "number" },
+              "offsetX": { "type": "number" },
+              "offsetY": { "type": "number" },
+              "side": { "enum": [-1, 0, 1] },
+              "flow": { "enum": ["h", "v", "r"] },
+              "branchLayout": { "enum": ["mindmap", "right", "left", "down", "up", "compact", "radial", "outline"] },
+              "pinnedSide": { "enum": ["left", "right"] },
+              "collapsed": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "rootInfo": {
+      "type": "object",
+      "required": ["position", "layout"],
+      "properties": {
+        "position": { "$ref": "#/$defs/point" },
+        "spacing": { "enum": ["narrow", "default", "wide"] },
+        "organic": { "const": true },
+        "layout": { "enum": ["mindmap", "right", "left", "down", "up", "compact", "radial", "outline", "timeline", "columns", "grid", "popcorn"] }
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "parent", "children", "text"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "parent": { "type": ["string", "null"] },
+        "children": { "$ref": "#/$defs/nodeIds" },
+        "text": { "type": "string" },
+        "generatedDraft": { "const": true },
+        "aliasGroup": { "type": "string", "pattern": "^[A-Za-z0-9_-]{1,80}$" },
+        "blankAnswer": { "type": "string" },
+        "note": { "type": "string" },
+        "interchange": {
+          "type": "object",
+          "properties": {
+            "opmlAttributes": {
+              "type": "array",
+              "items": { "type": "array", "items": { "type": "string" }, "minItems": 2, "maxItems": 2 }
+            },
+            "freeMindIcons": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "collapsed": { "type": "boolean" },
+        "side": { "enum": ["left", "right"] },
+        "branchLayout": { "enum": ["mindmap", "right", "left", "down", "up", "compact", "radial", "outline"] },
+        "offset": { "$ref": "#/$defs/point" },
+        "pinnedPosition": { "$ref": "#/$defs/point" },
+        "style": { "$ref": "#/$defs/style" },
+        "representation": { "enum": ["vector", "picture", "svg"] },
+        "imageAsset": { "type": "string" },
+        "imageAspect": { "type": "number", "exclusiveMinimum": 0 },
+        "imageScale": { "type": "number", "minimum": 0.25, "maximum": 6 },
+        "imageAlt": { "type": "string" },
+        "sketch": {
+          "type": "object", "required": ["placement", "strokes"],
+          "properties": {
+            "placement": { "enum": ["on", "beside"] },
+            "strokes": { "type": "array", "minItems": 1, "maxItems": 96, "items": {
+              "type": "object", "required": ["color", "width", "points"],
+              "properties": {
+                "color": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+                "width": { "type": "number", "minimum": 0.5, "maximum": 16 },
+                "points": { "type": "array", "minItems": 1, "maxItems": 512, "items": {
+                  "type": "object", "required": ["x", "y", "pressure"],
+                  "properties": {
+                    "x": { "type": "number", "minimum": 0, "maximum": 1 },
+                    "y": { "type": "number", "minimum": 0, "maximum": 1 },
+                    "pressure": { "type": "number", "minimum": 0, "maximum": 1 }
+                  }
+                } }
+              }
+            } }
+          }
+        },
+        "sourceHeading": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "sticker": { "type": "string", "maxLength": 64 },
+        "pictureArt": { "$ref": "#/$defs/art" },
+        "pictureArtError": { "type": "string", "maxLength": 280 },
+        "generatedStyle": {
+          "type":"object", "required":["request"], "properties":{
+            "request":{"type":"string"}, "themeId":{"type":"string"}, "layout":{"enum":["mindmap","right","left","down","radial"]},
+            "branch":{"type":"string"}, "shape":{"type":"string"}, "palette":{"type":"array","items":{"type":"string"}},
+            "fontFamily":{"type":"string"}, "medium":{"type":"string"}, "mood":{"type":"string"},
+            "centralImage":{"type":"boolean"}, "artPresetId":{"type":"string"},
+            "uppercaseMainBranches":{"type":"boolean"}, "warnings":{"type":"array","items":{"type":"string"}}
+          }
+        },
+        "pictureLabelPlacement": { "enum": ["caption", "branch", "recall"] },
+        "svgArt": { "$ref": "#/$defs/art" },
+        "svgArtError": { "type": "string", "maxLength": 280 },
+        "artReference": { "$ref": "#/$defs/art" },
+        "artStyleId": { "type": "string" },
+        "artStyleOverrides": { "$ref": "#/$defs/artStyleOverrides" },
+        "artStyleIsland": { "const": true },
+        "artStyleSheet": { "$ref": "#/$defs/subtreeArtStyle" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "task": {
+          "type": "object",
+          "required": ["done"],
+          "properties": { "done": { "type": "boolean" } }
+        },
+        "link": { "type": "string" },
+        "lastAiJob": { "type": "string" },
+        "origin": {
+          "oneOf": [
+            { "type": "object", "required": ["by"], "properties": { "by": { "const": "user" } } },
+            {
+              "type": "object",
+              "required": ["by", "job"],
+              "properties": { "by": { "const": "ai" }, "job": { "type": "string" } }
+            }
+          ]
+        }
+      }
+    },
+    "aiJob": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "status", "prompt", "created"],
+      "properties": {
+        "kind": { "enum": ["generate", "expand", "refine"] },
+        "status": { "enum": ["running", "done", "cancelled", "error"] },
+        "interrupted": { "const": true },
+        "route": { "enum": ["stream", "exec", "replay"] },
+        "prompt": { "type": "string", "minLength": 1, "maxLength": 1000000 },
+        "instructions": { "type": "string", "maxLength": 1000000 },
+        "fallbackPrompt": { "type": "string", "maxLength": 1000000 },
+        "warnings": { "type": "array", "maxItems": 24, "items": { "type": "string", "maxLength": 256 } },
+        "templateVersion": { "type": "string", "maxLength": 256 },
+        "model": { "type": "string", "maxLength": 256 },
+        "effort": { "enum": ["low", "medium", "high"] },
+        "webSearch": { "type": "boolean" },
+        "scopeId": { "type": "string", "maxLength": 256 },
+        "scope": { "enum": ["node", "branch", "map"] },
+        "created": { "type": "string", "format": "date-time" },
+        "limits": {
+          "type": "object",
+          "required": ["maxDepth", "maxChildren"],
+          "properties": {
+            "maxDepth": { "type": "integer", "minimum": 1, "maximum": 6 },
+            "maxChildren": { "type": "integer", "minimum": 1, "maximum": 7 }
+          }
+        },
+        "usage": {
+          "type": "object",
+          "properties": {
+            "inputTokens": { "type": "integer", "minimum": 0 },
+            "outputTokens": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "style": {
+      "type": "object",
+      "properties": {
+        "color": { "type": "string" },
+        "textColor": { "type": "string" },
+        "fillColor": { "type": "string" },
+        "fontFamily": { "type": "string" },
+        "alignment": { "enum": ["left", "center", "right"] },
+        "branchWidth": { "type": "number", "minimum": 1, "maximum": 64 },
+        "fontSize": { "type": "number" },
+        "bold": { "type": "boolean" },
+        "italic": { "type": "boolean" },
+        "curvedLabel": { "type": "boolean" },
+        "branchBoundary": { "type": "boolean" },
+        "extrudedLabel": { "type": "boolean" },
+        "shape": { "enum": ["underline", "box", "rectangle", "circle", "square", "none"] },
+        "branch": { "enum": ["tapered", "organic", "line", "rounded", "angular"] },
+        "emphasis": { "enum": [0, 1, 2] }
+      }
+    },
+    "subtreeArtStyle": {
+      "type": "object",
+      "required": ["version", "recordId", "id", "name", "inherits", "source", "medium", "palette", "line", "mood", "detail", "referenceAsset", "cast", "negative", "background", "seed"],
+      "properties": {
+        "version": { "const": 1 },
+        "recordId": { "type": "string" },
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "inherits": { "type": ["string", "null"] },
+        "generatedStyleNode": { "type": "string" },
+        "source": { "type": "string" },
+        "medium": { "type": "string" },
+        "palette": {
+          "type": "object", "required": ["source", "accents", "maxColours"],
+          "properties": {
+            "source": { "enum": ["branch-colour", "custom"] },
+            "accents": { "type": "array", "items": { "type": "string" } },
+            "maxColours": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "line": {
+          "type": "object", "required": ["weight", "colour"],
+          "properties": {
+            "weight": { "type": "string" },
+            "colour": { "type": "string" }
+          }
+        },
+        "mood": { "type": "string" },
+        "detail": { "type": "string" },
+        "canvas": {
+          "type": "object",
+          "required": ["branchEmphasis", "labels"],
+          "properties": {
+            "branchEmphasis": { "const": "curved" },
+            "labels": { "const": "keyword" },
+            "branchColors": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "referenceAsset": { "type": ["string", "null"], "pattern": "^[0-9a-f]{64}$" },
+        "cast": {
+          "type": ["object", "null"],
+          "required": ["symbols"],
+          "properties": {
+            "mascot": { "type": "string" },
+            "symbols": { "type": "object", "additionalProperties": { "type": "string" } }
+          }
+        },
+        "negative": { "type": "array", "items": { "type": "string" } },
+        "background": { "enum": ["transparent", "plain"] },
+        "seed": { "type": "integer" }
+      }
+    },
+    "artStyleOverrides": {
+      "type": "object",
+      "properties": {
+        "seed": { "type": "integer" },
+        "medium": { "type": "string" },
+        "mood": { "type": "string" },
+        "detail": { "type": "string" },
+        "lineWeight": { "type": "string" },
+        "palette": { "type": "array", "items": { "type": "string" } },
+        "negative": { "type": "array", "items": { "type": "string" } },
+        "background": { "enum": ["transparent", "plain"] }
+      }
+    },
+    "art": {
+      "type": "object",
+      "required": ["assetHash", "inputHash", "prompt", "styleId", "styleVersion", "generatedAt"],
+      "properties": {
+        "assetHash": { "type": "string" },
+        "inputHash": { "type": "string" },
+        "sourceHash": { "type": "string" },
+        "thumbnailHash": { "type": "string" },
+        "svgRegion": {
+          "type": "object",
+          "required": ["assetHash", "nodes", "palette"],
+          "properties": {
+            "assetHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "palette": { "type": "array", "items": { "type": "string" } },
+            "nodes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["id", "box", "parentId", "hasChildren"],
+                "properties": {
+                  "id": { "type": "string" },
+                  "parentId": { "type": ["string", "null"] },
+                  "hasChildren": { "type": "boolean" },
+                  "box": {
+                    "type": "object",
+                    "required": ["x", "y", "w", "h"],
+                    "properties": { "x": { "type": "number" }, "y": { "type": "number" },
+                      "w": { "type": "number", "exclusiveMinimum": 0 }, "h": { "type": "number", "exclusiveMinimum": 0 } }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "svgValidation": {
+          "type": "object",
+          "required": ["warnings"],
+          "properties": {
+            "warnings": { "type": "array", "items": { "type": "string" } },
+            "fitted": { "type": "boolean" }
+          }
+        },
+        "pixelSize": {
+          "type": "object",
+          "required": ["width", "height", "padding"],
+          "properties": {
+            "width": { "type": "integer", "minimum": 1 },
+            "height": { "type": "integer", "minimum": 1 },
+            "padding": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "prompt": { "type": "string" },
+        "brief": { "type": "string" },
+        "instructions": { "type": "string" },
+        "effort": { "enum": ["low", "medium", "high"] },
+        "originalAsset": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "model": { "type": "string" },
+        "revisedPrompt": { "type": "string" },
+        "templateVersion": { "type": "string" },
+        "styleId": { "type": "string" },
+        "styleVersion": { "type": "number" },
+        "styleSnapshot": { "type": "object" },
+        "seed": { "type": "integer" },
+        "svgSeed": { "type": "integer" },
+        "parentAsset": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "framed": { "type": "boolean" },
+        "anchors": {
+          "type": "object",
+          "required": ["in", "out"],
+          "properties": {
+            "in": { "$ref": "#/$defs/point" },
+            "out": { "$ref": "#/$defs/point" },
+            "outByChild": { "type": "object", "additionalProperties": { "$ref": "#/$defs/point" } }
+          }
+        }
+      }
+    },
+    "connection": {
+      "type": "object",
+      "required": ["id", "from", "to"],
+      "properties": {
+        "id": { "type": "string" },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "label": { "type": "string" },
+        "bend": { "$ref": "#/$defs/point" },
+        "color": { "type": "string" },
+        "dash": { "enum": ["solid", "dashed"] },
+        "arrows": { "enum": ["none", "start", "end", "both"] }
+      }
+    },
+    "presentation": {
+      "type": "object",
+      "required": ["id", "name", "steps"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string" },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/presentationStep" } },
+        "reveal": { "enum": ["progressive", "all"] },
+        "context": { "enum": ["dim", "hide"] },
+        "dimOpacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "motion": { "enum": ["full", "gentle", "none"] },
+        "targetMinutes": { "type": "number", "minimum": 0 }
+      }
+    },
+    "presentationStep": {
+      "type": "object",
+      "required": ["id", "focus"],
+      "additionalProperties": false,
+      "description": "A stop in a presentation. It names nodes and canvas elements, never camera coordinates. Ids that no longer exist are ignored when presenting.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "focus": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "reveal": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "hide": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "elements": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "frame": { "enum": ["nodes", "subtree", "map"] },
+        "build": { "enum": ["all", "each"] },
+        "dim": { "enum": ["others", "none"] },
+        "title": { "type": "string" },
+        "caption": { "type": "string" },
+        "note": { "type": "string" },
+        "transition": { "enum": ["glide", "cut"] },
+        "skip": { "type": "boolean" },
+        "seconds": { "type": "number", "minimum": 0 }
+      }
+    },
+    "canvas": {
+      "type": "object",
+      "required": ["elements"],
+      "additionalProperties": false,
+      "description": "Free drawing on the infinite canvas beside the maps. Absent when it holds nothing.",
+      "properties": {
+        "elements": {
+          "type": "array",
+          "maxItems": 20000,
+          "description": "Array order is stacking order within a band.",
+          "items": { "$ref": "#/$defs/canvasElement" }
+        },
+        "bookmarks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "name", "view"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "minLength": 1 },
+              "name": { "type": "string" },
+              "view": {
+                "type": "object",
+                "required": ["cx", "cy", "zoom"],
+                "additionalProperties": false,
+                "properties": {
+                  "cx": { "type": "number" },
+                  "cy": { "type": "number" },
+                  "zoom": { "type": "number", "exclusiveMinimum": 0 }
+                }
+              }
+            }
+          }
+        },
+        "grid": {
+          "type": "object",
+          "required": ["size", "snap"],
+          "additionalProperties": false,
+          "properties": { "size": { "type": "number", "exclusiveMinimum": 0 }, "snap": { "type": "boolean" } }
+        }
+      }
+    },
+    "canvasBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "An arrow end bound to exactly one node or canvas element.",
+      "properties": {
+        "node": { "type": "string", "minLength": 1 },
+        "element": { "type": "string", "minLength": 1 },
+        "at": { "$ref": "#/$defs/point" },
+        "gap": { "type": "number" }
+      },
+      "oneOf": [{ "required": ["node"] }, { "required": ["element"] }]
+    },
+    "canvasElement": {
+      "type": "object",
+      "required": ["id", "kind", "x", "y", "w", "h", "seed"],
+      "additionalProperties": false,
+      "description": "Geometry fields mean the same as Excalidraw's: top-left corner, size, angle in radians about the centre, seed, roughness and fill style.",
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["rect", "ellipse", "diamond", "line", "arrow", "draw", "text", "note", "frame", "image"] },
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "w": { "type": "number" },
+        "h": { "type": "number" },
+        "angle": { "type": "number" },
+        "band": {
+          "enum": ["back", "front"],
+          "description": "Default by kind: frame, rect, ellipse, diamond, note and image under the maps; arrow, line, draw and text over them."
+        },
+        "stroke": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "fill": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "fillStyle": { "enum": ["solid", "hachure", "cross-hatch", "zigzag"] },
+        "strokeWidth": { "type": "number", "exclusiveMinimum": 0 },
+        "strokeStyle": { "enum": ["solid", "dashed", "dotted"] },
+        "roughness": { "enum": [0, 1, 2] },
+        "round": { "type": "boolean" },
+        "opacity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "seed": { "type": "number" },
+        "locked": { "type": "boolean" },
+        "groups": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Innermost first."
+        },
+        "frame": { "type": "string", "minLength": 1, "description": "Id of the owning frame element." },
+        "link": { "type": "string" },
+        "text": { "type": "string", "description": "At most 8,000 UTF-8 bytes." },
+        "fontSize": { "type": "number", "exclusiveMinimum": 0 },
+        "font": { "enum": ["theme", "hand", "code"] },
+        "align": { "enum": ["left", "center", "right"] },
+        "textColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "points": {
+          "type": "array",
+          "items": { "type": "number" },
+          "maxItems": 8192,
+          "description": "x0, y0, x1, y1, ... relative to (x, y); at most 4,096 points."
+        },
+        "pressures": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0, "maximum": 1 },
+          "maxItems": 4096,
+          "description": "One per point."
+        },
+        "start": { "$ref": "#/$defs/canvasBinding" },
+        "end": { "$ref": "#/$defs/canvasBinding" },
+        "startHead": { "enum": ["none", "arrow", "dot", "bar"] },
+        "endHead": { "enum": ["none", "arrow", "dot", "bar"] },
+        "elbow": { "type": "boolean" },
+        "asset": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "Image content hash in the assets table."
+        },
+        "source": {
+          "type": "object",
+          "description": "Unused fields of an imported .excalidraw element, kept for the round trip."
+        }
+      }
+    }
+  }
+}

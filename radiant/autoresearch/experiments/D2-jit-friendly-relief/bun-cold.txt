@@ -1,0 +1,4 @@
+base.js: rope 258+39 | rope 64+31
+d2.js: rope 151+38 | rope 38+22
+base.js: clean 75+28 | soft-clay 107+36 | lifted-arcs 159+17 | rope 421+29 | paper-quilling 95+36 | clean 51+14
+d2.js: clean 69+37 | soft-clay 100+24 | lifted-arcs 103+18 | rope 191+33 | paper-quilling 81+34 | clean 60+11

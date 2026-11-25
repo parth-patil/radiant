@@ -1,0 +1,182 @@
+{
+ "chrome": {
+  "A": [
+   {
+    "inView": 127,
+    "sweep": {
+     "frames": 90,
+     "mean": 0.609,
+     "p95": 3.545,
+     "max": 5.31,
+     "sum": 54.82
+    },
+    "sweepSettleFrames": 1,
+    "jumpInView": 483,
+    "jump": {
+     "frames": 2,
+     "mean": 4.345,
+     "p95": 4.625,
+     "max": 4.625,
+     "sum": 8.69
+    },
+    "jumpFrames": 2,
+    "jumpSeq": "4.06/21 4.63/532"
+   },
+   {
+    "inView": 127,
+    "sweep": {
+     "frames": 90,
+     "mean": 0.639,
+     "p95": 3.555,
+     "max": 5.155,
+     "sum": 57.54
+    },
+    "sweepSettleFrames": 1,
+    "jumpInView": 483,
+    "jump": {
+     "frames": 2,
+     "mean": 4.36,
+     "p95": 4.675,
+     "max": 4.675,
+     "sum": 8.72
+    },
+    "jumpFrames": 2,
+    "jumpSeq": "4.04/30 4.68/532"
+   }
+  ],
+  "B": [
+   {
+    "inView": 127,
+    "sweep": {
+     "frames": 90,
+     "mean": 0.542,
+     "p95": 1.395,
+     "max": 5.985,
+     "sum": 48.81
+    },
+    "sweepSettleFrames": 1,
+    "jumpInView": 483,
+    "jump": {
+     "frames": 2,
+     "mean": 4.66,
+     "p95": 4.78,
+     "max": 4.78,
+     "sum": 9.32
+    },
+    "jumpFrames": 2,
+    "jumpSeq": "4.54/116 4.78/532"
+   },
+   {
+    "inView": 127,
+    "sweep": {
+     "frames": 90,
+     "mean": 0.515,
+     "p95": 1.395,
+     "max": 5.35,
+     "sum": 46.34
+    },
+    "sweepSettleFrames": 1,
+    "jumpInView": 483,
+    "jump": {
+     "frames": 2,
+     "mean": 4.407,
+     "p95": 4.45,
+     "max": 4.45,
+     "sum": 8.81
+    },
+    "jumpFrames": 2,
+    "jumpSeq": "4.45/136 4.36/532"
+   }
+  ]
+ },
+ "webkit": {
+  "A": [
+   {
+    "inView": 127,
+    "sweep": {
+     "frames": 90,
+     "mean": 1.668,
+     "p95": 5.12,
+     "max": 7.76,
+     "sum": 150.1
+    },
+    "sweepSettleFrames": 1,
+    "jumpInView": 483,
+    "jump": {
+     "frames": 6,
+     "mean": 4.677,
+     "p95": 6.4,
+     "max": 6.4,
+     "sum": 28.06
+    },
+    "jumpFrames": 6,
+    "jumpSeq": "6.4/2 4.64/116 4.66/208 4.68/325 4.62/442 3.06/532"
+   },
+   {
+    "inView": 127,
+    "sweep": {
+     "frames": 90,
+     "mean": 1.746,
+     "p95": 4.98,
+     "max": 18.04,
+     "sum": 157.18
+    },
+    "sweepSettleFrames": 1,
+    "jumpInView": 483,
+    "jump": {
+     "frames": 5,
+     "mean": 4.348,
+     "p95": 5.6,
+     "max": 5.6,
+     "sum": 21.74
+    },
+    "jumpFrames": 5,
+    "jumpSeq": "5.6/16 4.26/153 4.48/256 3.8/403 3.6/532"
+   }
+  ],
+  "B": [
+   {
+    "inView": 127,
+    "sweep": {
+     "frames": 90,
+     "mean": 1.204,
+     "p95": 4.94,
+     "max": 17.76,
+     "sum": 108.4
+    },
+    "sweepSettleFrames": 2,
+    "jumpInView": 483,
+    "jump": {
+     "frames": 6,
+     "mean": 4.613,
+     "p95": 6.1,
+     "max": 6.1,
+     "sum": 27.68
+    },
+    "jumpFrames": 6,
+    "jumpSeq": "6.1/1 4.46/114 4.52/202 4.58/308 4.34/415 3.68/532"
+   },
+   {
+    "inView": 127,
+    "sweep": {
+     "frames": 90,
+     "mean": 1.146,
+     "p95": 5.3,
+     "max": 8.1,
+     "sum": 103.18
+    },
+    "sweepSettleFrames": 2,
+    "jumpInView": 483,
+    "jump": {
+     "frames": 6,
+     "mean": 4.567,
+     "p95": 5.9,
+     "max": 5.9,
+     "sum": 27.4
+    },
+    "jumpFrames": 6,
+    "jumpSeq": "5.9/1 4.5/115 4.7/204 4.68/319 4.16/434 3.46/532"
+   }
+  ]
+ }
+}

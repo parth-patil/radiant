@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><script type="module">
+const q = new URLSearchParams(location.search);
+const n = q.get('n'), theme = q.get('theme');
+const M = await import('./' + q.get('a'));
+const data = await (await fetch('data/specs-' + n + '-' + theme + '.json')).json();
+const relief = data.relief || undefined;
+const specs = data.specs;
+window.__run = (reps) => { const out = {miss: [], pack: []}; for (let r = 0; r < reps; r++) { let t = performance.now(); const c = new M.BranchMeshCache(); const mesh = c.build(specs, relief); out.miss.push(performance.now() - t); t = performance.now(); M.packVertices(mesh); out.pack.push(performance.now() - t); } return out; };
+window.__ready = true;
+</script>

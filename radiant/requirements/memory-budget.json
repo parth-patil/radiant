@@ -1,0 +1,10 @@
+{
+  "peakTotalMiB": {
+    "small": 325,
+    "large": 700,
+    "stress": 1500
+  },
+  "peakCloseAboveBaselineMiB": 100,
+  "lateAboveEarlyMiB": 30,
+  "closeSlopeMiBPerCycle": 4
+}

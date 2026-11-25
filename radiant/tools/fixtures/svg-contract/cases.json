@@ -1,0 +1,309 @@
+{
+  "request": {
+    "palette": [
+      "#353950"
+    ],
+    "nodes": [
+      {
+        "id": "root",
+        "text": "Root",
+        "parentId": null,
+        "box": {
+          "x": 0,
+          "y": 0,
+          "w": 80,
+          "h": 80
+        }
+      },
+      {
+        "id": "leaf",
+        "text": "Leaf",
+        "parentId": "root",
+        "box": {
+          "x": 140,
+          "y": 0,
+          "w": 80,
+          "h": 80
+        }
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "good",
+      "file": "good.svg",
+      "errors": []
+    },
+    {
+      "name": "coincident",
+      "file": "coincident.svg",
+      "errors": [
+        "anchors-coincide:root"
+      ]
+    },
+    {
+      "name": "coincident-allowed",
+      "file": "coincident.svg",
+      "errors": [],
+      "limits": {
+        "anchorSeparation": 0
+      }
+    },
+    {
+      "name": "missing-child",
+      "file": "missing-child.svg",
+      "errors": [
+        "missing-group:leaf"
+      ]
+    },
+    {
+      "name": "nested-duplicate",
+      "file": "nested-duplicate.svg",
+      "errors": [
+        "nested-group"
+      ]
+    },
+    {
+      "name": "duplicate-group",
+      "file": "duplicate-group.svg",
+      "errors": [
+        "duplicate-group:leaf"
+      ]
+    },
+    {
+      "name": "anchor-outside",
+      "file": "anchor-outside.svg",
+      "errors": [
+        "anchor-outside:leaf"
+      ]
+    },
+    {
+      "name": "leaf-out-anchor",
+      "file": "leaf-out-anchor.svg",
+      "errors": [
+        "anchor-leaf:leaf"
+      ]
+    },
+    {
+      "name": "transformed-overflow",
+      "file": "transformed-overflow.svg",
+      "errors": [
+        "outside-box:leaf"
+      ]
+    },
+    {
+      "name": "stroked-overflow",
+      "file": "stroked-overflow.svg",
+      "errors": [
+        "outside-box:leaf"
+      ]
+    },
+    {
+      "name": "palette",
+      "file": "palette.svg",
+      "errors": [
+        "palette"
+      ]
+    },
+    {
+      "name": "implicit-palette",
+      "file": "implicit-palette.svg",
+      "errors": [
+        "palette"
+      ]
+    },
+    {
+      "name": "forbidden-text",
+      "file": "forbidden-text.svg",
+      "errors": [
+        "text"
+      ]
+    },
+    {
+      "name": "external-reference",
+      "file": "external-reference.svg",
+      "errors": [
+        "forbidden-attribute"
+      ]
+    },
+    {
+      "name": "malformed",
+      "file": "malformed.svg",
+      "errors": [
+        "malformed"
+      ]
+    },
+    {
+      "name": "outside-root",
+      "file": "outside-root.svg",
+      "errors": [
+        "malformed"
+      ]
+    },
+    {
+      "name": "node-budget",
+      "file": "node-budget.svg",
+      "errors": [
+        "budget-node:root"
+      ],
+      "limits": {
+        "perNode": 1
+      }
+    },
+    {
+      "name": "region-budget",
+      "file": "good.svg",
+      "errors": [
+        "budget-total"
+      ],
+      "limits": {
+        "total": 1
+      }
+    },
+    {
+      "name": "bytes-budget",
+      "file": "good.svg",
+      "errors": [
+        "too-large"
+      ],
+      "limits": {
+        "bytes": 32
+      }
+    },
+    {
+      "name": "arc-overflow",
+      "file": "arc-overflow.svg",
+      "errors": [
+        "outside-box:leaf"
+      ]
+    },
+    {
+      "name": "arc-inside",
+      "file": "arc-inside.svg",
+      "errors": []
+    },
+    {
+      "name": "malformed-entity",
+      "file": "malformed-entity.svg",
+      "errors": [
+        "malformed"
+      ]
+    },
+    {
+      "name": "connector-group",
+      "file": "connector-group.svg",
+      "errors": [
+        "connector"
+      ]
+    },
+    {
+      "name": "cross-node-drawing",
+      "file": "cross-node-drawing.svg",
+      "errors": [
+        "outside-box:root"
+      ]
+    },
+    {
+      "name": "missing-attribute-space",
+      "file": "missing-attribute-space.svg",
+      "errors": [
+        "malformed"
+      ]
+    },
+    {
+      "name": "rebound-namespace",
+      "file": "rebound-namespace.svg",
+      "errors": [
+        "xml"
+      ]
+    },
+    {
+      "name": "wrong-leaf-direction",
+      "file": "wrong-leaf-direction.svg",
+      "errors": [
+        "anchor-side:leaf"
+      ]
+    },
+    {
+      "name": "wrong-child-direction",
+      "file": "wrong-child-direction.svg",
+      "errors": [
+        "anchor-side:root"
+      ]
+    },
+    {
+      "name": "interior-anchor",
+      "file": "interior-anchor.svg",
+      "errors": [
+        "anchor-off-edge:leaf"
+      ]
+    },
+    {
+      "name": "diagonal-ellipse",
+      "file": "diagonal-ellipse.svg",
+      "errors": []
+    },
+    {
+      "name": "external-parent-anchor",
+      "file": "external-parent-anchor.svg",
+      "nodes": [
+        {
+          "id": "leaf",
+          "text": "Leaf",
+          "parentId": "external",
+          "parent": {
+            "id": "external",
+            "text": "Earlier region parent",
+            "centre": {
+              "x": -80,
+              "y": 40
+            },
+            "anchorOut": {
+              "x": 40,
+              "y": -70
+            }
+          },
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 80,
+            "h": 80
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "name": "external-parent-centre-mismatch",
+      "file": "external-parent-centre-mismatch.svg",
+      "nodes": [
+        {
+          "id": "leaf",
+          "text": "Leaf",
+          "parentId": "external",
+          "parent": {
+            "id": "external",
+            "text": "Earlier region parent",
+            "centre": {
+              "x": -80,
+              "y": 40
+            },
+            "anchorOut": {
+              "x": 40,
+              "y": -70
+            }
+          },
+          "box": {
+            "x": 0,
+            "y": 0,
+            "w": 80,
+            "h": 80
+          }
+        }
+      ],
+      "errors": [
+        "anchor-side:leaf"
+      ]
+    }
+  ]
+}

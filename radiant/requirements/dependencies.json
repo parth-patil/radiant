@@ -1,0 +1,426 @@
+{
+  "npm:@modelcontextprotocol/sdk": {
+    "purpose": "Agent tool protocol",
+    "rationale": "Reuse the reference MCP transport and schemas",
+    "boundary": "tools/agent-cli.ts",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:@tauri-apps/api": {
+    "purpose": "Native shell IPC",
+    "rationale": "Use the desktop shell's supported bridge",
+    "boundary": "src/lib/host/",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "npm:@tauri-apps/plugin-dialog": {
+    "purpose": "Native file selection",
+    "rationale": "Delegate OS dialogs to supported platform APIs",
+    "boundary": "src/lib/host/",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "npm:@tauri-apps/plugin-notification": {
+    "purpose": "Desktop study reminders",
+    "rationale": "Use system permission and notification delivery",
+    "boundary": "src/lib/host/",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "npm:@tauri-apps/plugin-opener": {
+    "purpose": "Validated external links",
+    "rationale": "Delegate application and browser launch to the OS",
+    "boundary": "src/lib/host/",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "npm:@tauri-apps/plugin-updater": {
+    "purpose": "Signed release updates",
+    "rationale": "Use the shell's verified update transport",
+    "boundary": "src/lib/host/",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "npm:fflate": {
+    "purpose": "Portable ZIP archives",
+    "rationale": "Reuse interoperable compression and archive parsing",
+    "boundary": "src/lib/core/io/",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:jspdf": {
+    "purpose": "PDF export",
+    "rationale": "Reuse a portable PDF writer and font handling",
+    "boundary": "src/lib/ui/export-visual.ts",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:katex": {
+    "purpose": "Math typesetting",
+    "rationale": "Use a mature, local TeX parser and layout engine",
+    "boundary": "src/lib/ui/note-preview.ts",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:markdown-it": {
+    "purpose": "Markdown parsing",
+    "rationale": "Reuse standardized parsing and extensions while retaining local rendering policy",
+    "boundary": "src/lib/core/model/markdown.ts",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:plist": {
+    "purpose": "Property-list decoding",
+    "rationale": "Reuse an interoperable XML plist decoder",
+    "boundary": "src/lib/ui/mindnode-import.ts",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:roughjs": {
+    "purpose": "Sketchy outlines and hachure fills for canvas elements",
+    "rationale": "Reuse the generator Excalidraw uses so imported shapes keep their seeded wobble",
+    "boundary": "src/lib/core/geometry/sketch.ts",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:svg2pdf.js": {
+    "purpose": "Editable SVG to PDF conversion",
+    "rationale": "Reuse vector, path and text translation",
+    "boundary": "src/lib/ui/export-visual.ts",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:zod": {
+    "purpose": "AI and protocol data validation",
+    "rationale": "Reuse typed input schemas and structured validation",
+    "boundary": "Agent tooling",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:@sveltejs/adapter-static": {
+    "purpose": "Static front-end packaging",
+    "rationale": "Build the same application for offline desktop and browser fixtures",
+    "boundary": "build tooling",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:@sveltejs/kit": {
+    "purpose": "Front-end routes and build",
+    "rationale": "Use the framework's client entry points and static build",
+    "boundary": "route shell",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:@sveltejs/vite-plugin-svelte": {
+    "purpose": "Svelte compilation",
+    "rationale": "Use the official compiler integration",
+    "boundary": "build tooling",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:@tauri-apps/cli": {
+    "purpose": "Desktop build and bundling",
+    "rationale": "Use the platform build and signing integration",
+    "boundary": "build tooling",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "npm:svelte": {
+    "purpose": "Reactive front-end components",
+    "rationale": "Use a maintained component runtime and compiler",
+    "boundary": "UI shell",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:svelte-check": {
+    "purpose": "Svelte diagnostics",
+    "rationale": "Use supported component and TypeScript validation",
+    "boundary": "build tooling",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:thumbhash": {
+    "purpose": "Compact bitmap placeholders",
+    "rationale": "Use the upstream encoder and decoder compatible with the native asset index",
+    "boundary": "src/lib/host/image-preview.ts and src/lib/render/images.ts",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:typescript": {
+    "purpose": "Type checking and compiler",
+    "rationale": "Use the ecosystem compiler and language service",
+    "boundary": "build tooling",
+    "licenses": [
+      "Apache-2.0"
+    ]
+  },
+  "npm:vite": {
+    "purpose": "Static bundling and development server",
+    "rationale": "Reuse fast module transformation and asset handling",
+    "boundary": "build tooling",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "npm:vitest": {
+    "purpose": "Automated check runner",
+    "rationale": "Reuse a Node runner compatible with the application build",
+    "boundary": "build tooling",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "crates.io:serde_json": {
+    "purpose": "JSON codec for document and IPC data",
+    "rationale": "Use a well-tested parser and serializer",
+    "boundary": "native shell modules",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:tauri-build": {
+    "purpose": "Generate native shell bindings",
+    "rationale": "Use official capability and resource tooling",
+    "boundary": "native build",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:tauri": {
+    "purpose": "Desktop windowing and IPC",
+    "rationale": "Use the shell's native APIs and WebView integration",
+    "boundary": "native shell",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:tauri-plugin-dialog": {
+    "purpose": "OS file dialogs",
+    "rationale": "Delegate file picking to the native shell",
+    "boundary": "native shell",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:tauri-plugin-opener": {
+    "purpose": "Validated item opening",
+    "rationale": "Delegate platform application selection",
+    "boundary": "native shell",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:tokio": {
+    "purpose": "Async native I/O and supervision",
+    "rationale": "Use a maintained scheduler and cancellation primitives",
+    "boundary": "native shell modules",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "crates.io:rusqlite": {
+    "purpose": "SQLite transactional storage",
+    "rationale": "Use the supported rusqlite 0.41 release line with a bundled SQLite engine that includes the RUSTSEC-2026-0459 fix",
+    "boundary": "src-tauri/src/store/",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "crates.io:thiserror": {
+    "purpose": "Typed storage and host errors",
+    "rationale": "Reuse derive-based error formatting and chaining",
+    "boundary": "native shell modules",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:anyhow": {
+    "purpose": "Native error context",
+    "rationale": "Reuse structured error chaining",
+    "boundary": "native shell modules",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:uuid": {
+    "purpose": "Stable app and record IDs",
+    "rationale": "Reuse standard UUID construction and entropy",
+    "boundary": "native shell modules",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:sha2": {
+    "purpose": "SHA-256 content hashing",
+    "rationale": "Use a vetted digest implementation",
+    "boundary": "native storage and AI",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:hex": {
+    "purpose": "Digest encoding",
+    "rationale": "Use standard hexadecimal encoding",
+    "boundary": "native storage and AI",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:base64": {
+    "purpose": "Binary IPC encoding",
+    "rationale": "Use interoperable binary-to-text conversions",
+    "boundary": "native shell modules",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:libc": {
+    "purpose": "Unix child-process group termination",
+    "rationale": "Use the platform signal definitions to stop the app-server and its subprocesses together",
+    "boundary": "src-tauri/src/codex/rpc.rs",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:log": {
+    "purpose": "Categorical diagnostic façade",
+    "rationale": "Keep logging backend-independent",
+    "boundary": "native shell modules",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:dirs": {
+    "purpose": "Platform data path discovery",
+    "rationale": "Use maintained OS path conventions",
+    "boundary": "native shell modules",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:serde": {
+    "purpose": "Typed structured serialization",
+    "rationale": "Reuse derives and a common serialization model",
+    "boundary": "native shell modules",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:tauri-plugin-updater": {
+    "purpose": "Signed update flow",
+    "rationale": "Use the host's signature and update validation",
+    "boundary": "native shell",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:tauri-plugin-notification": {
+    "purpose": "Desktop reminders",
+    "rationale": "Use the OS notification bridge",
+    "boundary": "native shell",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:drag": {
+    "purpose": "Native drag-out integration",
+    "rationale": "Use platform drop-source behavior",
+    "boundary": "src-tauri/src/native_interop.rs",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:image": {
+    "purpose": "Image dimensions and thumbnails",
+    "rationale": "Reuse hardened parsers for standard image formats",
+    "boundary": "src-tauri/src/store/",
+    "licenses": [
+      "MIT OR Apache-2.0"
+    ]
+  },
+  "crates.io:thumbhash": {
+    "purpose": "Compact image placeholders",
+    "rationale": "Use the compatible reference encoding",
+    "boundary": "src-tauri/src/store/asset_meta.rs",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "crates.io:resvg": {
+    "purpose": "Safe local SVG rasterization",
+    "rationale": "Reuse a purpose-built vector rasterizer",
+    "boundary": "src-tauri/src/store/asset_meta.rs",
+    "licenses": [
+      "Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:zip": {
+    "purpose": "Native archive reader",
+    "rationale": "Reuse a maintained ZIP parser",
+    "boundary": "src-tauri/src/store/mindnode.rs",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "crates.io:block2": {
+    "purpose": "EventKit permission completion",
+    "rationale": "Use typed Objective-C blocks to handle the operating system's asynchronous permission response",
+    "boundary": "src-tauri/src/reminders/eventkit.rs",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "crates.io:objc2": {
+    "purpose": "Objective-C system bridge",
+    "rationale": "Use typed native messaging",
+    "boundary": "macOS native shell",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "crates.io:objc2-foundation": {
+    "purpose": "Foundation types",
+    "rationale": "Reuse native bindings and ownership rules",
+    "boundary": "macOS native shell",
+    "licenses": [
+      "MIT"
+    ]
+  },
+  "crates.io:objc2-app-kit": {
+    "purpose": "AppKit integration",
+    "rationale": "Use typed system clipboard and window APIs",
+    "boundary": "macOS native shell",
+    "licenses": [
+      "Zlib OR Apache-2.0 OR MIT"
+    ]
+  },
+  "crates.io:objc2-web-kit": {
+    "purpose": "WebKit integration",
+    "rationale": "Use typed WebView bindings",
+    "boundary": "macOS native shell",
+    "licenses": [
+      "Zlib OR Apache-2.0 OR MIT"
+    ]
+  }
+}

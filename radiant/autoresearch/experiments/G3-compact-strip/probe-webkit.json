@@ -1,0 +1,1076 @@
+{
+ "args": {
+  "a": "/private/tmp/claude-501/-Users-parth-projects-general-mind-maps/58425155-0c4a-49c7-bc98-b2e0f4d9fe14/scratchpad/ar/gpu/builds/parent",
+  "b": "/private/tmp/claude-501/-Users-parth-projects-general-mind-maps/58425155-0c4a-49c7-bc98-b2e0f4d9fe14/scratchpad/ar/gpu/builds/g3",
+  "engine": "webkit",
+  "sizes": "5000,20000,50000",
+  "rounds": 3,
+  "frames": 60,
+  "theme": "clean",
+  "out": "/private/tmp/claude-501/-Users-parth-projects-general-mind-maps/58425155-0c4a-49c7-bc98-b2e0f4d9fe14/scratchpad/ar/gpu/g3-webkit.json"
+ },
+ "runs": [
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 159.41999999999996,
+    "editMs": 133.88,
+    "branchMeshMs": 15.240000000000002,
+    "editBranchMeshMs": 5.800000000000011,
+    "adoptMs": 0.07999999999998408,
+    "editAdoptMs": 0.03999999999996362,
+    "recordBytes": 0,
+    "gpuBufferBytes": 12465264,
+    "frames": {
+     "fit": {
+      "wall": 1.0199999999999818,
+      "cpu": 0.18000000000006366,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 64894,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.2800000000002,
+      "cpu": 0.29999999999972715,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 124994,
+      "draws": 4
+     },
+     "z0.35": {
+      "wall": 0.8999999999996362,
+      "cpu": 0.16000000000076398,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 20732,
+      "draws": 4
+     },
+     "z1": {
+      "wall": 1,
+      "cpu": 0.13999999999941792,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 8284,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 1.0199999999986176,
+      "cpu": 0.11999999999989086,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 1386,
+      "draws": 3
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 0,
+   "n": 5000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 153.1,
+    "editMs": 134.98000000000002,
+    "branchMeshMs": 4.760000000000005,
+    "editBranchMeshMs": 2.9000000000000057,
+    "adoptMs": 0.1400000000000432,
+    "editAdoptMs": 0.040000000000020464,
+    "recordBytes": 655360,
+    "gpuBufferBytes": 235480,
+    "frames": {
+     "fit": {
+      "wall": 0.9399999999998272,
+      "cpu": 0.20000000000004547,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 92384,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.4800000000000182,
+      "cpu": 0.3599999999996726,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 140016,
+      "draws": 10
+     },
+     "z0.35": {
+      "wall": 0.8599999999996726,
+      "cpu": 0.15999999999985448,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 23072,
+      "draws": 12
+     },
+     "z1": {
+      "wall": 0.9600000000000364,
+      "cpu": 0.11999999999989086,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 9184,
+      "draws": 10
+     },
+     "z4": {
+      "wall": 0.8800000000001091,
+      "cpu": 0.11999999999989086,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 1456,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 0,
+   "n": 5000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 351.04,
+    "editMs": 219,
+    "branchMeshMs": 13.060000000000002,
+    "editBranchMeshMs": 8.099999999999966,
+    "adoptMs": 0.13999999999998636,
+    "editAdoptMs": 0.12000000000000455,
+    "recordBytes": 2588672,
+    "gpuBufferBytes": 570412,
+    "frames": {
+     "fit": {
+      "wall": 1.3399999999999181,
+      "cpu": 0.2799999999999727,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 373024,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.6200000000003456,
+      "cpu": 0.3599999999996726,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 196272,
+      "draws": 19
+     },
+     "z0.35": {
+      "wall": 1.180000000000291,
+      "cpu": 0.2600000000002183,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 50160,
+      "draws": 14
+     },
+     "z1": {
+      "wall": 1.1599999999998545,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 33104,
+      "draws": 14
+     },
+     "z4": {
+      "wall": 1.140000000001237,
+      "cpu": 0.1000000000003638,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 25712,
+      "draws": 7
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 0,
+   "n": 20000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 407.56,
+    "editMs": 247.2600000000001,
+    "branchMeshMs": 35.56,
+    "editBranchMeshMs": 13.420000000000016,
+    "adoptMs": 0.15999999999996817,
+    "editAdoptMs": 0.08000000000004093,
+    "recordBytes": 0,
+    "gpuBufferBytes": 45522112,
+    "frames": {
+     "fit": {
+      "wall": 1.3799999999996544,
+      "cpu": 0.2599999999999909,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 237188,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.599999999999909,
+      "cpu": 0.36000000000012733,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 172674,
+      "draws": 3
+     },
+     "z0.35": {
+      "wall": 0.9600000000000364,
+      "cpu": 0.22000000000025466,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 45246,
+      "draws": 3
+     },
+     "z1": {
+      "wall": 1.0600000000004002,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 30786,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 0.8999999999996362,
+      "cpu": 0.11999999999898137,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 24346,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 0,
+   "n": 20000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 953.04,
+    "editMs": 561.9000000000001,
+    "branchMeshMs": 70.57999999999993,
+    "editBranchMeshMs": 29.360000000000127,
+    "adoptMs": 0.2400000000000091,
+    "editAdoptMs": 0.18000000000006366,
+    "recordBytes": 0,
+    "gpuBufferBytes": 109681744,
+    "frames": {
+     "fit": {
+      "wall": 2.099999999999909,
+      "cpu": 0.5,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 573650,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.819999999999709,
+      "cpu": 0.419999999999618,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 226750,
+      "draws": 3
+     },
+     "z0.35": {
+      "wall": 1.2799999999997453,
+      "cpu": 0.2599999999993088,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 103532,
+      "draws": 3
+     },
+     "z1": {
+      "wall": 1.2599999999993088,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 89394,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 1.3799999999991996,
+      "cpu": 0.13999999999941792,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 82640,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 0,
+   "n": 50000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 816.1199999999999,
+    "editMs": 480.3399999999999,
+    "branchMeshMs": 22.08000000000004,
+    "editBranchMeshMs": 11.220000000000027,
+    "adoptMs": 0.2599999999999909,
+    "editAdoptMs": 0.20000000000004547,
+    "recordBytes": 6422528,
+    "gpuBufferBytes": 1225496,
+    "frames": {
+     "fit": {
+      "wall": 2.0799999999999272,
+      "cpu": 0.5399999999999636,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 929280,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.400000000000091,
+      "cpu": 0.38000000000010914,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 259104,
+      "draws": 16
+     },
+     "z0.35": {
+      "wall": 1.3400000000001455,
+      "cpu": 0.23999999999978172,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 111392,
+      "draws": 14
+     },
+     "z1": {
+      "wall": 1.180000000000291,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 94528,
+      "draws": 12
+     },
+     "z4": {
+      "wall": 1.4400000000005093,
+      "cpu": 0.12000000000080036,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 86912,
+      "draws": 7
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 0,
+   "n": 50000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 156.26,
+    "editMs": 115.74000000000001,
+    "branchMeshMs": 6.040000000000006,
+    "editBranchMeshMs": 2.8400000000000034,
+    "adoptMs": 0.12000000000000455,
+    "editAdoptMs": 0.05999999999994543,
+    "recordBytes": 655360,
+    "gpuBufferBytes": 235480,
+    "frames": {
+     "fit": {
+      "wall": 1.1000000000001364,
+      "cpu": 0.1799999999998363,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 92384,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.4200000000000728,
+      "cpu": 0.3599999999996726,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 140016,
+      "draws": 10
+     },
+     "z0.35": {
+      "wall": 1.1400000000003274,
+      "cpu": 0.15999999999985448,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 23072,
+      "draws": 12
+     },
+     "z1": {
+      "wall": 1,
+      "cpu": 0.11999999999989086,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 9184,
+      "draws": 10
+     },
+     "z4": {
+      "wall": 0.9600000000000364,
+      "cpu": 0.1000000000003638,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 1456,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 1,
+   "n": 5000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 170.11999999999998,
+    "editMs": 132.57999999999998,
+    "branchMeshMs": 14.599999999999994,
+    "editBranchMeshMs": 5.299999999999983,
+    "adoptMs": 0.1400000000000432,
+    "editAdoptMs": 0.040000000000020464,
+    "recordBytes": 0,
+    "gpuBufferBytes": 12465264,
+    "frames": {
+     "fit": {
+      "wall": 0.8799999999998818,
+      "cpu": 0.16000000000008185,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 64894,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.5599999999999454,
+      "cpu": 0.36000000000012733,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 124994,
+      "draws": 4
+     },
+     "z0.35": {
+      "wall": 1.0799999999999272,
+      "cpu": 0.15999999999985448,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 20732,
+      "draws": 4
+     },
+     "z1": {
+      "wall": 0.9800000000004729,
+      "cpu": 0.11999999999989086,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 8284,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 0.9799999999995634,
+      "cpu": 0.11999999999989086,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 1386,
+      "draws": 3
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 1,
+   "n": 5000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 395.86,
+    "editMs": 247.62,
+    "branchMeshMs": 35.41999999999999,
+    "editBranchMeshMs": 13.180000000000007,
+    "adoptMs": 0.17999999999994998,
+    "editAdoptMs": 0.10000000000002274,
+    "recordBytes": 0,
+    "gpuBufferBytes": 45522112,
+    "frames": {
+     "fit": {
+      "wall": 1.259999999999991,
+      "cpu": 0.3400000000001455,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 237188,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.599999999999909,
+      "cpu": 0.3400000000001455,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 172674,
+      "draws": 3
+     },
+     "z0.35": {
+      "wall": 1.1400000000003274,
+      "cpu": 0.2600000000002183,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 45246,
+      "draws": 3
+     },
+     "z1": {
+      "wall": 1.1199999999998909,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 30786,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 0.9600000000009459,
+      "cpu": 0.13999999999941792,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 24346,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 1,
+   "n": 20000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 352.72,
+    "editMs": 230.98000000000002,
+    "branchMeshMs": 13.700000000000017,
+    "editBranchMeshMs": 9,
+    "adoptMs": 0.15999999999996817,
+    "editAdoptMs": 0.08000000000004093,
+    "recordBytes": 2588672,
+    "gpuBufferBytes": 570412,
+    "frames": {
+     "fit": {
+      "wall": 1.5199999999999818,
+      "cpu": 0.2799999999999727,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 373024,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.6600000000003092,
+      "cpu": 0.40000000000009095,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 196272,
+      "draws": 19
+     },
+     "z0.35": {
+      "wall": 1.0599999999994907,
+      "cpu": 0.22000000000025466,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 50160,
+      "draws": 14
+     },
+     "z1": {
+      "wall": 1.1199999999998909,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 33104,
+      "draws": 14
+     },
+     "z4": {
+      "wall": 1.1199999999989814,
+      "cpu": 0.11999999999898137,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 25712,
+      "draws": 7
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 1,
+   "n": 20000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 835.9800000000001,
+    "editMs": 478.8399999999999,
+    "branchMeshMs": 22.24000000000001,
+    "editBranchMeshMs": 10.720000000000027,
+    "adoptMs": 0.2599999999999909,
+    "editAdoptMs": 0.18000000000006366,
+    "recordBytes": 6422528,
+    "gpuBufferBytes": 1225496,
+    "frames": {
+     "fit": {
+      "wall": 1.8200000000001637,
+      "cpu": 0.5199999999999818,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 929280,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.7200000000002547,
+      "cpu": 0.42000000000007276,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 259104,
+      "draws": 16
+     },
+     "z0.35": {
+      "wall": 1.3200000000006185,
+      "cpu": 0.23999999999978172,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 111392,
+      "draws": 14
+     },
+     "z1": {
+      "wall": 1.0399999999999636,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 94528,
+      "draws": 12
+     },
+     "z4": {
+      "wall": 1.2600000000002183,
+      "cpu": 0.12000000000080036,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 86912,
+      "draws": 7
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 1,
+   "n": 50000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 916.8200000000002,
+    "editMs": 595.4200000000001,
+    "branchMeshMs": 66.74000000000001,
+    "editBranchMeshMs": 28.899999999999864,
+    "adoptMs": 0.22000000000002728,
+    "editAdoptMs": 0.1799999999998363,
+    "recordBytes": 0,
+    "gpuBufferBytes": 109681744,
+    "frames": {
+     "fit": {
+      "wall": 2.119999999999891,
+      "cpu": 0.5,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 573650,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.7600000000002183,
+      "cpu": 0.38000000000010914,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 226750,
+      "draws": 3
+     },
+     "z0.35": {
+      "wall": 1,
+      "cpu": 0.27999999999974534,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 103532,
+      "draws": 3
+     },
+     "z1": {
+      "wall": 1.139999999999418,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 89394,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 1.2600000000002183,
+      "cpu": 0.12000000000080036,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 82640,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 1,
+   "n": 50000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 164.06,
+    "editMs": 132.2,
+    "branchMeshMs": 14.18,
+    "editBranchMeshMs": 5.319999999999993,
+    "adoptMs": 0.13999999999998636,
+    "editAdoptMs": 0.03999999999996362,
+    "recordBytes": 0,
+    "gpuBufferBytes": 12465264,
+    "frames": {
+     "fit": {
+      "wall": 1.0799999999999272,
+      "cpu": 0.16000000000008185,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 64894,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.3800000000001091,
+      "cpu": 0.29999999999972715,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 124994,
+      "draws": 4
+     },
+     "z0.35": {
+      "wall": 1.0399999999999636,
+      "cpu": 0.15999999999985448,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 20732,
+      "draws": 4
+     },
+     "z1": {
+      "wall": 1.0399999999999636,
+      "cpu": 0.12000000000080036,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 8284,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 1,
+      "cpu": 0.11999999999989086,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 1386,
+      "draws": 3
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 2,
+   "n": 5000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 147.89999999999998,
+    "editMs": 115.30000000000001,
+    "branchMeshMs": 5.439999999999998,
+    "editBranchMeshMs": 2.780000000000001,
+    "adoptMs": 0.12000000000000455,
+    "editAdoptMs": 0.04000000000007731,
+    "recordBytes": 655360,
+    "gpuBufferBytes": 235480,
+    "frames": {
+     "fit": {
+      "wall": 1.1000000000001364,
+      "cpu": 0.1799999999998363,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 92384,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.300000000000182,
+      "cpu": 0.3400000000001455,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 140016,
+      "draws": 10
+     },
+     "z0.35": {
+      "wall": 1.139999999999418,
+      "cpu": 0.15999999999985448,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 23072,
+      "draws": 12
+     },
+     "z1": {
+      "wall": 1.0799999999999272,
+      "cpu": 0.11999999999989086,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 9184,
+      "draws": 10
+     },
+     "z4": {
+      "wall": 1.0599999999994907,
+      "cpu": 0.1000000000003638,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 1456,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 2,
+   "n": 5000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 356.14,
+    "editMs": 214.5,
+    "branchMeshMs": 13.099999999999994,
+    "editBranchMeshMs": 9.079999999999984,
+    "adoptMs": 0.12000000000000455,
+    "editAdoptMs": 0.08000000000004093,
+    "recordBytes": 2588672,
+    "gpuBufferBytes": 570412,
+    "frames": {
+     "fit": {
+      "wall": 1.4600000000000364,
+      "cpu": 0.2799999999999727,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 373024,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.4800000000000182,
+      "cpu": 0.3400000000001455,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 196272,
+      "draws": 19
+     },
+     "z0.35": {
+      "wall": 0.9800000000004729,
+      "cpu": 0.23999999999978172,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 50160,
+      "draws": 14
+     },
+     "z1": {
+      "wall": 1.160000000000764,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 33104,
+      "draws": 14
+     },
+     "z4": {
+      "wall": 1.1599999999998545,
+      "cpu": 0.11999999999898137,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 25712,
+      "draws": 7
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 2,
+   "n": 20000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 399.74,
+    "editMs": 247.58000000000004,
+    "branchMeshMs": 36.940000000000026,
+    "editBranchMeshMs": 12.879999999999995,
+    "adoptMs": 0.15999999999996817,
+    "editAdoptMs": 0.08000000000004093,
+    "recordBytes": 0,
+    "gpuBufferBytes": 45522112,
+    "frames": {
+     "fit": {
+      "wall": 1.1200000000003456,
+      "cpu": 0.2799999999999727,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 237188,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.1799999999998363,
+      "cpu": 0.36000000000012733,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 172674,
+      "draws": 3
+     },
+     "z0.35": {
+      "wall": 1.019999999999527,
+      "cpu": 0.2600000000002183,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 45246,
+      "draws": 3
+     },
+     "z1": {
+      "wall": 1.1599999999998545,
+      "cpu": 0.14000000000032742,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 30786,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 1.2199999999993452,
+      "cpu": 0.11999999999898137,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 24346,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 2,
+   "n": 20000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 924.4599999999999,
+    "editMs": 544.0999999999999,
+    "branchMeshMs": 65.66000000000003,
+    "editBranchMeshMs": 29.480000000000018,
+    "adoptMs": 0.3000000000001819,
+    "editAdoptMs": 0.22000000000002728,
+    "recordBytes": 0,
+    "gpuBufferBytes": 109681744,
+    "frames": {
+     "fit": {
+      "wall": 2.100000000000364,
+      "cpu": 0.5,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 573650,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.8200000000006185,
+      "cpu": 0.44000000000005457,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 226750,
+      "draws": 3
+     },
+     "z0.35": {
+      "wall": 1.319999999999709,
+      "cpu": 0.2600000000002183,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 103532,
+      "draws": 3
+     },
+     "z1": {
+      "wall": 1.0199999999986176,
+      "cpu": 0.15999999999985448,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 89394,
+      "draws": 3
+     },
+     "z4": {
+      "wall": 1.5200000000004366,
+      "cpu": 0.12000000000080036,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 82640,
+      "draws": 4
+     }
+    }
+   },
+   "errors": [],
+   "build": "A",
+   "round": 2,
+   "n": 50000
+  },
+  {
+   "timer": false,
+   "summary": {
+    "loadMs": 816.2199999999999,
+    "editMs": 447.74,
+    "branchMeshMs": 24.5,
+    "editBranchMeshMs": 10.160000000000082,
+    "adoptMs": 0.2400000000000091,
+    "editAdoptMs": 0.13999999999987267,
+    "recordBytes": 6422528,
+    "gpuBufferBytes": 1225496,
+    "frames": {
+     "fit": {
+      "wall": 2.019999999999982,
+      "cpu": 0.5,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 929280,
+      "draws": 3
+     },
+     "z0.05": {
+      "wall": 1.7799999999997453,
+      "cpu": 0.48000000000047294,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 259104,
+      "draws": 16
+     },
+     "z0.35": {
+      "wall": 1.5200000000004366,
+      "cpu": 0.28000000000065484,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 111392,
+      "draws": 14
+     },
+     "z1": {
+      "wall": 1.1599999999998545,
+      "cpu": 0.15999999999985448,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 94528,
+      "draws": 12
+     },
+     "z4": {
+      "wall": 1.3400000000001455,
+      "cpu": 0.13999999999941792,
+      "gpu": null,
+      "gpuN": 0,
+      "tris": 86912,
+      "draws": 7
+     }
+    }
+   },
+   "errors": [],
+   "build": "B",
+   "round": 2,
+   "n": 50000
+  }
+ ]
+}

@@ -1,0 +1,68 @@
+[package]
+name = "radiant"
+version = "0.1.0"
+description = "Radiant: a fast, organic mind-mapping app"
+authors = []
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "radiant_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[features]
+# Compile the desktop host without Radiant's private WKPreferences switch.
+public-webkit = []
+
+[build-dependencies]
+cc = "1"
+serde_json = "1"
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["protocol-asset", "tray-icon"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"
+tokio = { version = "1", features = ["process", "io-util", "sync", "macros", "rt-multi-thread", "time", "fs"] }
+rusqlite = { version = "0.41", features = ["bundled"] }
+thiserror = "2"
+anyhow = "1"
+uuid = { version = "1", features = ["v4"] }
+sha2 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+log = "0.4"
+dirs = "6"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri-plugin-updater = "2"
+tauri-plugin-notification = "2"
+drag = "2.1.1"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif"] }
+thumbhash = "0.1"
+resvg = { version = "0.48", default-features = false }
+roxmltree = "0.21"
+zip = { version = "9.6", default-features = false }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+block2 = "0.6.2"
+objc2 = "0.6"
+objc2-foundation = "0.3"
+objc2-app-kit = { version = "0.3", default-features = false, features = ["NSPasteboard", "NSPasteboardItem"] }
+objc2-web-kit = { version = "0.3", features = ["WKWebView", "WKWebViewConfiguration", "WKPreferences"] }
+
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

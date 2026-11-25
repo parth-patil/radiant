@@ -1,0 +1,20 @@
+{
+  "build": {"beforeBundleCommand": "bun tools/build-quicklook.ts"},
+  "bundle": {
+    "macOS": {
+      "signingIdentity": "-",
+      "files": {
+        "Resources/Credits.rtf": "Credits.rtf",
+        "PlugIns/RadiantQuickLook.appex": "quicklook/.bundle/RadiantQuickLook.appex",
+        "Resources/radiant-document.icns": "icons/radiant-document.icns"
+      }
+    },
+    "fileAssociations": [{
+      "ext": ["radiant"],
+      "name": "Radiant mind map",
+      "contentTypes": ["app.radiant.mindmap.document"],
+      "exportedType": {"identifier": "app.radiant.mindmap.document", "conformsTo": ["public.database"]},
+      "role": "Editor"
+    }]
+  }
+}

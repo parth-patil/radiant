@@ -1,0 +1,70 @@
+{
+ "chrome": {
+  "A": [
+   {
+    "fitZoom": 0.0025926182882093996,
+    "renderMean": 2.609,
+    "renderMed": 2.63,
+    "drawLabelsMean": 0.2507,
+    "pendingSeq": "0."
+   },
+   {
+    "fitZoom": 0.0025926182882093996,
+    "renderMean": 2.787,
+    "renderMed": 2.785,
+    "drawLabelsMean": 0.3805,
+    "pendingSeq": "0."
+   }
+  ],
+  "B": [
+   {
+    "fitZoom": 0.0025926182882093996,
+    "renderMean": 2.447,
+    "renderMed": 2.44,
+    "drawLabelsMean": 0.0007,
+    "pendingSeq": "0."
+   },
+   {
+    "fitZoom": 0.0025926182882093996,
+    "renderMean": 2.371,
+    "renderMed": 2.355,
+    "drawLabelsMean": 0.0003,
+    "pendingSeq": "0."
+   }
+  ]
+ },
+ "webkit": {
+  "A": [
+   {
+    "fitZoom": 0.0025926182882093996,
+    "renderMean": 1.249,
+    "renderMed": 1.26,
+    "drawLabelsMean": 0.3526,
+    "pendingSeq": "0 0 0."
+   },
+   {
+    "fitZoom": 0.0025926182882093996,
+    "renderMean": 1.358,
+    "renderMed": 1.4,
+    "drawLabelsMean": 0.3848,
+    "pendingSeq": "0 0 0 0."
+   }
+  ],
+  "B": [
+   {
+    "fitZoom": 0.0025926182882093996,
+    "renderMean": 0.951,
+    "renderMed": 0.96,
+    "drawLabelsMean": 0.0014,
+    "pendingSeq": "347 180 28 0."
+   },
+   {
+    "fitZoom": 0.0025926182882093996,
+    "renderMean": 1.057,
+    "renderMed": 1.1,
+    "drawLabelsMean": 0.002,
+    "pendingSeq": "279 105 0."
+   }
+  ]
+ }
+}

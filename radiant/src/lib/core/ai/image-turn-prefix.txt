@@ -1,0 +1,1 @@
+Use your image generation tool to create exactly one image and do not answer with text beyond one short sentence.

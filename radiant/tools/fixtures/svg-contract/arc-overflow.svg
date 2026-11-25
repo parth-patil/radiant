@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 80">
+  <g id="node-root" data-anchor-in="12,40" data-anchor-out="68,40"><circle cx="40" cy="40" r="28" fill="#353950"/></g>
+  <g id="node-leaf" data-anchor-in="154,40"><path d="M154 8 A26 26 0 01206 8" fill="none" stroke="#353950"/></g>
+</svg>

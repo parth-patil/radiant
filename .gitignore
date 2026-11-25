@@ -1,0 +1,10 @@
+# Generated company analyses (local output of the analyze-stock command)
+analyses/
+
+# Recorded Codex sessions: kept locally for the replay checks, not published (they name an account and a machine)
+spikes/codex-probe/logs/
+
+# Local settings and caches
+.claude/settings.local.json
+__pycache__/
+.DS_Store

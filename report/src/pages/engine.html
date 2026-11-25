@@ -1,0 +1,534 @@
+<section class="page" id="p-engine" data-g="product" data-title="Canvas engine: design and requirements" data-nav="Canvas engine">
+  <h1>Canvas engine: design and requirements</h1>
+  <p class="lead">The engine is a pure, portable core that owns the tree, the layout and the geometry, a small WebGL2 renderer that draws the result, and the browser engine, which supplies SVG rasterisation and text input. Measurements on your Mac show large headroom for this split: a batched WebGL2 scene held 120 frames per second with 100,000 branches, about twenty times the 5,000-node large reference map. This page explains the design, names the algorithms and sources behind it, and states 40 numbered engine requirements.</p>
+
+  <div class="stats">
+    <div class="stat"><b>60 fps</b><span>Default WKWebView frame rate on the 120 Hz built-in display, in every test</span><small>Measured, M4 Pro, macOS 26.5.1</small></div>
+    <div class="stat"><b>120 fps</b><span>Same tests with the private WebKit flag switched off at WebView creation</span><small>Measured, same machine</small></div>
+    <div class="stat"><b>3.5 ms</b><span>Script time per frame for Canvas2D with 5,000 tapered branches, 2,000 labels and 300 images, no culling, at 120 fps</span><small>Measured, one run per configuration</small></div>
+    <div class="stat"><b>100,000</b><span>Batched WebGL2 branches (2.4 million triangles) that held 120 fps; 200,000 branches ran at about 102 fps</span><small>Measured, synthetic scene</small></div>
+  </div>
+
+  <p>These numbers come from a synthetic scene, not a real map, and each configuration was run once. They are described in full on the <a href="#stack">stack page</a> and in the <a href="#quality">quality page</a>, which owns the performance requirements. Not measured: Electron or Chromium, input latency, SVG rendering, real content, real text layout, hit-testing and editing. The design below therefore treats the measurements as evidence that the renderer will not be the bottleneck, and treats everything else as design to be confirmed in the first milestone spikes.</p>
+
+  <div class="callout wide"><span class="tag">Implication for Radiant</span><p>Three decisions shape this page. The engine core is plain TypeScript with no browser or GPU dependencies (decision D-05), so it can run in a worker and later be ported piecemeal. The renderer is a small purpose-built WebGL2 layer behind a narrow interface (D-04). SVG artwork and text editing use the browser engine (D-12, D-03). The tree remains the single source of truth and pictures and SVG are only representations of it (D-09). Picture and SVG subtree behaviour is specified on the <a href="#art-subtrees">art subtrees page</a>; user-facing canvas features are on the <a href="#features">features page</a>.</p></div>
+
+  <h2>Architecture</h2>
+  <p>The engine is a stack of eight layers. The upper layers know nothing about the screen; the lower layers know nothing about the document. The rule that makes the split useful is the dependency direction: a layer may depend only on layers above it in the list, and the first four layers must run unchanged in a web worker and in a plain Node test process.</p>
+
+  <div class="layers">
+    <div class="layer"><b>1. Document model and operation log</b><span>Nodes with stable ids, edges, styles, asset references, and the list of edit operations with their inverses. Runs in the main thread or a worker. Must not depend on the DOM, the GPU, layout results or the file store.</span></div>
+    <div class="layer"><b>2. Layout engine</b><span>Computes a position for every visible node from node boxes, sibling order, the per-branch layout variant and the stored seed. Runs in a worker over compact arrays. Must not depend on rendering, fonts loaded in the page, or asset decoding; it receives sizes as numbers.</span></div>
+    <div class="layer"><b>3. Geometry and tessellation</b><span>Turns branch centrelines and width functions into closed outlines and triangles, and places glyphs along curves. Runs in a worker. Must not depend on WebGL objects; it emits typed arrays.</span></div>
+    <div class="layer"><b>4. Spatial index and hit-testing</b><span>Bounds index for culling and exact outline tests for picking. Runs where the geometry lives (worker, with a read-only copy or query messages for the main thread). Must not depend on the renderer.</span></div>
+    <div class="layer"><b>5. Scene and level of detail</b><span>Builds the per-frame draw list from the visible set, the camera and the zoom, choosing full, reduced or stand-in drawing per item. Runs on the main thread because it must read the camera each frame. Must not mutate the document.</span></div>
+    <div class="layer"><b>6. Renderer backends</b><span>The WebGL2 backend (a handful of batched draw calls) behind a narrow interface; a WebGPU backend later. Runs on the main thread (or an offscreen canvas in a worker if that is later measured to help). Must not know about nodes, only meshes, quads and uniforms.</span></div>
+    <div class="layer"><b>7. Asset pipeline</b><span>Decoding, thumbnail pyramids, placeholders, texture residency, SVG sanitising and rasterisation per zoom bucket. Decoding and rasterisation run in workers; texture upload on the main thread; heavy image work (thumbnails, background removal) in the Rust host (decision D-06). Must not block a frame.</span></div>
+    <div class="layer"><b>8. Host bridge</b><span>The single <code>host</code> interface for the SQLite store, the Codex process, file dialogs and export. Runs in the Rust host process (decision D-01). The front end must not import the shell library anywhere else, so Electron remains a days-not-months swap.</span></div>
+  </div>
+
+  <figure>
+    <div class="frame">
+      <svg viewBox="0 0 920 190" width="920" height="190" role="img" aria-label="Data flow from an edit to pixels through six stages, with where each stage runs">
+        <rect x="10" y="40" width="128" height="60" rx="8" fill="var(--surface)" stroke="var(--ink)"/>
+        <text x="74" y="76" text-anchor="middle" font-size="14" fill="var(--ink)">Edit</text>
+        <rect x="158" y="40" width="128" height="60" rx="8" fill="var(--surface)" stroke="var(--ink)"/>
+        <text x="222" y="76" text-anchor="middle" font-size="14" fill="var(--ink)">Operation log</text>
+        <rect x="306" y="40" width="128" height="60" rx="8" fill="var(--surface)" stroke="var(--ink)"/>
+        <text x="370" y="76" text-anchor="middle" font-size="14" fill="var(--ink)">Layout</text>
+        <rect x="454" y="40" width="128" height="60" rx="8" fill="var(--surface)" stroke="var(--ink)"/>
+        <text x="518" y="76" text-anchor="middle" font-size="14" fill="var(--ink)">Geometry</text>
+        <rect x="602" y="40" width="128" height="60" rx="8" fill="var(--surface)" stroke="var(--ink)"/>
+        <text x="666" y="76" text-anchor="middle" font-size="14" fill="var(--ink)">Scene and index</text>
+        <rect x="750" y="40" width="128" height="60" rx="8" fill="var(--surface)" stroke="var(--ink)"/>
+        <text x="814" y="76" text-anchor="middle" font-size="14" fill="var(--ink)">WebGL2 draw</text>
+        <path d="M138 70 H152" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <polygon points="158,70 150,65 150,75" fill="var(--ink)"/>
+        <path d="M286 70 H300" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <polygon points="306,70 298,65 298,75" fill="var(--ink)"/>
+        <path d="M434 70 H448" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <polygon points="454,70 446,65 446,75" fill="var(--ink)"/>
+        <path d="M582 70 H596" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <polygon points="602,70 594,65 594,75" fill="var(--ink)"/>
+        <path d="M730 70 H744" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <polygon points="750,70 742,65 742,75" fill="var(--ink)"/>
+        <text x="74" y="130" text-anchor="middle" font-size="13" fill="var(--ink-2)">main thread</text>
+        <text x="222" y="130" text-anchor="middle" font-size="13" fill="var(--ink-2)">main, saved by host</text>
+        <text x="370" y="130" text-anchor="middle" font-size="13" fill="var(--ink-2)">worker</text>
+        <text x="518" y="130" text-anchor="middle" font-size="13" fill="var(--ink-2)">worker</text>
+        <text x="666" y="130" text-anchor="middle" font-size="13" fill="var(--ink-2)">main thread</text>
+        <text x="814" y="130" text-anchor="middle" font-size="13" fill="var(--ink-2)">main thread, GPU</text>
+      </svg>
+    </div>
+    <figcaption>Data flow from an edit to pixels. Each edit becomes an operation, the layout worker produces new positions, the geometry worker produces new meshes, and only changed meshes are uploaded. Rendering is on demand, so an idle map draws nothing.</figcaption>
+  </figure>
+
+  <p>The flow in the figure is a proposed design (<span class="badge proposed">Proposed design</span>) that follows the layer list the research notes sketch. Two supporting facts come from published engines. tldraw documents level-of-detail rendering by zoom and on-screen size, reactive state that tracks dependencies automatically, and an R-tree spatial index for brush and erase tools <a class="src" href="https://tldraw.dev/sdk-features/performance" title="tldraw: SDK performance documentation">tldraw perf</a> <a class="src" href="https://tldraw.dev/blog/tldraw-sdk-4.4" title="tldraw: tldraw SDK 4.4 release blog post">tldraw 4.4</a>. Figma's renderer is C++ compiled to WebAssembly, sits behind an interface layer that maps closely to WebGL, uses WebGPU with a mid-session fallback to WebGL, and batches uniforms into one buffer <a class="src" href="https://www.figma.com/blog/figma-rendering-powered-by-webgpu/" title="Figma: Figma Rendering: Powered by WebGPU">Figma blog</a>. Both support the same shape: a spatial index, level of detail, a GPU renderer with a thin backend interface, and a fallback path.</p>
+
+  <p>Decision D-05 says to start in TypeScript and port only measured hot spots. The layers most likely to move are layout and tessellation, which are numeric loops over arrays. Decision D-16 keeps Zig as a candidate for exactly this kind of small kernel compiled to WebAssembly; see the <a href="#zig">Zig page</a>. Writing the layers as functions over typed arrays, with no object graphs crossing the boundary, is what keeps that port cheap.</p>
+
+  <div class="callout risk"><span class="tag">Risk</span><p>The 120 fps result depends on a private WebKit flag. The engine must therefore pace itself from the refresh interval it actually observes, not from an assumed 120 Hz, and must meet its work budget at 16.7 ms as well as 8.3 ms. WebKit bug 294338 asking for a public API is still open <a class="src" href="https://bugs.webkit.org/show_bug.cgi?id=294338" title="WebKit Bugzilla: bug 294338, 120 Hz in WKWebView">WebKit 294338</a>.</p></div>
+
+  <div class="req-list">
+    <div class="req" id="ENG-01">
+      <div class="req-head"><code class="req-id">ENG-01</code><span class="badge must">Must</span><h4>Pure engine core</h4></div>
+      <p>The document model, operation log, layout, geometry, tessellation, spatial index and hit-testing must be TypeScript modules with no import of DOM, canvas, WebGL, Tauri or Node-only APIs.</p>
+      <p class="req-meta"><b>Accept when:</b> the core test suite runs unchanged in a Node process and in a web worker, and a build check fails if any core module imports from the renderer, asset or host packages. <b>Why:</b> keeps a later port to Rust or Zig and a native-shell fallback open (decisions D-05, D-17).</p>
+    </div>
+    <div class="req" id="ENG-02">
+      <div class="req-head"><code class="req-id">ENG-02</code><span class="badge must">Must</span><h4>Narrow renderer and host interfaces</h4></div>
+      <p>All GPU work must go through one renderer interface that speaks in meshes, quads, glyph quads and uniforms, and all native calls must go through one <code>host</code> interface. No other module may import the shell library or call WebGL directly.</p>
+      <p class="req-meta"><b>Accept when:</b> a headless test renderer implementing the interface passes the same scene tests as the WebGL2 backend, and a search of the source finds the shell library imported in exactly one module. <b>Why:</b> allows a WebGPU backend, PixiJS fallback or Electron shell without touching the engine (decisions D-01, D-04; see <a href="#stack">the stack page</a>).</p>
+    </div>
+    <div class="req" id="ENG-03">
+      <div class="req-head"><code class="req-id">ENG-03</code><span class="badge must">Must</span><h4>Heavy work off the main thread</h4></div>
+      <p>Layout, tessellation, SVG rasterisation and image decoding must run off the main thread, and the main thread must receive only finished typed arrays or bitmaps.</p>
+      <p class="req-meta"><b>Accept when:</b> on the 5,000-node reference map, main-thread script time per frame during continuous pan and zoom is at most 4 ms, measured over a 10-second run, and stays within the 8.3 ms frame budget at 120 Hz. <b>Why:</b> the budgets in <a href="#quality">the quality page</a>; Canvas2D already used 3.5 ms of script per frame unculled in the spike.</p>
+    </div>
+  </div>
+
+  <h2>Layout</h2>
+  <p>Layout is the part of the engine that decides where every node goes. The recommended base is a non-layered tidy tree for variable-size nodes (decision D-13), with two-sided, radial, top-down and outline-like variants chosen per main branch, and an organic treatment on top that is seeded so it is reproducible. The model never decides layout (decision D-08).</p>
+
+  <h3>The tidy-tree lineage</h3>
+  <p>The standard lineage starts with Reingold and Tilford (1981), continues with Walker (1989 and 1990) and Buchheim, Juenger and Leipert (2002, linear time), and reaches van der Ploeg (2014). The first three are cited through the d3-flextree README <a class="src" href="https://github.com/Klortho/d3-flextree" title="Klortho: d3-flextree README">d3-flextree</a>; the research could not fetch the Walker and Buchheim full texts, so their details are not repeated here.</p>
+
+  <div class="table-wrap"><table>
+    <caption>Layout algorithms and implementations considered</caption>
+    <thead><tr><th>Algorithm or tool</th><th>What it gives</th><th>Use in Radiant</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><th>Reingold and Tilford (1981), Walker, Buchheim et al. (2002)</th><td>Compact tidy-tree drawing; Buchheim et al. make it linear time. Layered: every depth sits on a row.</td><td>Background only; fixed-size layered drawings do not suit pictures of different sizes.</td><td><span class="badge documented">Documented</span></td></tr>
+      <tr><th>van der Ploeg (2014), "Drawing non-layered tidy trees in linear time"</th><td>Non-layered drawing, so subtrees can tuck under neighbours; first linear-time algorithm for that case; a naive extension to unbounded-degree trees can reach O(n squared) and a modification restores O(n). <a class="src" href="https://core.ac.uk/download/301654972.pdf" title="van der Ploeg: Drawing non-layered tidy trees in linear time, Software: Practice and Experience 44(12), 2014">van der Ploeg 2014</a></td><td>The recommended base algorithm.</td><td><span class="badge documented">Documented</span></td></tr>
+      <tr><th>d3-flextree</th><td>JavaScript port of van der Ploeg's Java code; <code>nodeSize</code> accessor for per-node boxes; <code>spacing</code> accessor for minimum gaps that can depend on the pair of nodes; O(n); abstract coordinates that can be remapped. <a class="src" href="https://github.com/Klortho/d3-flextree" title="Klortho: d3-flextree README">d3-flextree</a></td><td>Reference implementation and starting point; Radiant ports the same algorithm to typed arrays.</td><td><span class="badge documented">Documented</span></td></tr>
+      <tr><th>non-layered-tidy-tree-layout (npm), cytoscape-tidytree</th><td>Other ports of the same algorithm. <a class="src" href="https://socket.dev/npm/package/non-layered-tidy-tree-layout" title="socket.dev: non-layered-tidy-tree-layout package listing">npm port</a> <a class="src" href="https://www.npmjs.com/package/cytoscape-tidytree" title="npm: cytoscape-tidytree">Cytoscape port</a></td><td>Cross-checks for correctness tests.</td><td><span class="badge documented">Documented</span></td></tr>
+      <tr><th>ELK (layered, mrtree, radial, force, stress)</th><td>The algorithm list is published; the page gives identifiers only, with no descriptions. <a class="src" href="https://eclipse.dev/elk/reference/algorithms.html" title="Eclipse ELK: Algorithms reference">ELK algorithms</a></td><td>Reference or fallback for radial and tree results; probably heavier than a purpose-built tree layout (the notes' inference).</td><td><span class="badge documented">Documented</span></td></tr>
+      <tr><th>markmap (tree, two-sided, org-chart)</th><td>Three layouts, an SVG renderer and a canvas renderer for very large maps, fold levels and per-node folding. The README does not say which layout algorithm it uses. <a class="src" href="https://github.com/markmap/markmap" title="markmap: README">markmap</a></td><td>Precedent for the layout set and for per-node folding.</td><td><span class="badge documented">Documented</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Variable node sizes are the deciding factor. A picture node's box is its image bounds plus caption plus padding, and an SVG node's box is the one the engine reserved for its artwork. Fixed-size variants of the older algorithms cannot express that, so the van der Ploeg and flextree family is the right base (the notes' inference).</p>
+
+  <h3>Two-sided balancing and other variants</h3>
+  <p><span class="badge proposed">Proposed design</span> For a two-sided map in the style of Xmind or MindNode, split the root's children into a left set and a right set, run the tidy layout on each half and mirror the left. Balance by total subtree extent (the sum of the children's heights) with a greedy or partition pass, not by child count, because one child with a hundred descendants outweighs five leaves. The notes found no primary source for this and no published treatment of left-right balancing, so it is the common approach rather than a cited one.</p>
+  <p><span class="badge proposed">Proposed design</span> For radial maps, map the layout's abstract depth and breadth coordinates onto radius and angle, with the angular wedge of each subtree proportional to its leaf weight, which is the "abstract coordinates" idea in the d3-flextree README. Wide pictures need a ring radius chosen from the largest node on that ring. Top-down and outline-like variants reuse the same engine with the axes swapped or the sibling gap changed. Because each main branch stores its own variant, one map can mix a radial cluster with an outline-like branch.</p>
+
+  <h3>Mental map and stability</h3>
+  <p>Misue, Eades, Lai and Sugiyama (1995), "Layout Adjustment and the Mental Map" (Journal of Visual Languages and Computing 6(2)), introduced the idea that an edit should not scramble the arrangement the user has learned, and includes a method to remove node overlaps while preserving it <a class="src" href="https://typeset.io/papers/layout-adjustment-and-the-mental-map-36y8o59qtx" title="Misue, Eades, Lai, Sugiyama: Layout Adjustment and the Mental Map, J. Visual Languages and Computing 6(2), 1995">Misue 1995</a>. Later work includes simulated-annealing-based mental-map-preserving drawing <a class="src" href="https://ir.lib.nycu.edu.tw/bitstream/11536/19026/1/000293304600012.pdf" title="NYCU: paper on mental-map-preserving drawing">NYCU paper</a>. For a memory-oriented app this matters more than usual: the <a href="#buzan">Buzan page</a> and the <a href="#science">science page</a> cover why a memorable map matters.</p>
+  <p><span class="badge proposed">Proposed design</span> Stability rules built on that literature: keep a cached position per node; re-lay-out only the changed subtree and the siblings it displaces; when a node is collapsed or expanded, keep the clicked node fixed on screen and translate everything else relative to it; store manual placements as offsets from the automatic position so they travel with their parent; and always lay out with the final box size, or a reserved placeholder box from the declared aspect ratio, so a picture arriving later does not move anything.</p>
+
+  <h3>Manual offsets and animation</h3>
+  <p>MindNode stores manual moves as offsets from the automatic position, and decision D-13 adopts the same model. The stored offset is relative to the node's own automatic position, so changing the tree above it moves the node with its parent and keeps its relation to the parent. Changes animate by interpolating old to new positions per node. The notes suggest roughly 200 to 300 milliseconds with per-node easing (the report's recommendation, not a measured preference). Layout itself runs in a worker over a compact structure-of-arrays tree and posts positions back. The notes did not benchmark flextree at 10,000 nodes; the 50 ms budget for 5,000 nodes in the decisions brief is a target to confirm in the first spike.</p>
+
+  <h3>Organic layout</h3>
+  <div class="callout gap"><span class="tag">Not verified</span><p>The notes found no published algorithm and no open-source implementation of Buzan-style organic layout (the curved, fanning, hand-made look of iMindMap). Everything in this subsection is the report's own design.</p></div>
+  <p><span class="badge proposed">Proposed design</span> Take the collision-free tidy skeleton as the starting point, then: (1) convert each parent-to-child edge into a cubic Bezier whose tangent at the parent follows the parent's incoming direction, so branches fan out smoothly; (2) bend each branch by a per-node angle offset derived from a hash of the node id and a document seed, never from a random number generator at draw time, in the same spirit as the <code>seed</code> option of rough.js <a class="src" href="https://github.com/rough-stuff/rough/wiki" title="rough.js: wiki">rough.js</a>; (3) run a few passes of overlap removal that displace overlapping boxes in the manner of Misue 1995; (4) store the result as cached positions that are derived data, not truth. Main branches at depth one carry the colour, and curvature and thickness fall with depth. Because the jitter is a pure function of id and seed, reloading the file or re-running layout gives the same picture.</p>
+
+  <div class="req-list">
+    <div class="req" id="ENG-04">
+      <div class="req-head"><code class="req-id">ENG-04</code><span class="badge must">Must</span><h4>Non-layered tidy layout with per-node boxes</h4></div>
+      <p>The default layout must be a linear-time non-layered tidy tree (van der Ploeg 2014) that accepts a width and height per node and a spacing function, and never lets two node boxes overlap.</p>
+      <p class="req-meta"><b>Accept when:</b> on the small (200 nodes) and large (5,000 nodes with 300 pictures) reference maps, with randomly sized boxes, a test finds zero overlapping box pairs, and the output matches the d3-flextree result on the same tree within floating-point tolerance. <b>Why:</b> variable-size picture and SVG nodes; see <a href="#art-subtrees">art subtrees</a>.</p>
+    </div>
+    <div class="req" id="ENG-05">
+      <div class="req-head"><code class="req-id">ENG-05</code><span class="badge must">Must</span><h4>Layout time budget</h4></div>
+      <p>A full layout of the large reference map must complete off the main thread within the budget, and an edit to a single subtree must re-lay-out only what it affects.</p>
+      <p class="req-meta"><b>Accept when:</b> a full layout of 5,000 nodes takes under 50 ms in the worker (median of ten runs), and the 50,000-node stress map completes without blocking the main thread for a frame. <b>Why:</b> budget from the decisions brief, to be confirmed in the spikes (target proposed by the report).</p>
+    </div>
+    <div class="req" id="ENG-06">
+      <div class="req-head"><code class="req-id">ENG-06</code><span class="badge must">Must</span><h4>Deterministic layout</h4></div>
+      <p>Layout must be a pure function of the document structure, node boxes, per-branch variants, stored offsets and the stored seed. It must not use the clock, an unseeded random source or iteration order of unordered collections.</p>
+      <p class="req-meta"><b>Accept when:</b> laying out the same document twice, and again after a save and reload, yields identical positions, and the same result in the worker and on the main thread. <b>Why:</b> reproducible organic layouts and stable exports (decision D-13).</p>
+    </div>
+    <div class="req" id="ENG-07">
+      <div class="req-head"><code class="req-id">ENG-07</code><span class="badge must">Must</span><h4>Stable, animated edits</h4></div>
+      <p>Editing, collapsing or expanding inside one subtree must not move nodes in unrelated main branches, and the node the user acted on must keep its screen position. Position changes must animate and must not drop frames.</p>
+      <p class="req-meta"><b>Accept when:</b> after an edit inside one main branch of the large map, every node of the other main branches has zero displacement, the acted-on node moves by less than one device pixel on screen, and frames during the transition stay within the 8.3 ms budget at 120 Hz (16.7 ms at 60 Hz). <b>Why:</b> mental-map preservation (Misue 1995) and decision D-13.</p>
+    </div>
+    <div class="req" id="ENG-08">
+      <div class="req-head"><code class="req-id">ENG-08</code><span class="badge must">Must</span><h4>Two-sided balancing by subtree extent</h4></div>
+      <p>The two-sided variant must assign root children to the left and right by cumulative subtree extent and must be recomputed only when the user adds or removes a main branch, so existing sides do not flip on unrelated edits.</p>
+      <p class="req-meta"><b>Accept when:</b> on a test map with one very large and five small main branches, the difference between left and right total extent is smaller than the largest main branch, and adding a deep descendant inside one branch changes no branch's side. <b>Why:</b> MindNode-style maps; proposed design without a published source.</p>
+    </div>
+    <div class="req" id="ENG-09">
+      <div class="req-head"><code class="req-id">ENG-09</code><span class="badge should">Should</span><h4>Layout variant per main branch</h4></div>
+      <p>Each main branch must store its own layout variant (two-sided, radial, top-down or outline-like) and the engine must lay out each branch with its variant while keeping all branches free of overlap with one another.</p>
+      <p class="req-meta"><b>Accept when:</b> a map with one branch in each variant lays out with zero box overlaps, and switching a branch's variant leaves other branches' positions unchanged. <b>Why:</b> decision D-13 and the variants in <a href="#features">the layout features</a>.</p>
+    </div>
+    <div class="req" id="ENG-10">
+      <div class="req-head"><code class="req-id">ENG-10</code><span class="badge must">Must</span><h4>Manual offsets from automatic position</h4></div>
+      <p>A manual node move must be stored as an offset from that node's automatic position, not as an absolute coordinate, so the node follows its parent when the layout changes.</p>
+      <p class="req-meta"><b>Accept when:</b> after dragging a node, then moving its parent by editing a sibling above it, the dragged node's offset value in the file is unchanged and its position relative to its parent is unchanged. Clearing the offset returns the node to its automatic position. <b>Why:</b> MindNode precedent, decision D-13.</p>
+    </div>
+    <div class="req" id="ENG-11">
+      <div class="req-head"><code class="req-id">ENG-11</code><span class="badge must">Must</span><h4>Reserved boxes for pending assets</h4></div>
+      <p>A node whose picture or SVG is pending must be laid out with a reserved box derived from the declared aspect ratio, and the arrival of the asset must not change any node position unless the actual box size differs from the reservation.</p>
+      <p class="req-meta"><b>Accept when:</b> replacing 300 placeholders with decoded images of the reserved sizes in the large map produces zero position changes in a layout comparison. <b>Why:</b> the layout must not shift while generation streams in (see <a href="#ai-engine">the AI engine page</a> and <a href="#art-subtrees">art subtrees</a>).</p>
+    </div>
+    <div class="req" id="ENG-12">
+      <div class="req-head"><code class="req-id">ENG-12</code><span class="badge should">Should</span><h4>Seeded organic treatment</h4></div>
+      <p>The organic style must derive every random-looking quantity (branch bend, wobble, curvature) from a hash of the node id and the document seed, and must store only the seed, never the derived values as truth.</p>
+      <p class="req-meta"><b>Accept when:</b> two machines opening the same file draw identical branch outlines, changing the seed changes the picture, and a search of the code finds no unseeded random call in layout or geometry. <b>Why:</b> proposed design; reproducibility (decision D-13).</p>
+    </div>
+  </div>
+
+  <h2>Branches</h2>
+  <p>A branch is a cubic Bezier centreline with a width that tapers from thick at the parent to thin at the child, drawn as a filled closed outline. The report recommends building that outline on the CPU, caching it per branch, and uploading all visible branches as one mesh. The spike shows the GPU side is far from the limit: 100,000 pre-tessellated branches of 24 triangles each, drawn in a single call, held 120 fps.</p>
+
+  <h3>What stroke research offers</h3>
+  <p>Levien and Uguray, "GPU-friendly Stroke Expansion" (HPG 2024, Best Paper third place; PACM CGIT 7(3)), approximate cubic Beziers with Euler spiral segments, lower the offset curves to lines or circular arcs, avoid recursion, introduce a new error metric and build on Nehab (2020) <a class="src" href="https://arxiv.org/abs/2405.00127" title="Levien and Uguray: GPU-friendly Stroke Expansion, arXiv 2405.00127">Levien 2024</a> <a class="src" href="https://linebender.org/gpu-stroke-expansion-paper/" title="Linebender: GPU-friendly Stroke Expansion paper page">paper page</a>. It is the state of the art for expanding strokes on the GPU every frame. A mind map has thousands of branches that change only on edits, so the notes judge CPU tessellation, cached per branch, to be enough, and Euler-spiral expansion to matter only if stroking must run on the GPU each frame. The authors list imperfect load balancing as a limitation of their approach.</p>
+  <p>The notes did not fetch the kurbo documentation, so the claim that kurbo has no variable-width stroke is not verified here; the nanoui library discussed on the <a href="#zig">Zig page</a> also lacks variable-width strokes (decision D-16). Vello now includes three renderers (the compute-centric original, Vello GPU and Vello CPU, with a WebGL2 and wgpu backend for the GPU one) <a class="src" href="https://github.com/linebender/vello" title="Linebender: Vello repository">Vello</a>, which makes it a reference for a later native path rather than a dependency for the web renderer.</p>
+  <p>perfect-freehand shows the simplest workable approach: input points, optionally with pressure, become a closed polygon outline, with <code>thinning</code> mapping pressure to width and <code>taper</code> options at the start and end. Self-crossings remain unless flattened with <code>polygon-clipping</code>, and the lower-level functions <code>getStrokePoints</code> and <code>getStrokeOutlinePoints</code> are exposed <a class="src" href="https://github.com/steveruizok/perfect-freehand" title="steveruizok: perfect-freehand README">perfect-freehand</a>. tldraw uses it for pen shapes according to its author <a class="src" href="https://www.github.com/steveruizok/perfect-freehand/discussions/38" title="steveruizok: perfect-freehand GitHub discussion 38">discussion 38</a>. rough.js adds the hand-drawn look with <code>roughness</code>, <code>bowing</code> and a <code>seed</code> for reproducibility <a class="src" href="https://github.com/rough-stuff/rough/wiki" title="rough.js: wiki">rough.js</a>.</p>
+
+  <h3>The recommended branch pipeline</h3>
+  <ol class="flow">
+    <li><b>Centreline.</b> One cubic Bezier from the parent's attach point to the child's in-anchor, with the tangent at the parent following the parent's direction.</li>
+    <li><b>Width function.</b> w(t) falls from the parent's width at the attach point to a thin end; the width at t = 0 equals the parent's width where the child leaves it.</li>
+    <li><b>Outline.</b> Sample the centreline, offset by half the width along the normal on both sides, add caps, and emit one closed polygon.</li>
+    <li><b>Triangles.</b> Triangulate into a strip or indexed triangles and append to a per-style batch.</li>
+    <li><b>Cache.</b> Rebuild only branches whose endpoints, widths, seed or style changed.</li>
+  </ol>
+  <p><span class="badge proposed">Proposed design</span> The whole pipeline is the report's design, assembled from perfect-freehand's outline idea and the cubic-plus-width model; no source describes it for mind maps. Triangle strips render cheaper, but a filled closed outline is easier to give textures, outlines and rough edges, so filled outlines with an optional second pass for texture are the recommended choice.</p>
+
+  <h3>Joins and wobble</h3>
+  <p><span class="badge proposed">Proposed design</span> Where several children leave one parent, each child branch starts slightly inside the parent's outline and is drawn before the parent (or merged into it), so the join shows no gap or seam. The same rule serves picture and SVG subtrees: the engine draws the parent branch to the node's declared in-anchor under the image, and the image's soft alpha edge hides the join. Seeded wobble moves the centreline sample points by a hash of the node id and the seed, so a hand-made look never changes between sessions. Batching puts every branch of a style into one mesh, so the number of draw calls does not grow with the number of branches.</p>
+
+  <div class="req-list">
+    <div class="req" id="ENG-13">
+      <div class="req-head"><code class="req-id">ENG-13</code><span class="badge must">Must</span><h4>Tapered closed-outline branches with matched joins</h4></div>
+      <p>Each branch must be generated as a closed outline from a cubic centreline and a width function, whose start width equals the parent's width at the attach point and which begins inside the parent's outline.</p>
+      <p class="req-meta"><b>Accept when:</b> a visual regression test of a parent with eight children shows no gap or seam at the join at three zoom levels, and the child's start width differs from the parent's by less than one device pixel at each. <b>Why:</b> seamless branches (proposed design); same rule is required at picture and SVG anchors, see <a href="#art-subtrees">art subtrees</a>.</p>
+    </div>
+    <div class="req" id="ENG-14">
+      <div class="req-head"><code class="req-id">ENG-14</code><span class="badge must">Must</span><h4>Batched, cached branch meshes</h4></div>
+      <p>Branch meshes must be cached per branch, rebuilt only when the branch's inputs change, and drawn in per-style batches so that the draw-call count for branches does not depend on the number of branches.</p>
+      <p class="req-meta"><b>Accept when:</b> the draw-call count for branches is the same on the small and the large reference maps; rebuilding the meshes of all 5,000 nodes takes no longer than the spike's measured 7 ms for 10,000 branches (synthetic, 12 segments each); and an edit to one branch rebuilds only that branch. <b>Why:</b> 100,000 batched branches held 120 fps in the spike; the cost lies in rebuilds, not drawing.</p>
+    </div>
+    <div class="req" id="ENG-15">
+      <div class="req-head"><code class="req-id">ENG-15</code><span class="badge must">Must</span><h4>Hit-testing against outlines</h4></div>
+      <p>Picking a branch must test the branch's outline polygon after a bounds-index prefilter, and picking a node must use its box or its representation's hit shape.</p>
+      <p class="req-meta"><b>Accept when:</b> a click on the thin end of a tapered branch selects it, a click within its bounding box but outside the outline does not, and a pick on the large map fits inside the 4 ms script budget. <b>Why:</b> bounds alone select the wrong object on curved branches (the notes' inference).</p>
+    </div>
+  </div>
+
+  <h2>Text</h2>
+  <p>Engine-drawn text is rendered on the GPU from a glyph atlas, laid horizontally by default and along the branch only where the branch is gentle enough. Editing uses a real HTML text field placed over the node, so input methods, accessibility and the system caret all work.</p>
+
+  <h3>GPU text rendering options</h3>
+  <div class="table-wrap"><table>
+    <caption>Two ways to draw text on the GPU</caption>
+    <thead><tr><th>Option</th><th>How it works</th><th>Strengths</th><th>Limits</th></tr></thead>
+    <tbody>
+      <tr><th>Multi-channel signed distance field atlas (msdfgen)</th><td>Glyph shapes are stored in three channels and the shader takes the median, which reproduces sharp corners almost perfectly. Modes: sdf, psdf, msdf and mtsdf (a true SDF in the alpha channel). <a class="src" href="https://github.com/Chlumsky/msdfgen" title="Chlumsky: msdfgen README">msdfgen</a></td><td>One quad per glyph, easy to instance and rotate individually, which suits per-glyph placement along a curve. Simplest first version.</td><td>Needs an atlas per font; channel values must be read as linear; <code>screenPxRange()</code> must never be below 1, and below 2 is likely to break anti-aliasing.</td></tr>
+      <tr><th>Slug algorithm</th><td>Eric Lengyel's 2017 method renders from glyph Bezier outlines with no atlas. <a class="src" href="https://jcgt.org/published/0006/02/02/paper.pdf" title="Lengyel: GPU-Centered Font Rendering Directly from Glyph Outlines, JCGT 2017">Lengyel 2017</a> The patent (US 10,373,352) was dedicated to the public domain effective 17 March 2026. <a class="src" href="https://terathon.com/blog/decade-slug.html" title="Terathon: A Decade of Slug">Terathon blog</a> <a class="src" href="https://hackaday.com/2026/03/20/slug-algorithm-for-on-gpu-rendering-of-fonts-with-bezier-curves-now-in-public-domain" title="Hackaday: Slug algorithm for on-GPU rendering of fonts now in public domain">Hackaday</a></td><td>No atlas; sharp at very large zoom ranges; no licensing barrier since March 2026.</td><td>Needs per-glyph curve buffers; more work than an atlas for a first version.</td></tr>
+    </tbody>
+  </table></div>
+  <p>A comment quoted in one blog claims that Microsoft's Loop-Blinn patent expires on 25 March 2026. It comes from an unverified commenter and is not used in this report <a class="src" href="https://mathewsachin.github.io/blog/2026/03/18/decade-of-slug.html" title="Mathew Sachin: blog post on a decade of Slug (unverified comment)">blog</a>.</p>
+  <p>The spike used a 2,048 by 2,048 label atlas pre-rasterised at 1x, so labels were slightly soft at a device pixel ratio of 2. That tells us the label count is not a constraint (2,000 labels ran at 120 fps) and tells us a plain bitmap atlas is not crisp enough; an MSDF atlas fixes the softness.</p>
+
+  <h3>Text along a branch</h3>
+  <p><span class="badge proposed">Proposed design</span> Shape the string with a text shaper (HarfBuzz is the notes' suggestion) to obtain glyph advances, then place each glyph at an arc length s along the centreline, rotated to the tangent and offset to the branch centre or edge. The constraints that make it legible are: reject or shorten a label if the radius of curvature falls below a threshold relative to the font size; reverse the path direction if the text would otherwise run upside down; and fall back to a horizontal label beside the branch when the branch is too short or too curved. The keyword is always engine-rendered text, never baked into a generated image.</p>
+  <p>The limit is script. Per-glyph placement assumes each glyph is an independent shape. Scripts whose letters join or reshape according to neighbours (Arabic is the usual example), and scripts with complex vowel marks, cannot be cut into independently rotated glyphs without breaking the writing, so the proposed rule is that they always take the horizontal fallback. The notes did not research SVG <code>textPath</code>, which would be the DOM-side equivalent, or glyph caching; both remain open.</p>
+
+  <h3>Inline editing</h3>
+  <p>When the user edits a label, the engine places a real HTML text field exactly over the node's box, matching font, size and zoom, and removes it on commit. The field gives the operating system's input methods, dead keys, spelling, selection behaviour and accessibility tree for free, none of which a canvas can reproduce. This follows decision D-03, which keeps ordinary HTML for text editing and accessibility.</p>
+
+  <div class="req-list">
+    <div class="req" id="ENG-16">
+      <div class="req-head"><code class="req-id">ENG-16</code><span class="badge must">Must</span><h4>Crisp GPU labels at every zoom</h4></div>
+      <p>Labels must be drawn by the engine from a multi-channel distance-field atlas (or an equivalent that stays sharp when magnified) and must remain crisp from the minimum to the maximum zoom, on both 1x and 2x displays.</p>
+      <p class="req-meta"><b>Accept when:</b> a visual test at a device pixel ratio of 2 shows no blur on 2,000 labels, the shader's screen pixel range is at least 2 at the zoom where a label is drawn at all (never below 1), and 2,000 labels draw at 120 fps in the scene that held 100,000 branches. <b>Why:</b> msdfgen guidance; 2,000 labels held 120 fps in the spike with a soft 1x atlas.</p>
+    </div>
+    <div class="req" id="ENG-17">
+      <div class="req-head"><code class="req-id">ENG-17</code><span class="badge should">Should</span><h4>Legible text along a branch</h4></div>
+      <p>Where a label is set along a curve, the engine must never draw it upside down, must refuse curvature above a configured limit relative to font size, and must fall back to a horizontal label for short or sharply curved branches and for scripts that cannot be split into independent glyphs.</p>
+      <p class="req-meta"><b>Accept when:</b> a test over a sweep of 360 branch directions finds zero upside-down labels, and the test corpus of Arabic and Devanagari labels always renders in the horizontal fallback. <b>Why:</b> proposed design; legibility rules from the notes.</p>
+    </div>
+    <div class="req" id="ENG-18">
+      <div class="req-head"><code class="req-id">ENG-18</code><span class="badge must">Must</span><h4>Inline editing through a real text field</h4></div>
+      <p>Editing a node's text must use an HTML text input or contenteditable element positioned over the node, with the same font metrics, and must hand back to the canvas on commit or cancel.</p>
+      <p class="req-meta"><b>Accept when:</b> Japanese or Chinese input method composition completes correctly, VoiceOver reads the field and its content, and the text field's position matches the drawn label within one device pixel at three zoom levels. <b>Why:</b> input methods and accessibility cannot be built on a canvas; decision D-03; accessibility targets are on <a href="#quality">the quality page</a>.</p>
+    </div>
+  </div>
+
+  <h2>Infinite canvas</h2>
+  <p>The infinite canvas rests on exact camera mathematics, precise coordinates at any zoom, a spatial index, level of detail, and a frame loop that draws only when something changed. The measurements below are sourced; the rest of this section is largely the report's own design, labelled as such.</p>
+
+  <h3>What the measurements say</h3>
+  <div class="table-wrap"><table>
+    <caption>Measured rendering headroom on your Mac (M4 Pro, macOS 26.5.1, built-in 120 Hz display; each row one run)</caption>
+    <thead><tr><th>Scene</th><th>Setting</th><th class="num">Mean frame interval</th><th class="num">Script ms per frame</th></tr></thead>
+    <tbody>
+      <tr><th>Canvas2D: 5,000 tapered branches, 2,000 labels, 300 images, no culling</th><td>Default WebView</td><td class="num">16.667 ms (60 fps)</td><td class="num">3.72</td></tr>
+      <tr><th>Same, no culling</th><td>Private flag off</td><td class="num">8.332 ms (120 fps)</td><td class="num">3.45</td></tr>
+      <tr><th>Same, culled to about 722 branches</th><td>Private flag off</td><td class="num">8.333 ms (120 fps)</td><td class="num">0.82</td></tr>
+      <tr><th>WebGL2: 5,000 branches, one indexed draw</th><td>Default WebView</td><td class="num">16.665 ms</td><td class="num">0.30</td></tr>
+      <tr><th>WebGL2: 100,000 branches (2.4 M triangles)</th><td>Private flag off</td><td class="num">8.332 ms (120 fps)</td><td class="num">not reported</td></tr>
+      <tr><th>WebGL2: 200,000 branches (4.8 M triangles)</th><td>Private flag off</td><td class="num">9.786 ms (about 102 fps)</td><td class="num">not reported</td></tr>
+      <tr><th>WebGL2: 400,000 branches (9.6 M triangles)</th><td>Private flag off</td><td class="num">18.983 ms (about 53 fps)</td><td class="num">not reported</td></tr>
+      <tr><th>WebGPU: 10,000 instanced quads</th><td>Private flag off</td><td class="num">8.332 ms (120 fps)</td><td class="num">not reported</td></tr>
+    </tbody>
+  </table></div>
+  <p>The knee for WebGL2 at the 120 Hz budget lies between 100,000 and 200,000 branches. Caveats stated in the spike: the branches were thin (3 to 8 pixels), so real overdraw and MSAA cost with large fills are not represented; Canvas2D script time excludes GPU-process rasterisation, so its ceiling was not found; GPU time could not be measured because the timer-query extension is not exposed (WebGPU advertises <code>timestamp-query</code>, which could supply it); and the 400,000-branch row shows the display dropping to the next refresh divisor. The 60 Hz external monitor caps at 60 regardless of the flag.</p>
+  <div class="callout evidence"><span class="tag">Evidence</span><p>Canvas2D holds 120 fps at 5,000 branches with no culling, and a batched WebGL2 scene has roughly twenty times that headroom. Real maps will add text layout, hit-testing, editing, SVG textures and re-tessellation, which the spike did not measure. The 50,000-node stress map is within the WebGL2 headroom for drawing but is unmeasured for everything else.</p></div>
+
+  <h3>Camera and precision</h3>
+  <p>Zoom towards the cursor by keeping the world point under the cursor fixed. With pan p, cursor c, and zoom changing from z to z', the new pan is <code>p' = c - (c - p) * (z' / z)</code>. This is standard mathematics and is the report's own formulation of it; the notes found no source on zoom and pan feel in shipping products, so the feel (inertia, trackpad against wheel) is a gap to explore hands-on.</p>
+  <p><span class="badge proposed">Proposed design</span> At extreme zoom, 32-bit floats on the GPU lose precision, which shows as jittering geometry. Keep the camera and node positions in double precision (or as offsets relative to a parent or island origin) in the model, and subtract the camera position on the CPU so that the GPU receives small camera-relative floats. The notes mark this as background knowledge, not a sourced result.</p>
+
+  <h3>Spatial index, level of detail and semantic zoom</h3>
+  <p><span class="badge proposed">Proposed design</span> Use a static R-tree, bounding-volume hierarchy or uniform grid over node and branch bounds, updated incrementally after layout changes, for both culling and hit-testing. tldraw documents an R-tree index and level-of-detail rendering by on-screen size <a class="src" href="https://tldraw.dev/sdk-features/performance" title="tldraw: SDK performance documentation">tldraw perf</a>. The spike's culled Canvas2D run drew about 14 per cent of the branches and cut script time from 3.45 to 0.82 ms, which shows the benefit even at small scale.</p>
+  <p>Semantic zoom means that what is drawn changes with the zoom, not only its size. <span class="badge proposed">Proposed design</span> Below a screen-size threshold, replace text by short bars, replace pictures by a low mip level or a dominant colour, and collapse deep subtrees into a single stand-in. The one shipping precedent the notes found is Heptabase: zooming out keeps section titles legible <a class="src" href="https://wiki.heptabase.com/section" title="Heptabase wiki: Sections">Heptabase sections</a>, which maps to showing a subtree's title or summary when its detail would be unreadable. Heptabase also recommends a higher-level whiteboard above roughly 100 cards and has improved large-whiteboard dragging and rendering <a class="src" href="https://wiki.heptabase.com/changelog" title="Heptabase wiki: changelog">Heptabase changelog</a>, which shows that large canvases need this design. Figma and tldraw treat caching of static content into textures or tiles as standard practice, but the notes found no primary source for Figma's tile-based rendering, so it is not claimed here.</p>
+
+  <h3>Frame budgeting and rendering on demand</h3>
+  <p>The budget is 8.3 ms per frame at 120 Hz and 16.7 ms at 60 Hz, with script time at most 4 ms on a 5,000-node map during pan and zoom. The notes suggest spending under 2 to 3 ms on culling and draw-list building, and keeping decoding and layout off the render thread. The renderer should draw only when something changed (a camera move, an edit, an animation step or a finished asset), so an idle map costs nothing. If a frame is going to be late, the engine lowers the level of detail first, before dropping frames.</p>
+
+  <div class="callout idea"><span class="tag">Idea for Radiant</span><p>Keep the spike scene as a permanent benchmark harness, and extend it with real content: a generated 5,000-node map with 300 pictures, real labels, and hit-testing. The first milestone then measures what the notes could not, and every later engine change can be compared against the same numbers.</p></div>
+
+  <div class="req-list">
+    <div class="req" id="ENG-19">
+      <div class="req-head"><code class="req-id">ENG-19</code><span class="badge must">Must</span><h4>Zoom towards the cursor</h4></div>
+      <p>Zooming must keep the world point under the cursor fixed on screen, using the camera relation <code>p' = c - (c - p) * (z' / z)</code>.</p>
+      <p class="req-meta"><b>Accept when:</b> a test zooming from the minimum to the maximum zoom around five cursor positions moves the world point under the cursor by less than one device pixel. <b>Why:</b> basic canvas behaviour; user-facing zoom features are on <a href="#features">the features page</a>.</p>
+    </div>
+    <div class="req" id="ENG-20">
+      <div class="req-head"><code class="req-id">ENG-20</code><span class="badge should">Should</span><h4>Camera-relative precision</h4></div>
+      <p>The camera and node positions must be held as double-precision values (or local offsets), and the CPU must convert to camera-relative single-precision values before upload, so geometry does not jitter at extreme zoom or far from the origin.</p>
+      <p class="req-meta"><b>Accept when:</b> at the maximum zoom, panning by one pixel moves every visible vertex by one pixel (no visible shimmer), tested at a node 100,000 world units from the origin. <b>Why:</b> proposed design from general knowledge, not sourced; confirm in the spike.</p>
+    </div>
+    <div class="req" id="ENG-21">
+      <div class="req-head"><code class="req-id">ENG-21</code><span class="badge must">Must</span><h4>Spatial index for culling and picking</h4></div>
+      <p>The engine must maintain a spatial index over node and branch bounds, update it incrementally after layout, and use it for culling, hit-testing and marquee selection.</p>
+      <p class="req-meta"><b>Accept when:</b> on the large reference map, building the visible set for a frame takes under 2 ms of script, and culling draws no more than the items intersecting the viewport plus a margin. <b>Why:</b> script budget of 4 ms per frame; the notes suggest 2 to 3 ms for culling and draw-list work.</p>
+    </div>
+    <div class="req" id="ENG-22">
+      <div class="req-head"><code class="req-id">ENG-22</code><span class="badge should">Should</span><h4>Level of detail and semantic zoom</h4></div>
+      <p>The scene layer must choose a drawing level per item from its on-screen size: full detail, labels as bars, pictures as low-resolution or dominant-colour stand-ins, and collapsed subtrees as a single titled stand-in that keeps its title legible.</p>
+      <p class="req-meta"><b>Accept when:</b> on the 50,000-node stress map at the fully zoomed-out view, frame time stays within 16.7 ms, and every collapsed stand-in at that view still shows its title at a readable size. <b>Why:</b> Heptabase precedent (the only shipping example found); everything else here is proposed design.</p>
+    </div>
+    <div class="req" id="ENG-23">
+      <div class="req-head"><code class="req-id">ENG-23</code><span class="badge must">Must</span><h4>Render on demand and pace to the display</h4></div>
+      <p>The engine must draw a frame only when something changed, must measure the actual refresh interval and adapt, and must meet its work budget at both 8.3 ms and 16.7 ms.</p>
+      <p class="req-meta"><b>Accept when:</b> an idle map issues no draw calls over ten seconds; the mean frame interval on the 120 Hz display with the private flag active is 8.3 ms and falls back to 16.7 ms without errors when the flag is unavailable. <b>Why:</b> decision D-02; the 60 Hz fallback must remain smooth.</p>
+    </div>
+    <div class="req" id="ENG-24">
+      <div class="req-head"><code class="req-id">ENG-24</code><span class="badge should">Should</span><h4>Permanent benchmark harness on real content</h4></div>
+      <p>The repository must contain a repeatable benchmark that measures mean, 95th and 99th percentile frame interval and script time per frame on the three reference maps, in the same format as the spike.</p>
+      <p class="req-meta"><b>Accept when:</b> one command produces a table for the small, large and stress maps at both 60 and 120 Hz, and a regression of more than 10 per cent in mean script time fails continuous integration (the threshold is a proposal). <b>Why:</b> the spike measured a synthetic scene once per configuration; see <a href="#quality">the quality page</a>.</p>
+    </div>
+  </div>
+
+  <h2>Pictures at scale</h2>
+  <p>Picture subtrees can produce hundreds of images. The engine must keep memory bounded and the frame loop free of decoding, which means decoding off the main thread, a thumbnail pyramid, a texture budget with eviction, and placeholders while pictures arrive. Most of this section is the report's recommendation; the notes include a few sourced facts and say explicitly that atlas-against-array choices, AVIF, JPEG XL and LRU budgets were not researched.</p>
+
+  <h3>The strategy</h3>
+  <div class="table-wrap"><table>
+    <caption>Image handling decisions</caption>
+    <thead><tr><th>Topic</th><th>Recommendation</th><th>Basis</th></tr></thead>
+    <tbody>
+      <tr><th>Decoding</th><td>Decode in workers into bitmaps (the spike used 256 by 256 ImageBitmaps) so the main thread only uploads textures.</td><td>Spike scene; own design</td></tr>
+      <tr><th>Mip levels and thumbnails</th><td>Store the source image and a thumbnail pyramid; keep small levels resident and load full resolution only when the node is large on screen.</td><td><span class="badge proposed">Proposed design</span></td></tr>
+      <tr><th>Atlas or array</th><td>Pack small levels into a texture atlas or a texture array so that many images share one draw call. The spike drew 300 images as instanced quads from a 4,096 by 2,048 atlas at 120 fps. The notes did not research atlases against arrays.</td><td>Spike; own design</td></tr>
+      <tr><th>Memory budget and eviction</th><td>A fixed GPU memory budget with least-recently-used eviction weighted by screen-space need.</td><td><span class="badge proposed">Proposed design</span></td></tr>
+      <tr><th>Compressed textures</th><td>Transcode to BC7 or ASTC from KTX2 with Basis UASTC for large maps. Transcoding UASTC LDR to ASTC LDR and BC7 is fast and simple, and KTX2 supports Zstandard supercompression. <a class="src" href="https://skia.googlesource.com/external/github.com/BinomialLLC/basis_universal/+/refs/tags/v2_0" title="Basis Universal: README and notes, v2.0 tag (Skia mirror)">Basis Universal</a> WebGPU in the WebView advertised ASTC, BC and ETC2 texture compression features in the spike.</td><td>Documented; quality cost on generated art noted in the notes</td></tr>
+      <tr><th>Placeholders</th><td>Show a ThumbHash while decoding. ThumbHash is a compact inline placeholder that encodes more detail than BlurHash in the same space, includes the aspect ratio and supports images with alpha. <a class="src" href="https://github.com/evanw/thumbhash" title="evanw: ThumbHash README">ThumbHash</a></td><td>Documented</td></tr>
+      <tr><th>Alpha</th><td>Use premultiplied alpha in all GPU blending so soft edges of generated cut-outs show no halo.</td><td><span class="badge proposed">Proposed design</span></td></tr>
+      <tr><th>Storage format</th><td>Lossless WebP or PNG for alpha cut-outs is the conservative choice. AVIF and JPEG XL were not researched.</td><td>Inference</td></tr>
+    </tbody>
+  </table></div>
+  <p>Picture subtrees need transparent images so that branches join cleanly (decision D-10). Image models with a transparent-background parameter exist, but a community report says one model sometimes did not return transparency, so local background removal is the planned fallback; the details are on the <a href="#art-subtrees">art subtrees page</a> and <a href="#ai-engine">AI engine page</a>, not here.</p>
+
+  <div class="req-list">
+    <div class="req" id="ENG-25">
+      <div class="req-head"><code class="req-id">ENG-25</code><span class="badge must">Must</span><h4>Off-thread decoding with placeholders</h4></div>
+      <p>Images must be decoded off the main thread, and a node whose image is not yet resident must show a ThumbHash or flat-colour placeholder at its reserved box.</p>
+      <p class="req-meta"><b>Accept when:</b> loading the 300 pictures of the large reference map while panning keeps main-thread script time at most 4 ms per frame, and each pending node shows a placeholder from its first frame. <b>Why:</b> frame budget; ThumbHash includes alpha and aspect ratio.</p>
+    </div>
+    <div class="req" id="ENG-26">
+      <div class="req-head"><code class="req-id">ENG-26</code><span class="badge should">Should</span><h4>Thumbnail pyramid and shared textures</h4></div>
+      <p>Every stored image must have a thumbnail pyramid, and resident small levels must be packed into atlases or texture arrays so a frame draws all pictures in a small, fixed number of calls.</p>
+      <p class="req-meta"><b>Accept when:</b> the large reference map's 300 pictures draw with no more than a handful of draw calls independent of picture count (the number is fixed in the first spike), and a zoomed-out view samples only small levels. <b>Why:</b> the spike drew 300 images as instanced quads from one atlas at 120 fps.</p>
+    </div>
+    <div class="req" id="ENG-27">
+      <div class="req-head"><code class="req-id">ENG-27</code><span class="badge must">Must</span><h4>GPU memory budget with eviction</h4></div>
+      <p>The engine must enforce a configurable GPU texture memory budget, evict least-recently-used levels weighted by screen-space need, and never fail a frame because a texture could not be allocated.</p>
+      <p class="req-meta"><b>Accept when:</b> a test with the budget set below the full set of images' resident size on the large map completes a pan across the whole map with resident texture memory never exceeding the budget and no missing-texture frames. <b>Why:</b> bounded memory on laptops; proposed design.</p>
+    </div>
+    <div class="req" id="ENG-28">
+      <div class="req-head"><code class="req-id">ENG-28</code><span class="badge must">Must</span><h4>Premultiplied alpha throughout</h4></div>
+      <p>All images must be uploaded and blended with premultiplied alpha, and generated cut-outs must show no light or dark fringe against any branch colour.</p>
+      <p class="req-meta"><b>Accept when:</b> a test image with soft semi-transparent edges drawn over a white, a black and a coloured background shows no halo in a pixel comparison against the reference. <b>Why:</b> soft cut-out edges; join hiding at picture anchors (see <a href="#art-subtrees">art subtrees</a>).</p>
+    </div>
+  </div>
+
+  <h2>SVG at scale</h2>
+  <p>SVG artwork is rendered by the browser engine (decision D-12). Visible SVG subtrees are rasterised into textures per zoom bucket for speed, and shown as live inline SVG only while the user inspects one closely. The main reason is capability: generated SVG can use gradients, clipping and filters that the small native SVG libraries do not support.</p>
+
+  <h3>Rendering choices</h3>
+  <p>The notes compared the alternatives. resvg supports a static SVG subset, is memory-safe Rust, renders with tiny-skia, has no native text rendering, and uses usvg to produce a simplified tree that another backend can draw <a class="src" href="https://github.com/linebender/resvg" title="Linebender: resvg README">resvg</a>. ThorVG targets SVG Tiny, offers CPU, GL, WebGL and WebGPU backends with masking, blending, gradients, blur and drop shadow, in a core of about 170 KB; its performance figures are the project's own <a class="src" href="https://github.com/ThorVG/thorvg" title="ThorVG: repository README">ThorVG</a>. Vello is a vector GPU renderer (see the Branches section). These suit a pure native path. For the WebView stack, the browser's own engine supports the full feature set at no extra size, and a later native shell (decision D-17) could use resvg or ThorVG behind the same interface. The notes did not research Skia's SVG module, lunasvg, NanoSVG or librsvg, and measured no re-rasterisation cost; the spike did not test SVG at all.</p>
+
+  <h3>Zoom buckets and live view</h3>
+  <p><span class="badge proposed">Proposed design</span> Rasterise each visible SVG node group, or the whole subtree, to a texture at a small number of discrete zoom levels (buckets). Drawing uses the bucket nearest the current zoom; when the camera crosses to another bucket, the new texture is rasterised in the background and swapped in, so the previous bucket keeps showing until then. When the user zooms deep into one SVG subtree to inspect it, the engine mounts the sanitised SVG as live inline DOM at that spot and removes it again when the user leaves. Bucket size, cost and the number of live elements that stay smooth are open questions for the SVG spike in milestone M5.</p>
+
+  <h3>Sanitising untrusted SVG</h3>
+  <p>SVG written by a language model must be treated as untrusted. DOMPurify permits HTML, SVG and MathML by default, supports <code>USE_PROFILES: {svg: true, svgFilters: true}</code> to restrict output to SVG, and strips event handlers such as <code>onload</code>; its README does not state the default handling of <code>foreignObject</code>, and shows a hook to remove it <a class="src" href="https://github.com/cure53/DOMPurify" title="cure53: DOMPurify README">DOMPurify</a>. The report therefore requires an explicit allowlist and explicit removal of risky elements rather than relying on defaults.</p>
+  <p><span class="badge proposed">Proposed design</span> Allowed elements: <code>svg</code>, <code>g</code>, <code>path</code>, <code>rect</code>, <code>circle</code>, <code>ellipse</code>, <code>line</code>, <code>polyline</code>, <code>polygon</code>, <code>defs</code>, <code>linearGradient</code>, <code>radialGradient</code>, <code>stop</code>, <code>clipPath</code>, <code>mask</code>, <code>title</code>, <code>desc</code>, with <code>transform</code>, fill, stroke and opacity. Forbidden: <code>script</code>, <code>foreignObject</code>, <code>image</code> with an external <code>href</code>, <code>use</code> with an external <code>href</code>, <code>style</code> containing <code>@import</code>, event attributes and animation elements. Filters are costly and unevenly supported, so avoid them or allow only <code>feGaussianBlur</code> and <code>feDropShadow</code>. The node contract of decision D-11 forbids <code>text</code> elements, so the keyword is drawn by the engine. The contract details, repair and fallback behaviour are on the <a href="#art-subtrees">art subtrees page</a>.</p>
+  <p>The browser-engine route has one additional safeguard to specify: the sanitised SVG is drawn from a document with no network access, so a missed external reference cannot leak anything. The notes do not cover this mechanism, so it is a design requirement to verify rather than a documented behaviour.</p>
+
+  <div class="req-list">
+    <div class="req" id="ENG-29">
+      <div class="req-head"><code class="req-id">ENG-29</code><span class="badge must">Must</span><h4>Allowlist sanitiser for generated SVG</h4></div>
+      <p>All generated or imported SVG must pass an allowlist sanitiser before it is stored, rasterised or mounted, and the sanitiser must remove scripts, event attributes, <code>foreignObject</code>, external references and animation, and must enforce a maximum element count.</p>
+      <p class="req-meta"><b>Accept when:</b> a corpus of malicious SVG samples (script, <code>onload</code>, <code>foreignObject</code>, external <code>image</code> and <code>use</code> references, <code>style</code> with <code>@import</code>) produces output with none of them, and rendering the sanitised outputs causes zero network requests. <b>Why:</b> model output is untrusted; DOMPurify's SVG profile is a starting point but defaults for <code>foreignObject</code> are not documented; see <a href="#quality">the security requirements</a>.</p>
+    </div>
+    <div class="req" id="ENG-30">
+      <div class="req-head"><code class="req-id">ENG-30</code><span class="badge should">Should</span><h4>Zoom-bucket rasterisation with live inspection</h4></div>
+      <p>The engine must draw visible SVG subtrees from textures rasterised per zoom bucket in the background, keep the old bucket visible until the new one is ready, and mount live inline SVG only for the subtree under close inspection.</p>
+      <p class="req-meta"><b>Accept when:</b> crossing a bucket boundary on the large map produces no blank frame and no frame over the 8.3 ms budget at 120 Hz, and at most one live SVG subtree is mounted at a time. <b>Why:</b> decision D-12; rasterisation cost is unmeasured, so the accept thresholds depend on the milestone M5 spike.</p>
+    </div>
+  </div>
+
+  <h2>Data model and undo</h2>
+  <p>The document is a tree of nodes with stable ids, plus separate collections for cross-links, styles and assets. Every edit is an operation with an inverse, recorded in a log that drives undo and redo, autosave and crash recovery, and that would later map onto a collaboration layer.</p>
+
+  <h3>The model</h3>
+  <dl class="kv">
+    <dt>Node</dt><dd>Stable id (UUIDv7 or ULID), parent, order among siblings (a fractional index), text, note, collapsed flag, representation (vector, raster or SVG), asset reference, style reference and layout fields: an optional manual offset, side and seed. <span class="badge proposed">Proposed design</span></dd>
+    <dt>Multiple roots</dt><dd>A document may have several roots, each with its own layout.</dd>
+    <dt>Floating node</dt><dd>A node with no parent and an absolute position, for notes that belong to no branch.</dd>
+    <dt>Cross-link</dt><dd>An edge between any two nodes, with label and style, stored separately from the tree so the tree stays a tree.</dd>
+    <dt>Representation</dt><dd>A per-subtree setting that picks vector, picture or SVG drawing. Every node keeps its text in all three, so search, outline, export and accessibility always work, and switching back is a flag change (decision D-09).</dd>
+    <dt>Styles and themes</dt><dd>Named style records referenced by nodes, inheriting from the map's theme; per-subtree style sheets for generated art are described on <a href="#art-subtrees">art subtrees</a>.</dd>
+    <dt>Assets</dt><dd>Cached, regenerable images and SVG referenced by hash, with generation metadata (prompt, model, seed, style snapshot), keyed so a text edit invalidates only that node's asset.</dd>
+  </dl>
+
+  <h3>Undo and redo</h3>
+  <p>A command log, where each operation carries its inverse, is the simplest approach for a single-user app and maps well onto an operation-log CRDT later; this is the notes' inference. SQLite triggers can also maintain an undo and redo stack inside the database so that undo survives restarts, according to sqlite.org's file-format page <a class="src" href="https://www.sqlite.org/appfileformat.html" title="SQLite: Using SQLite as an application file format">SQLite appfileformat</a>. The report recommends application-level operations, not triggers, because group operations such as a multi-node paste or a streamed AI generation must undo as one step. AI generation applies lines as they arrive (decision D-08), so one generation job must be one undo group, however many nodes it adds.</p>
+
+  <h3>Autosave and crash safety</h3>
+  <p>Each committed operation is written in a SQLite transaction in the host. SQLite's transactional atomic writes, incremental updates and crash-safe continuous saves are listed on the same page, so no separate save step is needed; the operation log doubles as the recovery record.</p>
+
+  <h3>Looking ahead to collaboration</h3>
+  <p>The notes cover one candidate. Loro provides a movable tree CRDT based on Kleppmann et al., "A highly-available move operation for replicated trees": each node has a unique tree id and an associated map container, sibling order uses a fractional index, and cycles are prevented after concurrent moves merge; its API has <code>create</code>, <code>mov</code> and <code>mov_to</code> <a class="src" href="https://www.loro.dev/docs/tutorial/tree" title="Loro: Tree tutorial">Loro tree</a> <a class="src" href="https://loro.dev/blog/movable-tree" title="Loro: Movable tree CRDTs">Loro blog</a>. Automerge and Yjs were not researched, so no comparison is offered. Version 1 needs only a few habits to keep the option open: stable ids for every entity, fractional sibling order, operations that name ids and never positions in a list, and no derived data (layout) stored as truth. Decision D-15 puts a collaboration server, if ever built, on the Elixir side.</p>
+
+  <div class="req-list">
+    <div class="req" id="ENG-31">
+      <div class="req-head"><code class="req-id">ENG-31</code><span class="badge must">Must</span><h4>Stable ids and tree structure</h4></div>
+      <p>Every node, edge, style and asset must have a stable identifier that never changes or is reused; siblings must be ordered by a fractional index so an insert changes one record; and the model must support multiple roots, floating nodes and cross-links.</p>
+      <p class="req-meta"><b>Accept when:</b> inserting between two siblings in a 1,000-child list writes exactly one node record, and a test document with two roots, a floating node and a cross-link survives save and reload unchanged. <b>Why:</b> operation log, import and collaboration readiness; Loro uses the same two ideas.</p>
+    </div>
+    <div class="req" id="ENG-32">
+      <div class="req-head"><code class="req-id">ENG-32</code><span class="badge must">Must</span><h4>Representation as a subtree flag; text always kept</h4></div>
+      <p>The representation of a subtree (vector, raster or SVG) must be a per-node field and every node must keep its text in every representation. Switching representation must not delete any asset or text and must be reversible with one operation.</p>
+      <p class="req-meta"><b>Accept when:</b> switching a 50-node subtree from vector to raster to SVG and back, then comparing the exported Markdown outline, gives an identical outline, and undo restores the previous representation. <b>Why:</b> decision D-09.</p>
+    </div>
+    <div class="req" id="ENG-33">
+      <div class="req-head"><code class="req-id">ENG-33</code><span class="badge must">Must</span><h4>Operation log with grouped undo and redo</h4></div>
+      <p>Every document change must be recorded as an operation with an inverse, in a log that supports undo, redo and grouped steps, and a whole AI generation job or multi-node paste must undo as one step.</p>
+      <p class="req-meta"><b>Accept when:</b> applying 1,000 random operations and undoing them all returns a document byte-identical (by content hash) to the start, and redoing all returns the final state. <b>Why:</b> decisions D-08, D-14.</p>
+    </div>
+    <div class="req" id="ENG-34">
+      <div class="req-head"><code class="req-id">ENG-34</code><span class="badge must">Must</span><h4>Continuous autosave and crash recovery</h4></div>
+      <p>Each committed operation must reach disk in a transaction so that a crash or forced quit loses at most the operation in progress, and reopening the file must restore the last committed state without a recovery dialog.</p>
+      <p class="req-meta"><b>Accept when:</b> killing the process 100 times at random points during a scripted edit session leaves a file that opens every time, with at most one operation missing. <b>Why:</b> SQLite's transactional, crash-safe writes; reliability targets are on <a href="#quality">the quality page</a>.</p>
+    </div>
+    <div class="req" id="ENG-35">
+      <div class="req-head"><code class="req-id">ENG-35</code><span class="badge later">Later</span><h4>Collaboration-ready operations</h4></div>
+      <p>Operations must name entities by id and sibling position by fractional index, and must not store derived layout, so a replicated-tree layer (for example Loro's movable tree) could replace the log without changing the model.</p>
+      <p class="req-meta"><b>Accept when:</b> a review of the operation types finds none that refer to a list index or a stored computed position. <b>Why:</b> keeps the collaboration option open at no cost; the notes did not research Automerge or Yjs.</p>
+    </div>
+  </div>
+
+  <h2>File format</h2>
+  <p>A map is one SQLite database file (decision D-14). The sqlite.org page on application file formats lists the reasons that fit this app: a single-file document with an application id; transactional, atomic writes; incremental updates that write only changed pages; crash-safe continuous saves; an extensible schema; fast access to just the data needed; blobs under about 100 KB that can be faster than separate files; concurrent readers; cross-platform portability; and backward compatibility since 2004 <a class="src" href="https://www.sqlite.org/appfileformat.html" title="SQLite: Using SQLite as an application file format">SQLite appfileformat</a>. The same page warns that users can be tricked into opening a malicious database, so an opened file must be validated, not trusted. The notes add one concern of their own: SQLite files are opaque to diff and sync tools, so a periodic export to a plain bundle should exist for version control.</p>
+
+  <h3>Schema sketch</h3>
+  <p><span class="badge proposed">Proposed design</span> The tables below are a sketch for discussion, not a final schema; the notes name the tables (<code>nodes</code>, <code>edges</code>, <code>styles</code>, <code>assets</code>, <code>meta</code>, <code>ops</code>) and the asset columns.</p>
+  <pre class="code"><code>-- application_id and user_version set with PRAGMA, so the file is recognisable and versioned
+CREATE TABLE meta   (key TEXT PRIMARY KEY, value TEXT);        -- schema version, document seed, theme
+
+CREATE TABLE nodes  (
+  id TEXT PRIMARY KEY,            -- UUIDv7 or ULID, stable
+  parent_id TEXT,                 -- NULL for a root or a floating node
+  sort_key TEXT,                  -- fractional index among siblings
+  text TEXT NOT NULL, note TEXT,
+  collapsed INTEGER NOT NULL DEFAULT 0,
+  representation TEXT NOT NULL DEFAULT 'vector',   -- vector | raster | svg
+  asset_hash TEXT,                -- references assets.hash
+  style_id TEXT,
+  layout_json TEXT,               -- variant, side, manual offset, seed
+  x REAL, y REAL                  -- only for floating nodes
+);
+
+CREATE TABLE edges  (id TEXT PRIMARY KEY, from_id TEXT, to_id TEXT, label TEXT, style_id TEXT);
+CREATE TABLE styles (id TEXT PRIMARY KEY, kind TEXT, json TEXT);
+
+CREATE TABLE assets (
+  hash TEXT PRIMARY KEY,          -- content hash: identical bytes are stored once
+  mime TEXT, bytes BLOB, width INTEGER, height INTEGER,
+  thumbhash BLOB,
+  gen_json TEXT                   -- prompt, model, seed, style-sheet snapshot, parent asset
+);
+
+CREATE TABLE ops    (seq INTEGER PRIMARY KEY, ts INTEGER, group_id TEXT, op_json TEXT, inverse_json TEXT);</code></pre>
+  <p>Assets are content-addressed: the primary key is a hash of the bytes, so identical images are stored once and a node refers to an asset by hash. The <code>gen_json</code> column records the prompt, model and style snapshot of each generated asset, which decision D-19 requires and which allows regeneration. Sanitised SVG is stored as text with the validated contract recorded. Layout results are not stored as truth; the notes recommend storing cached positions only as a cache. The host owns the file (decision D-06), so the front end never opens SQLite directly.</p>
+
+  <h3>Import and export</h3>
+  <p>Open formats are first-class (decision D-14). What each can carry decides what a round trip loses.</p>
+  <div class="table-wrap"><table class="dense">
+    <caption>Interchange formats: what each can carry, and its status in the research</caption>
+    <thead><tr><th>Format</th><th>Can carry</th><th>Cannot carry</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><th>Markdown outline</th><td>Hierarchy and text; markmap uses Markdown with YAML frontmatter options as its input. <a class="src" href="https://github.com/markmap/markmap" title="markmap: README">markmap</a></td><td>Positions, styles, pictures, SVG, cross-links</td><td><span class="badge documented">Documented</span> for markmap; export rules are the report's design</td></tr>
+      <tr><th>OPML</th><td>Outline hierarchy and text (general knowledge)</td><td>Layout, styles, pictures</td><td><span class="badge unverified">Unverified</span>: not researched</td></tr>
+      <tr><th>FreeMind <code>.mm</code></th><td>A tree of nodes with text (general knowledge)</td><td>Radiant layouts, generated art, seeds</td><td><span class="badge unverified">Unverified</span>: not researched</td></tr>
+      <tr><th>Xmind</th><td>A ZIP with a JSON content document (older Xmind 8 files use <code>content.xml</code>), a thumbnail and attachment folders; community tools also mention <code>metadata.json</code> and <code>manifest.json</code>. <a class="src" href="https://en.wikipedia.org/wiki/XMind" title="Wikipedia: XMind">XMind overview</a> <a class="src" href="https://github.com/xmindltd/xmind-sdk-js" title="xmindltd: xmind-sdk-js">xmind-sdk-js</a></td><td>The notes found no authoritative content schema, so fidelity is unknown</td><td><span class="badge reported">Third-party</span></td></tr>
+      <tr><th>JSON Canvas 1.0</th><td>Top-level <code>nodes</code> and <code>edges</code>; node types text, file, link and group; common fields id, type, x, y, width, height, color; edges with from and to node, sides, ends, color and label; node order is z-order. <a class="src" href="https://jsoncanvas.org/spec/1.0/" title="JSON Canvas: specification 1.0">JSON Canvas</a></td><td>Tree order and sibling hierarchy as such, representation modes, generation metadata; edges attach only to the four sides of a node</td><td><span class="badge documented">Documented</span></td></tr>
+      <tr><th>Mermaid mindmap</th><td>Text outline of a tree (general knowledge)</td><td>Everything visual</td><td><span class="badge unverified">Unverified</span>: not researched</td></tr>
+      <tr><th>Documented JSON export</th><td>The whole document: nodes, edges, styles, assets by hash, operations optionally</td><td>Nothing in the document</td><td>Own design (decision D-14), keeps the file agent-readable</td></tr>
+      <tr><th>PNG</th><td>A rendered picture of the map at a chosen scale</td><td>Structure, text as data</td><td>Own design</td></tr>
+      <tr><th>SVG</th><td>The whole map as vector artwork</td><td>Editable structure</td><td>Own design, see below</td></tr>
+      <tr><th>PDF</th><td>The map as pages with vector paths and placed images</td><td>Editable structure; PDF tooling not researched</td><td>Own design, see below</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Exporting a mixed picture and SVG map</h3>
+  <p><span class="badge proposed">Proposed design</span> A whole-map SVG export inlines each SVG node's sanitised group directly, embeds raster nodes as <code>&lt;image href="data:..."&gt;</code> elements with clip paths where needed, and draws branches and labels as paths and text from the engine's own geometry. A PDF export renders the vector layer as paths and places raster images at their native resolution. Both rely on the engine drawing branches and labels itself, which is why keeping text out of generated images (decision D-10) pays off here. The notes did not research PDF tooling, so the library choice is open. Cross-links, collapsed subtrees and the hidden-label recall state are export options, not defaults; the choices belong to <a href="#features">the import and export features</a>.</p>
+
+  <div class="req-list">
+    <div class="req" id="ENG-36">
+      <div class="req-head"><code class="req-id">ENG-36</code><span class="badge must">Must</span><h4>SQLite document file</h4></div>
+      <p>A document must be a single SQLite database with an application id, a schema version and tables for nodes, edges, styles, assets, metadata and operations, opened and written only by the host, and validated on open.</p>
+      <p class="req-meta"><b>Accept when:</b> a file with a wrong application id or an unknown future schema version is rejected with a clear message, a deliberately corrupted file does not crash the app, and the small reference map round trips with no change. <b>Why:</b> decision D-14; sqlite.org warns that malicious databases exist.</p>
+    </div>
+    <div class="req" id="ENG-37">
+      <div class="req-head"><code class="req-id">ENG-37</code><span class="badge must">Must</span><h4>Content-addressed assets with generation metadata</h4></div>
+      <p>Assets must be stored by content hash, with mime type, dimensions, a ThumbHash and a generation record (prompt, model, seed, style snapshot, parent asset), and identical bytes must be stored once.</p>
+      <p class="req-meta"><b>Accept when:</b> adding the same image to 10 nodes stores one asset row, and every generated asset row has a non-empty generation record. <b>Why:</b> decisions D-14 and D-19.</p>
+    </div>
+    <div class="req" id="ENG-38">
+      <div class="req-head"><code class="req-id">ENG-38</code><span class="badge must">Must</span><h4>Open the large map quickly</h4></div>
+      <p>Opening the large reference map must show a first frame under the budget, loading structure and thumbnails first and full images lazily.</p>
+      <p class="req-meta"><b>Accept when:</b> from the open command to the first frame takes under 500 ms on the large reference map (5,000 nodes, 300 pictures), measured on the M4 Pro. <b>Why:</b> budget from the decisions brief (a target proposed by the report); see <a href="#quality">the quality page</a>.</p>
+    </div>
+    <div class="req" id="ENG-39">
+      <div class="req-head"><code class="req-id">ENG-39</code><span class="badge should">Should</span><h4>Open-format import and export</h4></div>
+      <p>The engine must import and export Markdown outline, OPML, FreeMind and JSON Canvas, and export a documented JSON form of the whole document, with a stated list of what each format cannot carry shown at export time.</p>
+      <p class="req-meta"><b>Accept when:</b> a vector-only map round trips through Markdown, OPML and FreeMind with identical hierarchy and text, and a JSON Canvas export opens in a third-party reader with all nodes present. <b>Why:</b> decision D-14; the OPML, FreeMind and Mermaid specifications were not researched, so the test fixes the supported subset.</p>
+    </div>
+    <div class="req" id="ENG-40">
+      <div class="req-head"><code class="req-id">ENG-40</code><span class="badge should">Should</span><h4>Single-file SVG and PDF export of mixed maps</h4></div>
+      <p>A map containing vector, picture and SVG subtrees must export to one SVG file and one PDF file in which branches, labels, pictures and artwork are all present and connected as on screen.</p>
+      <p class="req-meta"><b>Accept when:</b> exporting the large reference map to SVG and PDF succeeds and a pixel comparison of the export against the on-screen render at the same scale differs only at anti-aliasing edges, and the exported SVG contains no script or external reference. <b>Why:</b> proposed design; engine-drawn labels and branches make this possible.</p>
+    </div>
+  </div>
+
+  <h2>Limits of this research</h2>
+  <p>The engine's architecture, layout and rendering rest on a small number of verified sources and one set of measurements. The following points should be read as design, not as established practice.</p>
+  <ul>
+    <li><b>Proposed designs without prior art:</b> organic Buzan-style layout; two-sided balancing by subtree extent; the radial mapping with ring radii for wide pictures; the branch outline pipeline and join rule; per-glyph text along branches with its curvature, direction and script rules; camera-relative precision; zoom-bucket rasterisation with live inline SVG; GPU texture budgets; operation-log undo grouping for AI jobs; the schema sketch; and mixed SVG or PDF export.</li>
+    <li><b>Sources not fetched or not read in full:</b> Walker (1990) and Buchheim et al. (2002); yFiles, dagre and the internals of Xmind and MindNode layout; Levien's blog posts and kurbo (so the kurbo variable-width limitation is not verified); Skia and Inkscape power stroke; Excalidraw, Miro, Zed, Google Maps and Flutter Impeller engineering write-ups; SVG <code>textPath</code>; HarfBuzz; AVIF and JPEG XL; atlases against texture arrays; Automerge and Yjs; the OPML, FreeMind and Mermaid mindmap specifications; PDF export tooling.</li>
+    <li><b>Weakly sourced:</b> Figma's tile-based rendering (only a secondary tutorial claims it); the patent expiry date quoted by a blog commenter; the Xmind file structure (community tools and an encyclopaedia, no official schema); ThorVG's benchmark claims (the project's own); Safari and WKWebView behaviour on other OS builds, where a Tauri plugin README contradicts the measurement on macOS 26.5.1 <a class="src" href="https://docs.rs/crate/tauri-plugin-macos-fps/0.1.0/source/README.md" title="tauri-plugin-macos-fps: README">plugin README</a>.</li>
+    <li><b>Not measured:</b> Electron or Chromium, input latency, SVG rendering and re-rasterisation, real text layout, hit-testing, editing, memory, thermal behaviour, older Apple Silicon and Intel Macs, the 400,000-branch row against a single process (the 10,000 to 50,000 and the 100,000 to 400,000 rows come from different runs), and any display that is not the built-in 120 Hz panel.</li>
+  </ul>
+  <div class="callout gap wide"><span class="tag">Not verified</span><p>Every requirement threshold on this page that is a time or frame figure is either taken from the decisions brief budgets (to be confirmed in the spikes) or from the measurements above. Percentages and tolerances written as accept checks (such as one device pixel) are test tolerances proposed by the report, not measured results.</p></div>
+</section>

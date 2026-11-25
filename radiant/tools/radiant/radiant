@@ -1,0 +1,3 @@
+#!/bin/sh
+# Launcher for the radiant agent CLI from a Radiant checkout: tools/radiant/radiant COMMAND ...
+exec bun "$(dirname "$0")/../agent-cli.ts" "$@"

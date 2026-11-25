@@ -1,0 +1,161 @@
+<section class="page" id="p-vision" data-g="product" data-title="Product vision and scope" data-nav="Vision and scope">
+  <h1>Product vision and scope</h1>
+  <p class="lead">Radiant is a fast, local, organic-looking mind-mapping app for the Mac. An AI drafts the map from a topic and a requested style, the user reworks it, and any branch can be turned into pictures or SVG artwork. It is designed so that the user ends up remembering the content, which is why it also includes recall and review tools, and why the AI produces a draft to be improved and never a finished product to be admired. This page states what the app is for, who it serves, what it will and will not do in version 1, and the principles that settle design arguments.</p>
+
+  <div class="callout wide decision"><span class="tag">Decision</span><p>Every requirement on the <a href="#features">features page</a>, the <a href="#ai-engine">AI engine page</a>, the <a href="#art-subtrees">art subtrees page</a>, the <a href="#engine">engine page</a> and the <a href="#quality">quality page</a> should trace back to a statement on this page. If a requirement cannot be traced to a problem, a user, a differentiator or a principle below, it should be removed or this page should be corrected.</p></div>
+
+  <h2>The problem</h2>
+  <p>Mind-mapping tools solve drawing and organising well. They leave five problems open, each backed by the research pages.</p>
+  <ul>
+    <li><b>Maps look alike.</b> Most tools draw boxes and straight or lightly curved lines. The one-click hand-drawn style in Xmind is a filter on those shapes, and it does not give the tapered organic branches that Tony Buzan describes (<a href="#desktop-tools">desktop tools</a>, <a href="#buzan">Buzan</a>). Memory-sport and sketchnote communities say hand-drawn maps are the more memorable ones, although no controlled study supports that (<a href="#community">community</a>, <a href="#science">evidence</a>).</li>
+    <li><b>AI maps are finished products that nobody learns from.</b> Tools that turn a prompt into a map hand over a complete result, and reviewers say such maps include everything and are static. The evidence says that building or reworking a map helps memory more than studying a finished one (creating g = 0.72 against studying g = 0.43 in one meta-analysis). An AI that does all the work removes the useful part (<a href="#science">evidence</a>, <a href="#community">community</a>).</li>
+    <li><b>Large maps are slow and layouts are unstable.</b> Users repeatedly complain that automatic layout moves nodes they have already placed, and the ranked needs on the community page put stable layout first. Reports of sluggish large files exist for MindManager, for Xmind (old reports, 2020 to 2021) and for Miro boards (search snippets). MindNode's own large-map speed is unmeasured (<a href="#community">community</a>, <a href="#mindnode">MindNode</a>).</li>
+    <li><b>Layouts and structure are rigid.</b> Tools are strict trees, or free-form canvases with no structure. Users ask for labelled cross-links, one node in several places, and linked sub-maps so that big subjects can be split (<a href="#community">community</a>).</li>
+    <li><b>Lock-in.</b> MindNode keeps its documents inside iCloud as invisible files, and users complain about it. Many users want plain-text storage and vector export (<a href="#mindnode">MindNode</a>, <a href="#community">community</a>).</li>
+  </ul>
+  <div class="callout gap"><span class="tag">Not verified</span><p>The <a href="#ai-tools">AI tools page</a> found no verified product that combines all of the following: AI tree generation from a topic and a natural-language style for the whole map, a per-subtree switch to generated raster or SVG art, and an engine that keeps every node as editable text. Xmind Make Image comes closest, per topic, and the search for subtree-level art found nothing. The claim rests on a limited search, so it is a gap that Radiant aims at and not a proven market.</p></div>
+
+  <h2>Who it is for</h2>
+  <p>The primary user is the developer who is building it. Radiant is first a personal tool, and the report treats the developer as a real user whose habits settle design questions. Three further profiles are plausible if the app is later shared. They are sketches to test requirements against, not market research.</p>
+  <div class="grid">
+    <div class="card"><h3>The developer (primary)</h3><p class="meta">Knowledge worker and learner, Mac, uses MindNode today</p><p>Maps a new technical topic, a paper or a domain before starting work, and wants to remember it afterwards. Works on the keyboard. Already has a ChatGPT subscription, so the Codex CLI is available. Wants the map to look distinctive and wants to open it again in a year.</p></div>
+    <div class="card"><h3>The student or self-learner</h3><p class="meta">Secondary</p><p>Prepares for an exam or a certification with a target date. Needs the AI draft, then recall and spaced review on that date. Will use the recall tools more than anything else, and may care more about the review schedule than about the art.</p></div>
+    <div class="card"><h3>The visual note-taker</h3><p class="meta">Secondary</p><p>Sketchnote or memory-sport hobbyist who currently draws maps by hand. Wants organic branches, pictures and a hand-drawn feel, and will judge the app mainly on how the maps look. Accepts a slower, more manual workflow.</p></div>
+    <div class="card"><h3>The coding-agent user</h3><p class="meta">Secondary, after version 1</p><p>Keeps design notes and project knowledge in maps and wants a coding agent to read them. Needs a documented file and an agent interface that is read-only by default.</p></div>
+  </div>
+
+  <h2>What it does</h2>
+  <p>The core loop has five steps. The first three are the main use of the app and the last two are what separates it from a drawing tool.</p>
+  <ol class="flow">
+    <li><b>Topic and style in.</b> The user types a topic and picks or describes a style, such as a Buzan preset or a theme taken from an earlier map.</li>
+    <li><b>A streamed draft.</b> The AI, through the user's Codex login, writes the map line by line and nodes grow on the canvas as they arrive. The layout is always computed by the app and never by the model.</li>
+    <li><b>Rework.</b> The user edits, prunes, reorders and relabels with the keyboard, expands single nodes with the AI where needed, and decides what stays.</li>
+    <li><b>Illustrate chosen branches.</b> The user selects a branch and switches it to a picture or SVG representation. It stays connected to its parent, can still be folded, and keeps its text.</li>
+    <li><b>Recall and review.</b> The user hides branches or labels and recalls them, and the app schedules later reviews. The map is kept as a file the user owns.</li>
+  </ol>
+  <p>Measured on your Mac with Codex CLI 0.167.0, the app-server mode starts streaming 2.8 to 3.7 seconds after a request, and a plain line-per-node format delivers about one complete node every 290 ms. These are single samples. See the <a href="#codex">Codex page</a> and the <a href="#ai-engine">AI engine page</a> for the detail. The mode that shows nodes growing is built on that rate.</p>
+
+  <h2>What makes it different</h2>
+  <div class="table-wrap"><table>
+    <caption>Differentiators, why they matter and where the evidence is</caption>
+    <thead><tr><th>Differentiator</th><th>Why it matters</th><th>Evidence</th></tr></thead>
+    <tbody>
+      <tr><th>Any subtree can become pictures or SVG artwork and stay editable text</th><td>Beauty and distinctiveness are the open ground, since "a mind map with AI" is already being built by hobbyists. No verified product does this at subtree level.</td><td><a href="#ai-tools">AI tools</a> (gap), <a href="#community">community</a>, <a href="#art-subtrees">art subtrees</a>. Design is proposed.</td></tr>
+      <tr><th>AI drafts and the user reworks</th><td>The effort of building is what helps memory. The AI removes the blank page, not the thinking.</td><td><a href="#science">Evidence</a> (strong for creating over studying), <a href="#practice">practice</a>.</td></tr>
+      <tr><th>Recall and spaced review built in</th><td>Retrieval and spacing are the best-supported learning techniques, and mapping alone is not.</td><td><a href="#science">Evidence</a> (strong), <a href="#community">community</a>.</td></tr>
+      <tr><th>Speed with measured budgets</th><td>Sluggish large maps are a reported pain. The WebView measurement shows 100,000 branches at 120 fps.</td><td>Measured on your Mac, see <a href="#stack">the stack decision</a> and <a href="#engine">engine</a>.</td></tr>
+      <tr><th>Stable layout and a keyboard model that matches MindNode</th><td>The two most repeated complaints are moving nodes and slow keyboard flow.</td><td><a href="#community">Community</a> (ranks 1 and 2), <a href="#mindnode">MindNode</a>.</td></tr>
+      <tr><th>Open files and agent-readable maps</th><td>Answers lock-in, and gives coding agents a documented format.</td><td><a href="#community">Community</a> (rank 3), <a href="#desktop-tools">desktop tools</a>.</td></tr>
+      <tr><th>Uses the user's own Codex login</th><td>No credits, no separate key, and no charge from the app for AI.</td><td>Verified on the developer's machine, see <a href="#codex">Codex</a>.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Design principles</h2>
+  <p>These principles settle arguments. When two requirements pull in different directions, the one that follows the earlier relevant principle wins unless the report records a reason.</p>
+  <dl class="kv">
+    <dt>The tree is the truth, and looks are views</dt><dd>The document is a tree of text nodes, and vector, picture and SVG are three representations of the same subtree. Every node keeps its text, so search, outline, export and accessibility always work and a branch can return to plain form. See <a href="#art-subtrees">art subtrees</a> and <a href="#engine">engine</a>.</dd>
+    <dt>The AI drafts and the user decides</dt><dd>Generated output arrives as an editable draft, and the app pushes the user to rework and recall it. People learn from the effortful step. See <a href="#science">evidence</a> and <a href="#practice">practice</a>.</dd>
+    <dt>Speed is a feature with a budget</dt><dd>Every performance claim is a number in the quality requirements and is checked, not hoped for. Where the budget and a visual effect conflict, the effect is simplified. See <a href="#quality">quality</a> and <a href="#stack">stack</a>.</dd>
+    <dt>Beauty must carry meaning</dt><dd>Pictures depict the concept, a few key nodes get the richest treatment, and decoration can be switched off. The evidence supports meaningful pictures and contrast and gives no support to ornament. See <a href="#science">evidence</a>.</dd>
+    <dt>Layout never surprises</dt><dd>The app does not move what the user has already seen unless asked, and changes animate. This is the most repeated complaint about existing tools. See <a href="#community">community</a>.</dd>
+    <dt>Keyboard first</dt><dd>Everything frequent is possible without the mouse, using the conventions most tools share, with the rest configurable. See <a href="#desktop-tools">desktop tools</a>.</dd>
+    <dt>Files are yours</dt><dd>One visible file per map, open formats in and out, and generated assets that record how they were made. See <a href="#mindnode">MindNode</a> and <a href="#community">community</a>.</dd>
+    <dt>Buzan's laws are defaults, not dogma</dt><dd>A preset applies his laws, each one a switch. Where the evidence disagrees with him, as it does on one word per branch, the rule is a default the user can change. See <a href="#buzan">Buzan</a> and <a href="#science">evidence</a>.</dd>
+    <dt>Honest about what the AI did</dt><dd>Document history marks AI and agent changes, generated assets record their prompt and model, and the app makes no percentage claims about memory gains. See <a href="#mindnode">MindNode</a> and <a href="#science">evidence</a>.</dd>
+  </dl>
+
+  <h2>Scope for version 1</h2>
+  <p>Version 1 means milestones M1 to M7 of the <a href="#roadmap">roadmap</a>. "In" means it is built in version 1, "Later" means it is deliberately postponed, and "Out" means it is not planned.</p>
+  <div class="table-wrap"><table class="dense">
+    <caption>Capability areas and their scope status</caption>
+    <thead><tr><th>Capability area</th><th>Status</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><th>Infinite canvas, keyboard editing, layout, folding, undo</th><td>In</td><td>The baseline of any mapper; the MindNode model, see <a href="#features">features</a>.</td></tr>
+      <tr><th>Styles, themes, Buzan preset, organic branches</th><td>In</td><td>The reason the app looks different; see <a href="#features">features</a>.</td></tr>
+      <tr><th>Outline view and open-format import and export</th><td>In</td><td>Strong feature and answer to lock-in.</td></tr>
+      <tr><th>AI generation, streaming, expand a node</th><td>In</td><td>The core promise; see <a href="#ai-engine">AI engine</a>.</td></tr>
+      <tr><th>Picture subtrees and SVG subtrees</th><td>In</td><td>The signature feature; see <a href="#art-subtrees">art subtrees</a>.</td></tr>
+      <tr><th>Recall and review</th><td>In</td><td>The memory purpose; strongest evidence available.</td></tr>
+      <tr><th>macOS app, directly distributed</th><td>In</td><td>First platform. The 120 fps setting uses a private WebKit flag, which is acceptable for a personal app (decision D-02).</td></tr>
+      <tr><th>Second platform (Windows)</th><td>In, at M7</td><td>Windows uses Chromium's WebView2; Linux is the weakest target and may need an Electron build (decision D-01).</td></tr>
+      <tr><th>Agent interface (command line and MCP)</th><td>Later</td><td>After version 1 (decision D-20); read-only by default.</td></tr>
+      <tr><th>Pen and ink input, flashcards, slides from branches</th><td>Later</td><td>Useful, with weak or secondary evidence; see <a href="#community">community</a>.</td></tr>
+      <tr><th>Local-model AI engine</th><td>Later</td><td>The provider interface allows it (decision D-07); no work in version 1.</td></tr>
+      <tr><th>Reminders, Things and OmniFocus sync</th><td>Later</td><td>Apple-specific and outside the stated goals.</td></tr>
+      <tr><th>Cloud sync and real-time collaboration</th><td>Out</td><td>Not in the stated goals. Users can sync the file with any service. Elixir would suit a later server (decision D-15).</td></tr>
+      <tr><th>App Store distribution</th><td>Out</td><td>The private WebKit flag is not acceptable there. Open decision below.</td></tr>
+      <tr><th>iPhone, iPad, Watch, Vision Pro, widgets, Siri</th><td>Out</td><td>Outside a macOS-first desktop tool (<a href="#mindnode">MindNode verdicts</a>).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Non-goals</h2>
+  <ul>
+    <li>Real-time collaboration and a hosted service.</li>
+    <li>A mobile app. The architecture keeps the option open but nothing is built for it.</li>
+    <li>A general whiteboard or diagramming tool. Radiant draws mind maps and linked maps, not flowcharts or free sketches.</li>
+    <li>A note-taking system. Nodes have notes, but long prose belongs in an outliner, and the app does not compete with them (<a href="#community">community</a>).</li>
+    <li>App Store distribution in version 1.</li>
+    <li>Generating a whole map as a single flat image. Maps are always built from nodes so that they stay editable, searchable and foldable (decision D-09).</li>
+    <li>Claims that mind maps or AI pictures raise memory by a stated percentage. The evidence does not support one.</li>
+  </ul>
+
+  <h2>How requirements are organised</h2>
+  <p>Requirements are grouped by prefix. Every identifier is unique, is numbered from 01 within its prefix, and does not change once written.</p>
+  <div class="table-wrap"><table>
+    <caption>Requirement prefixes and the pages that hold them</caption>
+    <thead><tr><th>Prefix</th><th>Subject</th><th>Page</th></tr></thead>
+    <tbody>
+      <tr><th><code>FR-CAN</code>, <code>FR-EDT</code>, <code>FR-LAY</code>, <code>FR-STY</code>, <code>FR-OUT</code>, <code>FR-ORG</code>, <code>FR-MEM</code>, <code>FR-IO</code>, <code>FR-AGT</code></th><td>Canvas, editing, layout, styles, outline, organising, recall, files, agent interface</td><td><a href="#features">Features</a></td></tr>
+      <tr><th><code>FR-AI</code></th><td>AI generation and the Codex engine</td><td><a href="#ai-engine">AI engine</a></td></tr>
+      <tr><th><code>FR-ART</code></th><td>Picture and SVG subtrees</td><td><a href="#art-subtrees">Art subtrees</a></td></tr>
+      <tr><th><code>ENG</code></th><td>Engine internals</td><td><a href="#engine">Engine</a></td></tr>
+      <tr><th><code>NFR-PERF</code>, <code>NFR-REL</code>, <code>NFR-SEC</code>, <code>NFR-A11Y</code>, <code>NFR-PLAT</code>, <code>NFR-MAINT</code></th><td>Performance, reliability, security, accessibility, platforms, maintainability</td><td><a href="#quality">Quality</a></td></tr>
+    </tbody>
+  </table></div>
+  <div class="table-wrap"><table>
+    <caption>Priorities and the milestones they roughly map to</caption>
+    <thead><tr><th>Priority</th><th>Meaning</th><th>Milestones</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge must">Must</span></td><td>Needed for the first usable version.</td><td>M1 to M3, with AI generation in M2</td></tr>
+      <tr><td><span class="badge should">Should</span></td><td>Part of version 1.</td><td>M3 to M6, with polish in M7</td></tr>
+      <tr><td><span class="badge could">Could</span></td><td>After version 1, if it proves valuable.</td><td>After M7</td></tr>
+      <tr><td><span class="badge later">Later</span></td><td>Deliberately deferred.</td><td>Not scheduled</td></tr>
+    </tbody>
+  </table></div>
+  <p>The milestones are M0 spikes, M1 canvas core, M2 AI generation, M3 organic style, outline, import and export, M4 picture subtrees, M5 SVG subtrees, M6 recall and review, and M7 packaging, polish and a second platform. See the <a href="#roadmap">roadmap</a>.</p>
+
+  <h2>Success measures</h2>
+  <p>The measures below use only the performance budgets and behavioural checks that the report proposes. All numerical targets are <span class="badge proposed">Proposed design</span> targets to be confirmed in the M0 spikes. The reference maps are small (200 nodes), large (5,000 nodes with 300 pictures) and stress (50,000 nodes).</p>
+  <div class="table-wrap"><table class="dense">
+    <caption>Success measures</caption>
+    <thead><tr><th>Measure</th><th>Target</th><th>Kind</th></tr></thead>
+    <tbody>
+      <tr><th>Frame budget during pan and zoom</th><td>8.3 ms at 120 Hz, 16.7 ms at 60 Hz; at most 4 ms of script per frame on the large map</td><td>Budget, proposed</td></tr>
+      <tr><th>Cold start to an interactive window</th><td>Under 1 second</td><td>Budget, proposed</td></tr>
+      <tr><th>Open the large map to first frame</th><td>Under 500 ms</td><td>Budget, proposed</td></tr>
+      <tr><th>Layout of 5,000 nodes</th><td>Under 50 ms, off the main thread</td><td>Budget, proposed</td></tr>
+      <tr><th>Input to pixel for pan</th><td>Under two frames</td><td>Budget, proposed</td></tr>
+      <tr><th>First draft from a topic</th><td>First nodes visible a few seconds after the request, and a draft of about 100 nodes within one minute. At the measured 290 ms per node plus a start delay of up to 3.7 seconds, 100 nodes take about 33 seconds, which leaves room for a slower model.</td><td>Behaviour, proposed (derived from single samples)</td></tr>
+      <tr><th>Layout stability</th><td>After any edit, no node outside the edited main branch changes position.</td><td>Behaviour, checked by test</td></tr>
+      <tr><th>Keyboard only</th><td>The developer can build a 20-node map with no mouse, using the MindNode shortcuts.</td><td>Behaviour</td></tr>
+      <tr><th>Reliability</th><td>After a forced quit, every committed edit is present on reopening.</td><td>Behaviour, checked by test</td></tr>
+      <tr><th>Rework and recall</th><td>After a generated map, the app has recorded at least one edit session and one recall session on it. The measure counts use of the effortful steps, with no claim about memory gains.</td><td>Behaviour</td></tr>
+      <tr><th>Own use</th><td>The developer replaces MindNode for new maps for one month.</td><td>Behaviour, informal</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Assumptions and open decisions</h2>
+  <p>The user gave four answers that fix the starting point. The reference app is MindNode. The platform is macOS first, with a stack that can reach Windows and Linux later without a rewrite. The audience is a personal tool now and possibly shared or sold later, each user with their own Codex login. When stack options trade off, the best app by the fastest path wins, and performance must still be excellent. The working name Radiant is a placeholder.</p>
+  <p>The following decisions are still the user's to make.</p>
+  <ul>
+    <li><b>App Store distribution.</b> It would rule out the private WebKit flag that gives 120 fps (decision D-02). Shipping there would mean accepting 60 fps or building another way. The report recommends direct distribution.</li>
+    <li><b>Manual editing against AI generation.</b> The report assumes the user reworks a draft heavily. If most use turns out to be generation with light editing, the recall and rework prompts matter more and detailed editing less.</li>
+    <li><b>Default style.</b> The report proposes a restrained default and an optional Buzan preset. Whether the Buzan strict preset should be the default is open; the evidence page treats one word per branch as folklore and the app lets it be switched off.</li>
+    <li><b>Keyboard default.</b> Shift+Return is the cross-tool key for a sibling before, while MindNode uses it for a new main node. The report binds both sibling-before keys and offers a MindNode preset.</li>
+    <li><b>File format.</b> The brief proposes one SQLite file. Readable plain text answers lock-in better, so the format is to be revisited at the end of the first milestone.</li>
+    <li><b>Naming.</b> The words "Mind Map" may be a trademark. The <a href="#history">history page</a> could not check registries, so the app should say "mind mapping" in its name and copy until that is done.</li>
+    <li><b>Pricing.</b> If the app is sold, a one-time price or a charge tied to AI use fits the review complaints better than a subscription. The Codex login has its own terms to check.</li>
+    <li><b>Local-model AI.</b> Some users want AI without cloud upload. The provider interface allows it later and nothing is promised.</li>
+    <li><b>Linux.</b> Whether to accept a weaker WebView there or ship an Electron build.</li>
+  </ul>
+</section>

@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["nodes"],
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "parent_id", "title", "note", "source_heading"],
+        "properties": {
+          "id": { "type": "string" },
+          "parent_id": { "type": ["string", "null"] },
+          "title": { "type": "string" },
+          "note": { "type": ["string", "null"] },
+          "source_heading": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

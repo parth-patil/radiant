@@ -1,0 +1,3 @@
+interface:
+  display_name: "Radiant Map"
+  short_description: "Read, edit and validate local Radiant mind maps"

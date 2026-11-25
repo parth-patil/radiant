@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8"><script type="module">
+const q = new URLSearchParams(location.search);
+const n = q.get('n'), themes = q.get('themes').split(',');
+const M = await import('./' + q.get('a'));
+const datas = {};
+for (const t of new Set(themes)) datas[t] = await (await fetch('data/specs-' + n + '-' + t + '.json')).json();
+const cache = new M.BranchMeshCache();
+const out = [];
+for (const t of themes) {
+  const { relief, specs } = datas[t];
+  if (self.gc) self.gc();
+  await new Promise(r => setTimeout(r, 50));
+  let t0 = performance.now();
+  const mesh = cache.build(specs, relief || undefined);
+  const a = performance.now() - t0;
+  t0 = performance.now();
+  M.packVertices(mesh);
+  out.push({ theme: t, mesh: a, pack: performance.now() - t0 });
+}
+window.__result = out;
+</script>
