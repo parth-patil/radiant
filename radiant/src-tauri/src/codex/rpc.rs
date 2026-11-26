@@ -64,24 +64,22 @@ fn common_dirs() -> Vec<PathBuf> {
     v
 }
 
-/// Finds the `codex` binary: `$CODEX_BIN`, PATH, common install locations, then a login shell.
-pub async fn locate_codex() -> Result<PathBuf, AiError> {
-    if let Ok(p) = std::env::var("CODEX_BIN") {
+/// Finds `name`: `$<env>`, PATH, common install locations and `extra`, then a login shell. `Err` when `$<env>` names
+/// something that is not an executable file.
+pub(super) async fn find_binary(name: &str, env: &str, extra: &[PathBuf]) -> Result<Option<PathBuf>, ()> {
+    if let Ok(p) = std::env::var(env) {
         let p = PathBuf::from(p);
-        return if is_executable(&p) {
-            Ok(p)
-        } else {
-            Err(AiError::new("not_installed", "The configured Codex CLI was not found. Install Codex (npm i -g @openai/codex) or update CODEX_BIN."))
-        };
+        return if is_executable(&p) { Ok(Some(p)) } else { Err(()) };
     }
     let mut dirs_to_try: Vec<PathBuf> = std::env::var_os("PATH")
         .map(|p| std::env::split_paths(&p).collect())
         .unwrap_or_default();
     dirs_to_try.extend(common_dirs());
+    dirs_to_try.extend(extra.iter().cloned());
     for d in dirs_to_try {
-        let c = d.join("codex");
+        let c = d.join(name);
         if is_executable(&c) {
-            return Ok(c);
+            return Ok(Some(c));
         }
     }
     // Login shell: picks up PATH changes made in ~/.zprofile / ~/.zshrc.
@@ -91,7 +89,7 @@ pub async fn locate_codex() -> Result<PathBuf, AiError> {
         }
         let out = tokio::time::timeout(
             Duration::from_secs(6),
-            Command::new(shell).args(["-lc", "command -v codex"]).stdin(Stdio::null()).stderr(Stdio::null()).output(),
+            Command::new(shell).args(["-lc", &format!("command -v {name}")]).stdin(Stdio::null()).stderr(Stdio::null()).output(),
         )
         .await;
         if let Ok(Ok(o)) = out {
@@ -99,15 +97,24 @@ pub async fn locate_codex() -> Result<PathBuf, AiError> {
             if let Some(line) = s.lines().rev().find(|l| l.starts_with('/')) {
                 let p = PathBuf::from(line.trim());
                 if is_executable(&p) {
-                    return Ok(p);
+                    return Ok(Some(p));
                 }
             }
         }
     }
-    Err(AiError::new(
-        "not_installed",
-        "The Codex CLI was not found. Install it (npm i -g @openai/codex) and sign in with `codex login`.",
-    ))
+    Ok(None)
+}
+
+/// Finds the `codex` binary: `$CODEX_BIN`, PATH, common install locations, then a login shell.
+pub async fn locate_codex() -> Result<PathBuf, AiError> {
+    match find_binary("codex", "CODEX_BIN", &[]).await {
+        Ok(Some(p)) => Ok(p),
+        Err(()) => Err(AiError::new("not_installed", "The configured Codex CLI was not found. Install Codex (npm i -g @openai/codex) or update CODEX_BIN.")),
+        Ok(None) => Err(AiError::new(
+            "not_installed",
+            "The Codex CLI was not found. Install it (npm i -g @openai/codex) and sign in with `codex login`.",
+        )),
+    }
 }
 
 /// PATH for the child: the binary's own directory first (so its `#!/usr/bin/env node` finds node), then the
@@ -125,15 +132,16 @@ pub(super) fn child_path(bin: &Path) -> std::ffi::OsString {
 }
 
 pub async fn read_version(bin: &Path) -> Result<String, AiError> {
+    let name = bin.file_name().and_then(|name| name.to_str()).unwrap_or("codex");
     let out = tokio::time::timeout(
         Duration::from_secs(10),
-        Command::new(bin).arg("--version").env("PATH", child_path(bin)).stdin(Stdio::null()).output(),
+        Command::new(bin).arg("--version").env("PATH", child_path(bin)).stdin(Stdio::null()).kill_on_drop(true).output(),
     )
     .await
-    .map_err(|_| AiError::new("other", "`codex --version` timed out"))?
+    .map_err(|_| AiError::new("other", format!("`{name} --version` timed out")))?
     .map_err(|e| AiError::new("other", format!("could not run {}: {e}", bin.display())))?;
     if !out.status.success() {
-        return Err(AiError::new("other", "`codex --version` failed"));
+        return Err(AiError::new("other", format!("`{name} --version` failed")));
     }
     Ok(String::from_utf8_lossy(&out.stdout).trim().to_string())
 }

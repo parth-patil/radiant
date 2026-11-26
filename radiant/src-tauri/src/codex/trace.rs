@@ -70,7 +70,7 @@ impl Trace {
         let kind = event["kind"].as_str().unwrap_or("");
         let mut safe = match kind {
             "started" => {
-                json!({"kind":kind,"route":event["route"],"model":event["model"],"templateVersion":event["templateVersion"]})
+                json!({"kind":kind,"route":event["route"],"model":event["model"],"engine":event["engine"],"templateVersion":event["templateVersion"]})
             }
             "delta" if self.include_text => json!({"kind":kind,"text":event["text"]}),
             "delta" => {
@@ -88,7 +88,7 @@ impl Trace {
                 image
             }
             "error" => {
-                json!({"kind":kind,"code":event["code"],"message":"Recorded Codex job failed"})
+                json!({"kind":kind,"code":event["code"],"message":"Recorded AI job failed"})
             }
             "warning" => json!({"kind":kind,"message":event["message"]}),
             "mapRoundDone" | "done" | "cancelled" => json!({"kind":kind}),

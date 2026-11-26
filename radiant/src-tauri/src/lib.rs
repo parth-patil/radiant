@@ -1,5 +1,5 @@
 //! Radiant host. Module ownership:
-//!   codex     – Codex app-server client and AI commands (ai_*)
+//!   codex     – AI commands (ai_*): Codex app-server client, Claude Code and Antigravity CLI turns
 //!   store     – document files, autosave, crash recovery, asset store (doc_*, asset_*)
 //!   platform  – window setup, 120 Hz WebKit setting, platform_info
 //!   app_state – settings and History snapshots in <app data>/state.sqlite (state_*)
@@ -20,6 +20,11 @@ mod store;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // The AI self-test never builds the app, so it cannot open windows or touch settings, documents or agent access.
+    #[cfg(debug_assertions)]
+    if codex::selftest_requested() {
+        codex::selftest_main();
+    }
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
@@ -47,6 +52,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             codex::ai_status,
+            codex::ai_engines,
             codex::ai_queue,
             capture::capture_recent,
             capture::capture_submit,

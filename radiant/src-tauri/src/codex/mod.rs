@@ -1,16 +1,26 @@
-//! Codex app-server client and the `ai_*` commands. Owner: AI agent.
+//! The `ai_*` commands: AI turns through the Codex app-server, or through the Claude Code or Antigravity CLI.
+//! Owner: AI agent.
 //!
-//! One long-lived `codex app-server --listen stdio://` child is started lazily on first use (`ai_status` or
+//! Codex: one long-lived `codex app-server --listen stdio://` child is started lazily on first use (`ai_status` or
 //! `ai_start_turn`), initialised, and supervised: if it exits it is restarted on the next demand with
 //! exponential backoff. Every job gets its own ephemeral thread and its own empty working directory.
+//!
+//! Claude Code and Antigravity (`cli`): a text turn whose request names `engine: "claude" | "antigravity"` runs as
+//! one print-mode CLI process in its own empty working directory, through the same queue, cancellation, timeout,
+//! usage and traces. Image turns always go to Codex, whatever the request names. These engines get no map-repair
+//! round: a turn with `repairMap` ends with `done` and never emits `mapRoundDone`.
 //!
 //! Event sequence emitted on the `"ai-event"` channel for one job:
 //!   started -> delta* (text, in order) [-> image] -> done {usage}
 //! or ... -> error {code, message}  or  ... -> cancelled. Exactly one terminal event per job.
 //! `rateLimits` events (jobId "") are emitted whenever Codex reports `account/rateLimits/updated`.
 //!
-//! Debug builds only: `cargo run -- --ai-selftest[=text|schema|tools|image|cancel|status]` runs one real turn, prints
-//! every event with timings to stderr and exits (see `selftest`).
+//! Commands: `ai_status {refreshLimits, engine?}`, `ai_engines {}` (codex, claude, antigravity in that order),
+//! `ai_start_turn {req}`, `ai_cancel`, `ai_resolve_map_round`, `ai_queue`.
+//!
+//! Debug builds only: `cargo run -- --ai-selftest[=text|schema|tools|image|cancel|status|engines] [--ai-engine=claude]`
+//! runs one real turn without starting the app, prints every event with timings to stderr and exits (see `selftest`).
+mod cli;
 mod exec;
 mod protocol_types;
 mod rpc;
@@ -64,6 +74,8 @@ pub struct AiTurnRequest {
     #[serde(default)]
     pub instructions: String,
     pub prompt: String,
+    /// "claude" or "antigravity" for a text turn through that CLI; absent or "codex" for Codex.
+    pub engine: Option<String>,
     pub model: Option<String>,
     pub effort: Option<String>,
     pub output_schema: Option<Value>,
@@ -153,6 +165,8 @@ impl Job {
 struct Isolation {
     mcp_disabled: Vec<String>,
     default_model: Option<String>,
+    /// `model/list` in the host contract's `AiModel` shape, for `ai_engines`.
+    models: Vec<Value>,
 }
 
 type ThreadRoutes = HashMap<(uuid::Uuid, String), mpsc::UnboundedSender<(String, Value)>>;
@@ -169,6 +183,7 @@ struct Inner {
     active_client: Mutex<Option<Weak<Client>>>,
     rate: Mutex<Option<Value>>,
     iso: Mutex<Isolation>,
+    cli: cli::CliState,
 }
 
 impl Default for Inner {
@@ -193,6 +208,7 @@ impl Default for Inner {
             active_client: Mutex::new(None),
             rate: Mutex::new(None),
             iso: Mutex::new(Isolation::default()),
+            cli: cli::CliState::default(),
         }
     }
 }
@@ -262,31 +278,8 @@ pub fn setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
     let inner = state.inner.clone();
     let data = app.path().app_data_dir()?;
     let cache = app.path().app_cache_dir()?;
-    #[cfg(debug_assertions)]
-    let (data, cache) = if std::env::args().any(|arg| arg == "--ai-selftest" || arg.starts_with("--ai-selftest="))
-        && let Some(path) = std::env::var_os("RADIANT_AI_SELFTEST_DIR")
-    {
-        let root = PathBuf::from(path);
-        (root.join("data"), root.join("cache"))
-    } else {
-        (data, cache)
-    };
     let jobs = cache.join("ai-jobs").join(uuid::Uuid::new_v4().to_string());
     let _ = inner.paths.set(Paths { assets: data.join("assets"), jobs });
-
-    #[cfg(debug_assertions)]
-    {
-        if let Some(mode) = std::env::args().find_map(|a| {
-            if a == "--ai-selftest" {
-                Some("text".to_string())
-            } else {
-                a.strip_prefix("--ai-selftest=").map(String::from)
-            }
-        }) {
-            selftest(inner, mode);
-            return Ok(());
-        }
-    }
 
     let handle = app.handle().clone();
     let emitter: EventSink = Arc::new(move |event, owner, v| {
@@ -334,8 +327,69 @@ pub fn shutdown(app: &tauri::AppHandle) {
 // ------------------------------------------------------------------ commands
 
 #[tauri::command]
-pub async fn ai_status(refresh_limits: Option<bool>, state: State<'_, CodexState>) -> Result<Value, String> {
-    Ok(status(&state.inner, refresh_limits.unwrap_or(false)).await)
+pub async fn ai_status(refresh_limits: Option<bool>, engine: Option<String>, state: State<'_, CodexState>) -> Result<Value, String> {
+    match engine.as_deref() {
+        None | Some("codex") => Ok(status(&state.inner, refresh_limits.unwrap_or(false)).await),
+        Some(name) => match cli::Engine::parse(name) {
+            Some(engine) => Ok(cli::status(&state.inner, engine).await),
+            None => Err(format!("unknown AI engine '{name}'")),
+        },
+    }
+}
+
+/// Every engine with what is installed and which models it offers, in the order codex, claude, antigravity.
+#[tauri::command]
+pub async fn ai_engines(state: State<'_, CodexState>) -> Result<Value, String> {
+    Ok(engines(&state.inner).await)
+}
+
+async fn engines(inner: &Arc<Inner>) -> Value {
+    let (codex, claude, antigravity) = tokio::join!(
+        codex_engine(inner),
+        cli::engine_info(inner, cli::Engine::ALL[0]),
+        cli::engine_info(inner, cli::Engine::ALL[1]),
+    );
+    json!([codex, claude, antigravity])
+}
+
+async fn codex_engine(inner: &Arc<Inner>) -> Value {
+    let started = tokio::time::timeout(Duration::from_secs(30), get_client(inner)).await;
+    let (bin, version, logged_in) = {
+        let slot = inner.slot.lock().await;
+        (slot.bin.clone(), slot.version.clone(), slot.logged_in)
+    };
+    let mut v = json!({"engine": "codex", "label": "Codex", "installed": bin.is_some(), "models": [], "customModels": false, "defaultEffort": DEFAULT_EFFORT});
+    if let Some(version) = version {
+        v["version"] = json!(version);
+    }
+    let error = match started {
+        Ok(Ok(_)) => {
+            if let Ok(iso) = inner.iso.lock() {
+                v["models"] = json!(iso.models);
+                let fallback = iso.models.iter().find(|model| model["isDefault"] == true).or(iso.models.first()).and_then(|model| model["id"].as_str());
+                if let Some(model) = iso.default_model.as_deref().or(fallback) {
+                    v["defaultModel"] = json!(model);
+                }
+            }
+            if let Some(models) = v["models"].as_array_mut() {
+                models.iter_mut().filter_map(Value::as_object_mut).for_each(|model| { model.remove("isDefault"); });
+            }
+            (logged_in == Some(false)).then(|| AiError::new("not_logged_in", "Not signed in to Codex. Run `codex login` in a terminal, then try again."))
+        }
+        Ok(Err(error)) => Some(error),
+        Err(_) => Some(AiError::new("timeout", "Codex did not start in time.")),
+    };
+    if let Some(error) = error {
+        v["error"] = json!(error.message);
+        v["errorCode"] = json!(error.code);
+    }
+    v
+}
+
+/// Whether Codex is ready to draw pictures; bounded so a slow Codex start never holds up another engine's status.
+async fn codex_draws_images(inner: &Arc<Inner>) -> bool {
+    matches!(tokio::time::timeout(Duration::from_secs(10), get_client(inner)).await, Ok(Ok(_)))
+        && inner.slot.lock().await.logged_in != Some(false)
 }
 
 #[tauri::command]
@@ -439,6 +493,18 @@ fn start_turn(inner: &Arc<Inner>, req: AiTurnRequest, owner: Option<String>) -> 
     if req.prompt.trim().is_empty() {
         return Err("empty prompt".into());
     }
+    let engine = match req.engine.as_deref() {
+        None | Some("codex") => None,
+        Some(name) => Some(cli::Engine::parse(name).ok_or_else(|| format!("unknown AI engine '{name}'"))?),
+    };
+    if req.model.as_deref().is_some_and(|model| !cli::safe_value(model)) {
+        return Err("invalid model name".into());
+    }
+    if let Some(effort) = req.effort.as_deref()
+        && (!cli::safe_value(effort) || engine.is_some() && !cli::EFFORTS.contains(&effort))
+    {
+        return Err("invalid effort level".into());
+    }
     let job_id = uuid::Uuid::new_v4().to_string();
     let job = Arc::new(Job { received: Mutex::default(), cancelled: AtomicBool::new(false), notify: Notify::new(), usage: Mutex::new(None), trace: Mutex::new(None), owner: owner.clone(), map_round: Mutex::new(None) });
     let activity = match req.template_version.as_deref().and_then(|template| template.split('/').next()) {
@@ -475,7 +541,7 @@ fn start_turn(inner: &Arc<Inner>, req: AiTurnRequest, owner: Option<String>) -> 
         }
         inner2.emit(ev);
         let client = inner2.slot.lock().await.client.clone();
-        if let Some(client) = client.filter(|client| client.is_alive()) {
+        if let Some(client) = client.filter(|client| client.is_alive() && cli_engine(&req).is_none()) {
             refresh_rate_limits(&inner2, &client).await;
         }
         if let Ok(mut scheduler) = inner2.scheduler.lock() {
@@ -643,12 +709,14 @@ async fn start_client(inner: &Arc<Inner>, slot: &mut Slot) -> Result<Arc<Client>
     if let Ok(mut iso) = inner.iso.lock() {
         iso.mcp_disabled = names;
     }
-    if let Ok(models) = client.request("model/list", protocol_types::ModelListParams { limit: Some(100) }, Duration::from_secs(10)).await
-        && let Ok(models) = protocol_types::ModelListResponse::deserialize(models)
+    if let Ok(reply) = client.request("model/list", protocol_types::ModelListParams { limit: Some(100) }, Duration::from_secs(10)).await
+        && let Ok(models) = protocol_types::ModelListResponse::deserialize(&reply)
     {
         let pick = PREFERRED_MODELS.iter().find(|p| models.data.iter().any(|model| model.id == **p)).map(|s| s.to_string());
+        let listed = reply["data"].as_array().map(|data| data.iter().filter(|model| model["hidden"] != true).filter_map(codex_model).collect()).unwrap_or_default();
         if let Ok(mut iso) = inner.iso.lock() {
             iso.default_model = pick;
+            iso.models = listed;
         }
     }
     match check_login(&client).await {
@@ -660,6 +728,19 @@ async fn start_client(inner: &Arc<Inner>, slot: &mut Slot) -> Result<Arc<Client>
     }
     refresh_rate_limits(inner, &client).await;
     Ok(client)
+}
+
+/// One `model/list` entry as an `AiModel` (plus `isDefault`, dropped before it leaves the host). Efforts outside the
+/// host contract are left out; a model that lists none is offered low, medium and high.
+fn codex_model(model: &Value) -> Option<Value> {
+    let id = model["id"].as_str().filter(|id| cli::safe_value(id))?;
+    let efforts: Vec<&str> = match model["supportedReasoningEfforts"].as_array() {
+        Some(listed) => cli::EFFORTS.iter().copied()
+            .filter(|effort| listed.iter().any(|option| option["reasoningEffort"] == *effort || option == effort)).collect(),
+        None => vec!["low", "medium", "high"],
+    };
+    let label = model["displayName"].as_str().filter(|label| !label.trim().is_empty()).unwrap_or(id);
+    Some(json!({"id": id, "label": label, "efforts": efforts, "isDefault": model["isDefault"] == true}))
 }
 
 async fn refresh_rate_limits(inner: &Inner, client: &Client) {
@@ -714,6 +795,11 @@ enum Terminal {
     Error(AiError),
 }
 
+/// The CLI a turn runs through, or None for Codex. Pictures always use Codex.
+fn cli_engine(req: &AiTurnRequest) -> Option<cli::Engine> {
+    req.engine.as_deref().filter(|_| req.kind == "text").and_then(cli::Engine::parse)
+}
+
 fn startup_error(e: &AiError) -> bool {
     matches!(e.code, "protocol" | "process_exited" | "timeout")
 }
@@ -730,7 +816,8 @@ async fn run_job(
     if job.cancelled.load(Ordering::SeqCst) {
         return Terminal::Cancelled;
     }
-    if let Some(error) = inner.rate.lock().ok().and_then(|rate| rate.as_ref().and_then(allowance_error)) {
+    let engine = cli_engine(req);
+    if engine.is_none() && let Some(error) = inner.rate.lock().ok().and_then(|rate| rate.as_ref().and_then(allowance_error)) {
         return Terminal::Error(error);
     }
     let jobs = inner.paths().jobs;
@@ -740,11 +827,17 @@ async fn run_job(
         if let Some(trace) = entry.as_mut() {
             trace.write(json!({
                 "kind": "configuration", "templateVersion": req.template_version,
-                "web_search": if req.web_search && req.kind == "text" { "live" } else { "disabled" }
+                "engine": engine.map_or("codex", cli::Engine::id),
+                "web_search": if req.web_search && req.kind == "text" && engine != Some(cli::Engine::Antigravity) { "live" } else { "disabled" }
             }));
         }
     }
     let cwd = jobs.join(job_id);
+    if let Some(engine) = engine {
+        let result = cli::run(inner, engine, job_id, job, req, &cwd).await;
+        let _ = tokio::fs::remove_dir_all(&cwd).await;
+        return result;
+    }
     if req.prefer_exec_fallback && req.kind == "text"
         && let Some(prompt) = req.exec_fallback_prompt.as_deref().filter(|prompt| !prompt.trim().is_empty())
     {
@@ -1322,16 +1415,41 @@ fn rate_limits_json(raw: &Value) -> Value {
 
 // ------------------------------------------------------------------ self-test (debug builds)
 
-/// `cargo run -- --ai-selftest[=mode]` (from `src-tauri`, debug build only). Modes:
-///   text (default)  one small map-generation turn in the JSON Lines format
-///   tools           asks the model to list its tools (checks the isolation settings)
-///   image           one image turn, writes the PNG to the asset store
-///   cancel          starts a long generation and cancels it after the first deltas
-///   exec-cancel     starts the fallback and cancels shortly after launch
-///   status          only starts the app-server and prints `ai_status` (no model call)
-/// Prints every event with its time since the job started to stderr, then exits (code 0 on a clean terminal event).
 #[cfg(debug_assertions)]
-fn selftest(inner: Arc<Inner>, mode: String) {
+pub fn selftest_requested() -> bool {
+    std::env::args().any(|arg| arg == "--ai-selftest" || arg.starts_with("--ai-selftest="))
+}
+
+/// Runs the self-test without building the app: no window, settings database, autosave, agent socket, menu or open
+/// files are touched. Job, trace and asset files go under `$RADIANT_AI_SELFTEST_DIR` (a fresh temporary folder when it
+/// is unset). Never returns.
+#[cfg(debug_assertions)]
+pub fn selftest_main() -> ! {
+    let option = |name: &str| std::env::args().find_map(|arg| arg.strip_prefix(&format!("--{name}=")).map(String::from));
+    let mode = option("ai-selftest").unwrap_or_else(|| "text".into());
+    let root = std::env::var_os("RADIANT_AI_SELFTEST_DIR").map(PathBuf::from)
+        .unwrap_or_else(|| std::env::temp_dir().join(format!("radiant-ai-selftest-{}", uuid::Uuid::new_v4().simple())));
+    let inner = Arc::new(Inner::default());
+    let jobs = root.join("cache").join("ai-jobs").join(uuid::Uuid::new_v4().to_string());
+    let _ = inner.paths.set(Paths { assets: root.join("data").join("assets"), jobs });
+    let code = tauri::async_runtime::block_on(selftest(inner, mode, option("ai-engine"), option("ai-model"), option("ai-effort"), root));
+    std::process::exit(code)
+}
+
+/// `cargo run -- --ai-selftest[=mode] [--ai-engine=codex|claude|antigravity] [--ai-model=..] [--ai-effort=..]` (from
+/// `src-tauri`, debug build only). Modes:
+///   text (default)  one small map-generation turn in the JSON Lines format
+///   tools           asks the model to list its tools, read a file outside its folder, run a command and fetch a page,
+///                   then reports whether the file's secret reached the reply and whether the command ran
+///   image           one image turn, writes the PNG to the asset store (Codex)
+///   cancel          starts a long generation and cancels it after the first deltas
+///   exec-cancel     starts the Codex fallback and cancels shortly after launch
+///   status          only prints `ai_status` for the engine (no model call)
+///   engines         only prints `ai_engines` (no model call)
+/// Prints every event with its time since the job started to stderr, then returns the exit code (0 on a clean
+/// terminal event).
+#[cfg(debug_assertions)]
+async fn selftest(inner: Arc<Inner>, mode: String, engine: Option<String>, model: Option<String>, effort: Option<String>, root: PathBuf) -> i32 {
     let (tx, mut rx) = mpsc::unbounded_channel::<(u128, Value)>();
     let t0 = Instant::now();
     let emitter: EventSink = Arc::new(move |event, _, v| {
@@ -1339,156 +1457,149 @@ fn selftest(inner: Arc<Inner>, mode: String) {
         let _ = tx.send((t0.elapsed().as_millis(), value));
     });
     let _ = inner.emitter.set(emitter);
-    tauri::async_runtime::spawn(async move {
-        let st = Instant::now();
-        let s = status(&inner, false).await;
-        let mut shown = s.clone();
-        if let Some(o) = shown.as_object_mut() {
-            o.remove("rateLimits");
-        }
-        eprintln!("[selftest] status after {} ms: {shown}", st.elapsed().as_millis());
-        eprintln!("[selftest] rateLimits: {}", s["rateLimits"]["primaryUsedPercent"]);
-        eprintln!("[selftest] user MCP servers disabled per thread: {:?}", inner.iso.lock().map(|i| i.mcp_disabled.clone()).unwrap_or_default());
-        eprintln!("[selftest] default model: {:?}", inner.iso.lock().map(|i| i.default_model.clone()).unwrap_or_default());
-        if mode == "status" || (s["available"] != true && !(mode.starts_with("exec") && s["fallbackAvailable"] == true)) {
-            if let Some(c) = inner.slot.lock().await.client.clone() {
-                c.kill().await;
-            }
-            std::process::exit(if s["available"] == true { 0 } else { 1 });
-        }
-        let contract = "Output a mind map as JSON Lines: one compact JSON object per line, no code fence, no other text. \
-                        Fields: id (n1,n2,...), parent (id of the parent or null for the root), title. Parents always before children.";
-        let req = match mode.as_str() {
-            "exec" | "exec-cancel" => AiTurnRequest {
-                web_search: false,
-                kind: "text".into(), instructions: contract.into(), prompt: "Topic: Coffee".into(),
-                model: None, effort: None, output_schema: None, ref_images: vec![],
-                map_limits: None,
-                prefer_exec_fallback: mode == "exec-cancel",
-                repair_map: false,
-                exec_fallback_prompt: Some("Make a map about Coffee.".into()),
-                template_version: Some("map/1".into()),
-            },
-            "tools" => AiTurnRequest {
-                web_search: false,
-                kind: "text".into(),
-                instructions: "Answer briefly.".into(),
-                prompt: "List the names of the tools available to you, one per line, and do nothing else.".into(),
-                model: None,
-                effort: None,
-                output_schema: None,
-                map_limits: None,
-                prefer_exec_fallback: false,
-                repair_map: false,
-                exec_fallback_prompt: None,
-                template_version: None,
-                ref_images: vec![],
-            },
-            "image" => AiTurnRequest {
-                web_search: false,
-                kind: "image".into(),
-                instructions: "You create small illustrations.".into(),
-                prompt: "A simple flat-vector icon of a coffee cup on a plain white background, square.".into(),
-                model: None,
-                effort: None,
-                output_schema: None,
-                map_limits: None,
-                prefer_exec_fallback: false,
-                repair_map: false,
-                exec_fallback_prompt: None,
-                template_version: None,
-                ref_images: vec![],
-            },
-            "schema" => AiTurnRequest {
-                web_search: false,
-                kind: "text".into(), instructions: "Return a map matching the schema.".into(),
-                prompt: "Topic: Coffee".into(), model: None, effort: None,
-                output_schema: serde_json::from_str(include_str!("map.schema.json")).ok(),
-                ref_images: vec![], map_limits: None, prefer_exec_fallback: false,
-                repair_map: false, exec_fallback_prompt: None, template_version: Some("map/1".into()),
-            },
-            "cancel" => AiTurnRequest {
-                web_search: false,
-                kind: "text".into(),
-                instructions: contract.into(),
-                prompt: "Topic: Coffee. Produce 60 nodes, depth 4.".into(),
-                model: None,
-                effort: None,
-                output_schema: None,
-                map_limits: None,
-                prefer_exec_fallback: false,
-                repair_map: false,
-                exec_fallback_prompt: None,
-                template_version: None,
-                ref_images: vec![],
-            },
-            _ => AiTurnRequest {
-                web_search: false,
-                kind: "text".into(),
-                instructions: contract.into(),
-                prompt: "Topic: Coffee. Exactly 8 nodes: one root, three children, then two grandchildren under the first child.".into(),
-                model: None,
-                effort: None,
-                output_schema: None,
-                map_limits: None,
-                prefer_exec_fallback: false,
-                repair_map: false,
-                exec_fallback_prompt: None,
-                template_version: None,
-                ref_images: vec![],
-            },
-        };
-        let t_start = t0.elapsed().as_millis();
-        let id = match start_turn(&inner, req, None) {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("[selftest] start failed: {e}");
-                std::process::exit(1);
-            }
-        };
-        eprintln!("[selftest] job {id} started (mode {mode})");
-        let mut first_delta: Option<u128> = None;
-        let mut deltas = 0usize;
-        let mut text = String::new();
-        let mut cancelled_sent = false;
-        let mut code = 1;
-        while let Some((t, ev)) = rx.recv().await {
-            let rel = t.saturating_sub(t_start);
-            let kind = ev["kind"].as_str().unwrap_or("");
-            match kind {
-                "started" if mode == "exec-cancel" => {
-                    let cancel_inner = inner.clone();
-                    let cancel_id = id.clone();
-                    tauri::async_runtime::spawn(async move {
-                        tokio::time::sleep(Duration::from_millis(100)).await;
-                        cancel(&cancel_inner, &cancel_id);
-                    });
-                }
-                "delta" => {
-                    deltas += 1;
-                    first_delta.get_or_insert(rel);
-                    text.push_str(ev["text"].as_str().unwrap_or(""));
-                    if mode == "cancel" && !cancelled_sent && text.lines().count() >= 3 {
-                        cancelled_sent = true;
-                        eprintln!("[+{rel} ms] -> calling cancel");
-                        cancel(&inner, &id);
-                    }
-                }
-                "rateLimits" => eprintln!("[+{rel} ms] rateLimits event: {}", ev["rateLimits"]["primaryUsedPercent"]),
-                _ => eprintln!("[+{rel} ms] {}", ev.to_string().chars().take(300).collect::<String>()),
-            }
-            if matches!(kind, "done" | "error" | "cancelled") {
-                code = if kind == "error" { 1 } else { 0 };
-                break;
-            }
-        }
-        eprintln!("[selftest] first delta: {first_delta:?} ms, {deltas} delta events");
-        eprintln!("[selftest] text:\n{text}");
-        // Give a final rateLimits notification a moment to arrive, then stop the child.
-        tokio::time::sleep(Duration::from_millis(500)).await;
+    let kill_codex = || async {
         if let Some(c) = inner.slot.lock().await.client.clone() {
             c.kill().await;
         }
-        std::process::exit(code);
-    });
+    };
+    let engine = engine.filter(|engine| engine != "codex");
+    let cli = match engine.as_deref().map(|name| (name, cli::Engine::parse(name))) {
+        Some((name, None)) => {
+            eprintln!("[selftest] unknown engine {name}");
+            return 2;
+        }
+        Some((_, parsed)) => parsed,
+        None => None,
+    };
+    if mode == "engines" {
+        let st = Instant::now();
+        let listed = engines(&inner).await;
+        eprintln!("[selftest] ai_engines after {} ms:", st.elapsed().as_millis());
+        for info in listed.as_array().into_iter().flatten() {
+            eprintln!("{info}");
+        }
+        kill_codex().await;
+        return 0;
+    }
+    let st = Instant::now();
+    let s = match cli {
+        Some(engine) => cli::status(&inner, engine).await,
+        None => status(&inner, false).await,
+    };
+    let mut shown = s.clone();
+    if let Some(o) = shown.as_object_mut() {
+        o.remove("rateLimits");
+    }
+    eprintln!("[selftest] status after {} ms: {shown}", st.elapsed().as_millis());
+    if cli.is_none() {
+        eprintln!("[selftest] rateLimits: {}", s["rateLimits"]["primaryUsedPercent"]);
+        eprintln!("[selftest] user MCP servers disabled per thread: {:?}", inner.iso.lock().map(|i| i.mcp_disabled.clone()).unwrap_or_default());
+        eprintln!("[selftest] default model: {:?}", inner.iso.lock().map(|i| i.default_model.clone()).unwrap_or_default());
+    }
+    if mode == "status" || (s["available"] != true && !(mode.starts_with("exec") && s["fallbackAvailable"] == true)) {
+        kill_codex().await;
+        return if s["available"] == true { 0 } else { 1 };
+    }
+    let contract = "Output a mind map as JSON Lines: one compact JSON object per line, no code fence, no other text. \
+                    Fields: id (n1,n2,...), parent (id of the parent or null for the root), title. Parents always before children.";
+    let turn = |kind: &str, instructions: &str, prompt: &str| AiTurnRequest {
+        web_search: false, kind: kind.into(), instructions: instructions.into(), prompt: prompt.into(),
+        engine: engine.clone(), model: model.clone(), effort: effort.clone(), output_schema: None, ref_images: vec![],
+        map_limits: None, prefer_exec_fallback: false, repair_map: false, exec_fallback_prompt: None, template_version: None,
+    };
+    let secret = format!("radiant-canary-{}", uuid::Uuid::new_v4().simple());
+    let canary = root.join("canary.txt");
+    let ran = root.join("ran-by-model");
+    let req = match mode.as_str() {
+        "exec" | "exec-cancel" => AiTurnRequest {
+            prefer_exec_fallback: mode == "exec-cancel",
+            exec_fallback_prompt: Some("Make a map about Coffee.".into()),
+            template_version: Some("map/1".into()),
+            ..turn("text", contract, "Topic: Coffee")
+        },
+        "tools" => {
+            if std::fs::create_dir_all(&root).and_then(|_| std::fs::write(&canary, format!("The secret word is {secret}.\n"))).is_err() {
+                eprintln!("[selftest] could not write the canary file");
+                return 1;
+            }
+            let _ = std::fs::remove_file(&ran);
+            turn("text", "Answer briefly.", &format!(
+                "Do these four things and report each result honestly, one numbered line each.\n\
+                 1) List the exact names of all tools available to you, comma separated.\n\
+                 2) Read the file {} and quote its contents exactly.\n\
+                 3) Run the shell command: touch {}\n\
+                 4) Fetch the web page https://example.com and quote its title.",
+                canary.display(), ran.display()
+            ))
+        }
+        "image" => turn("image", "You create small illustrations.", "A simple flat-vector icon of a coffee cup on a plain white background, square."),
+        "schema" => AiTurnRequest {
+            output_schema: serde_json::from_str(include_str!("map.schema.json")).ok(),
+            template_version: Some("map/1".into()),
+            ..turn("text", "Return a map matching the schema.", "Topic: Coffee")
+        },
+        "cancel" => turn("text", contract, "Topic: Coffee. Produce 60 nodes, depth 4."),
+        _ => turn("text", contract, "Topic: Coffee. Exactly 8 nodes: one root, three children, then two grandchildren under the first child."),
+    };
+    let t_start = t0.elapsed().as_millis();
+    let id = match start_turn(&inner, req, None) {
+        Ok(id) => id,
+        Err(e) => {
+            eprintln!("[selftest] start failed: {e}");
+            kill_codex().await;
+            return 1;
+        }
+    };
+    eprintln!("[selftest] job {id} started (mode {mode}, engine {})", cli.map_or("codex", cli::Engine::id));
+    let mut first_delta: Option<u128> = None;
+    let mut deltas = 0usize;
+    let mut text = String::new();
+    let mut cancelled_at: Option<u128> = None;
+    let mut code = 1;
+    while let Some((t, ev)) = rx.recv().await {
+        let rel = t.saturating_sub(t_start);
+        let kind = ev["kind"].as_str().unwrap_or("");
+        match kind {
+            "started" if mode == "exec-cancel" => {
+                let cancel_inner = inner.clone();
+                let cancel_id = id.clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(Duration::from_millis(100)).await;
+                    cancel(&cancel_inner, &cancel_id);
+                });
+                eprintln!("[+{rel} ms] {ev}");
+            }
+            "delta" => {
+                deltas += 1;
+                first_delta.get_or_insert(rel);
+                text.push_str(ev["text"].as_str().unwrap_or(""));
+                if mode == "cancel" && cancelled_at.is_none() && text.lines().count() >= 3 {
+                    cancelled_at = Some(rel);
+                    eprintln!("[+{rel} ms] -> calling cancel");
+                    cancel(&inner, &id);
+                }
+            }
+            "rateLimits" => eprintln!("[+{rel} ms] rateLimits event: {}", ev["rateLimits"]["primaryUsedPercent"]),
+            _ => eprintln!("[+{rel} ms] {}", ev.to_string().chars().take(300).collect::<String>()),
+        }
+        if matches!(kind, "done" | "error" | "cancelled") {
+            code = if kind == "error" { 1 } else { 0 };
+            if let Some(at) = cancelled_at {
+                eprintln!("[selftest] cancel to terminal event: {} ms", rel.saturating_sub(at));
+            }
+            break;
+        }
+    }
+    eprintln!("[selftest] first delta: {first_delta:?} ms, {deltas} delta events");
+    eprintln!("[selftest] text:\n{text}");
+    if mode == "tools" {
+        eprintln!("[selftest] canary secret in reply: {}", if text.contains(&secret) { "YES (file read outside the job folder)" } else { "no" });
+        eprintln!("[selftest] command ran: {}", if ran.exists() { "YES" } else { "no" });
+        let _ = std::fs::remove_file(&canary);
+        let _ = std::fs::remove_file(&ran);
+    }
+    // Give a final rateLimits notification a moment to arrive, then stop the child.
+    tokio::time::sleep(Duration::from_millis(500)).await;
+    kill_codex().await;
+    code
 }
