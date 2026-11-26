@@ -211,6 +211,8 @@ const MOVING_MS = 120;
  * smooth while moving, since skipping it there saves little and shows stair-steps on every edge.
  */
 const MOVING_PLAIN_TRIANGLES = 400_000;
+/** Smallest drawing-buffer scale (see Renderer.bufferScale). */
+const MIN_BUFFER_SCALE = 2;
 /**
  * Below this zoom the static branch mesh is drawn from a coarse index buffer over the same vertices: every LOD_STEP
  * ribbon segments become one, and fans (caps, dots) take every other step. The sampling keeps a quarter pixel of chord
@@ -592,9 +594,18 @@ export class Renderer implements RenderDevice {
     this.stats.refreshIntervalMs = sorted[Math.floor(sorted.length / 2)];
   }
 
-  /** Match the drawing buffer to the canvas CSS size and devicePixelRatio. */
+  /**
+   * Device pixels drawn per CSS pixel. On a display of ordinary density this is 2, not 1: the frame is drawn at twice
+   * the size and scaled down, so outlines get sixteen samples a pixel with the 4x target instead of four and thin
+   * shapes are shaded more than once a pixel. A Retina display already has that density and is left as it is.
+   */
+  private bufferScale(): number {
+    return Math.max(window.devicePixelRatio || 1, MIN_BUFFER_SCALE);
+  }
+
+  /** Match the drawing buffer to the canvas CSS size and the buffer scale. */
   resize(): void {
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = this.bufferScale();
     const cw = this.canvas.clientWidth;
     const ch = this.canvas.clientHeight;
     if (cw === 0 || ch === 0) return;
@@ -1233,7 +1244,7 @@ export class Renderer implements RenderDevice {
     const t0 = performance.now();
     const gl = this.gl;
     const scene = this.scene;
-    if ((window.devicePixelRatio || 1) !== this.dpr) this.resize();
+    if (this.bufferScale() !== this.dpr) this.resize();
     this.frame++;
     this.drawCalls = 0;
     const st = this.stats;
