@@ -297,13 +297,24 @@ in vec4 v_n;
 out vec4 o;
 const vec3 L = vec3(-0.24, -0.5, 0.83);
 const vec3 H = vec3(-0.1255, -0.2615, 0.9570); // normalize(L + view)
-void main() {
-  vec2 n = v_n.xy;
+// Diffuse and specular terms for an in-plane normal.
+vec2 lit(vec2 n) {
   float q = min(dot(n, n), 1.0);
   vec3 N = vec3(n, sqrt(1.0 - q));
-  float lambert = max(dot(N, L), 0.0);
-  float spec = u_mat.z * pow(max(dot(N, H), 0.0), u_mat.w);
-  o = vec4(min(v_col.rgb * (u_mat.x + u_mat.y * lambert) + spec * v_col.a, vec3(v_col.a)), v_col.a);
+  return vec2(max(dot(N, L), 0.0), pow(max(dot(N, H), 0.0), u_mat.w));
+}
+void main() {
+  vec2 n = v_n.xy;
+  vec2 dx = dFdx(n), dy = dFdy(n);
+  vec2 s = lit(n);
+  // Across a ribbon only a few pixels wide the normal turns a long way within one pixel, and lighting it at the pixel
+  // centre alone makes the highlight and the dark side alternate along the ribbon. Multisampling does not help (it
+  // covers edges, not shading), so average the lighting over the pixel: four taps on a rotated grid.
+  if (max(dot(dx, dx), dot(dy, dy)) > 0.0016) {
+    s = 0.25 * (lit(n + dx * 0.125 + dy * 0.375) + lit(n - dx * 0.375 + dy * 0.125)
+      + lit(n + dx * 0.375 - dy * 0.125) + lit(n - dx * 0.125 - dy * 0.375));
+  }
+  o = vec4(min(v_col.rgb * (u_mat.x + u_mat.y * s.x) + u_mat.z * s.y * v_col.a, vec3(v_col.a)), v_col.a);
 }`;
 
 // 'rope': the bundle ribbon drawn as N plies twisting round it. Across the ribbon a = sin(angle round the bundle); the
@@ -395,10 +406,19 @@ void main() {
     float a = clamp(v_n.w, 0.0, 1.0);
     float w = fwidth(a);
     float e = max(0.07, 0.9 * w);
-    float top = 1.0 - smoothstep(e, e + w, 1.0 - a);
-    vec3 face = v_col.rgb * mix(0.74, 1.0, a * a);
+    // The lit top edge is about a pixel high on a low wall: average it and the face over the pixel (four taps on a
+    // rotated grid), so the line does not jump a whole row where the wall's top crosses a pixel boundary.
+    float ax = dFdx(v_n.w), ay = dFdy(v_n.w);
+    float top = 0.0, shade = 0.0;
+    for (int j = 0; j < 4; j++) {
+      vec2 t = j == 0 ? vec2(0.125, 0.375) : j == 1 ? vec2(-0.375, 0.125) : j == 2 ? vec2(0.375, -0.125) : vec2(-0.125, -0.375);
+      float b = clamp(v_n.w + ax * t.x + ay * t.y, 0.0, 1.0);
+      top += 1.0 - smoothstep(e, e + w, 1.0 - b);
+      shade += mix(0.74, 1.0, b * b);
+    }
+    vec3 face = v_col.rgb * (shade * 0.25);
     vec3 edge = min(vec3(v_col.a), v_col.rgb * 1.25 + 0.34 * v_col.a);
-    o = vec4(mix(face, edge, top), v_col.a);
+    o = vec4(mix(face, edge, top * 0.25), v_col.a);
     return;
   }
   float m = v_n.z < 0.0 ? -1.0 : 1.0;

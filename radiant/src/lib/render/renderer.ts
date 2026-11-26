@@ -206,6 +206,12 @@ const RUN_GAP = 1536;
 /** Camera changes closer together than this are one movement, drawn without multisampling until it ends. */
 const MOVING_MS = 120;
 /**
+ * Frames while the camera moves skip multisampling only when the branch mesh in view is this large (triangles drawn in
+ * the previous frame): the whole-map view of a map of roughly 20,000 nodes or more. Lighter frames keep their edges
+ * smooth while moving, since skipping it there saves little and shows stair-steps on every edge.
+ */
+const MOVING_PLAIN_TRIANGLES = 400_000;
+/**
  * Below this zoom the static branch mesh is drawn from a coarse index buffer over the same vertices: every LOD_STEP
  * ribbon segments become one, and fans (caps, dots) take every other step. The sampling keeps a quarter pixel of chord
  * error at MESH_DETAIL_ZOOM (4), so LOD_STEP^2 merged segments stay within 64 * 0.25 * 0.02 / 4 = 0.08 px here.
@@ -446,7 +452,8 @@ export class Renderer implements RenderDevice {
     u: Record<'view' | 'zoom' | 'off' | 'offLow' | 'coarse' | 'stride' | 'mat' | 'coded', WebGLUniformLocation | null> }>();
   /**
    * 4x multisampled colour target for frames at rest, resolved to the canvas at the end of the frame (what
-   * `antialias: true` did implicitly). Frames while the camera keeps moving draw straight to the canvas without it.
+   * `antialias: true` did implicitly). Frames while the camera keeps moving also use it, unless the mesh in view is very
+   * large (MOVING_PLAIN_TRIANGLES): those draw straight to the canvas and the full-quality frame follows when it stops.
    */
   private msaa: { fbo: WebGLFramebuffer; rb: WebGLRenderbuffer; w: number; h: number; samples: number } | null = null;
   /** Framebuffer the frame draws to (the multisampled one, or null for the canvas). */
@@ -1280,10 +1287,12 @@ export class Renderer implements RenderDevice {
     const canvasFront = this.visibleMesh(this.canvasFront, bounds);
     st.visibleSetMs = performance.now() - visibilityStart;
 
-    // Moving: draw straight to the canvas; still: into the multisampled target, resolved at the end of the frame.
+    // Into the multisampled target, resolved at the end of the frame; a heavy frame while the camera moves goes
+    // straight to the canvas instead.
     const moving = this.moving && performance.now() - this.lastCameraAt < MOVING_MS;
+    const plain = moving && this.stats.meshTriangles > MOVING_PLAIN_TRIANGLES;
     if (!moving) this.moving = false;
-    this.target = moving ? null : this.ensureMsaa().fbo;
+    this.target = plain ? null : this.ensureMsaa().fbo;
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.target);
 
     // Dimensional branches: their shadows go to their own layer before anything is drawn on the canvas.

@@ -166,7 +166,7 @@ The final build is not pixel-identical to the baseline. Compared scene by scene:
 
 - **GPU-expanded branches (G1 to G5):** at most a few edge pixels per scene differ beyond a small threshold (0.0002% of pixels or less at normal zoom). Rope shows sub-threshold speckle inside the plies on about 0.2% of pixels; I looked at the captures and could not see a difference.
 - **Coarse far-zoom mesh (F4):** below zoom 0.02 the branch mesh is drawn with fewer segments; about 0.02% of pixels differ on the 5,000-node whole-map view.
-- **No multisampling while moving (F5):** edges stair-step slightly while the camera moves; the resting frame, drawn 120 ms after it stops, is identical.
+- **No multisampling while moving (F5):** edges stair-step slightly while the camera moves; the resting frame, drawn 120 ms after it stops, is identical. Since 26 November this applies only to heavy frames (more than 400,000 branch triangles in view, roughly the whole-map view of a 20,000-node map); lighter frames keep 4x multisampling while moving, which costs about 2 to 2.5 ms of GPU time per moving frame at 3456×2234 in Chrome.
 - **Label rasters during a zoom (L4):** labels are drawn from a raster one size step off during a zoom gesture, so they look slightly soft or thin until one frame after the zoom stops.
 
 F4, F5 and L4 are deliberate trade-offs and each is a single commit that can be reverted.
