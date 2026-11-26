@@ -13,6 +13,11 @@ import { open, save } from '@tauri-apps/plugin-dialog';
 import { isPermissionGranted, requestPermission, sendNotification } from '@tauri-apps/plugin-notification';
 import type { PortableFiles } from '../core/io/portable';
 import type {
+  AppStateHost,
+  AppStateImported,
+  AppStateLoad,
+  SettingEntry,
+  StoredSnapshot,
   AiEvent,
   AiStatus,
   AiTurnRequest,
@@ -49,6 +54,18 @@ function bytesToBase64(bytes: Uint8Array): string {
 
 export class TauriHost implements Host {
   readonly shell = 'desktop' as const;
+  /** Settings and History snapshots in the host's state.sqlite. */
+  readonly appState: AppStateHost = {
+    load: (origin) => invoke<AppStateLoad>('state_load', { origin }),
+    set: (entries) => invoke<void>('state_set', { entries }),
+    onChanged: (handler) => getCurrentWindow().listen<SettingEntry[]>('state-changed', ({ payload }) => handler(payload)),
+    snapshotList: (docId) => invoke<StoredSnapshot[]>('state_snapshot_list', { docId }),
+    snapshotGet: (id) => invoke<StoredSnapshot | null>('state_snapshot_get', { id }),
+    snapshotPut: (row) => invoke<void>('state_snapshot_put', { row }),
+    snapshotDelete: (id) => invoke<void>('state_snapshot_delete', { id }),
+    importBatch: (origin, settings, snapshots) => invoke<AppStateImported>('state_import', { origin, settings, snapshots }),
+    importDone: (origin) => invoke<void>('state_import_done', { origin })
+  };
   isWindowFullscreen(): Promise<boolean> {
     return getCurrentWindow().isFullscreen();
   }

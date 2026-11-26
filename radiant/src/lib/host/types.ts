@@ -16,9 +16,18 @@
  *   platform_info() -> PlatformInfo
  *   text_read(path: string) -> string
  *   text_write(path: string, text: string) -> ()
+ *   state_load(origin: string) -> AppStateLoad
+ *   state_set(entries: SettingEntry[]) -> ()   (one transaction; then "state-changed" to every other window)
+ *   state_snapshot_list(docId: string) -> StoredSnapshot[] (newest first)
+ *   state_snapshot_get(id: string) -> StoredSnapshot | null
+ *   state_snapshot_put(row: StoredSnapshot) -> ()
+ *   state_snapshot_delete(id: string) -> ()
+ *   state_import(origin: string, settings: Record<string, string>, snapshots: StoredSnapshot[]) -> AppStateImported
+ *   state_import_done(origin: string) -> ()
  * Rust events:
  *   "ai-event" with payload AiEvent
  *   "menu" with payload MenuId (native menu item chosen)
+ *   "state-changed" with payload SettingEntry[] (settings another window wrote)
  */
 
 import type { ThumbnailLevels } from '../core/image-levels';
@@ -43,7 +52,7 @@ export interface DesktopQuitDecision {
 }
 
 export type DiagnosticEvent =
-  | 'started' | 'ui_error' | 'window_error' | 'unhandled_rejection' | 'layout_worker_fallback' | 'webkit_refresh_fallback' | 'update_failed' | 'artwork_unavailable'
+  | 'started' | 'ui_error' | 'window_error' | 'unhandled_rejection' | 'layout_worker_fallback' | 'webkit_refresh_fallback' | 'update_failed' | 'artwork_unavailable' | 'settings_unavailable'
   | 'codex_not_installed' | 'codex_not_logged_in' | 'codex_rate_limit'
   | 'codex_protocol' | 'codex_timeout' | 'codex_interrupted' | 'codex_error';
 
@@ -170,7 +179,50 @@ export type PresenterCommand =
   | { kind: 'start' } | { kind: 'end' }
   | { kind: 'fullscreen'; display: string | null };
 
+/** A setting write: a value, or null to delete the key. Keys start with "radiant." or "radiant:". */
+export type SettingEntry = [key: string, value: string | null];
+
+/** One History snapshot (the rows of the former IndexedDB "snapshots" store). */
+export interface StoredSnapshot {
+  id: string;
+  docId: string;
+  name: string;
+  /** Epoch ms. */
+  at: number;
+  json: string;
+  automatic: boolean;
+  change?: import('../core/model/editor').ChangeSummary;
+}
+
+export interface AppStateLoad {
+  settings: Record<string, string>;
+  /** Whether this WebView origin's old localStorage and IndexedDB data has already been imported. */
+  imported: boolean;
+}
+
+export interface AppStateImported { settings: number; snapshots: number }
+
+/**
+ * Settings and History snapshots. The desktop keeps them in the host's state.sqlite; the browser preview keeps
+ * them in localStorage and IndexedDB as before.
+ */
+export interface AppStateHost {
+  load(origin: string): Promise<AppStateLoad>;
+  set(entries: SettingEntry[]): Promise<void>;
+  /** Settings written by another window. */
+  onChanged(handler: (entries: SettingEntry[]) => void): Promise<Unlisten>;
+  snapshotList(docId: string): Promise<StoredSnapshot[]>;
+  snapshotGet(id: string): Promise<StoredSnapshot | null>;
+  snapshotPut(row: StoredSnapshot): Promise<void>;
+  snapshotDelete(id: string): Promise<void>;
+  /** Insert-if-missing import of WebView data; callable several times with batches. */
+  importBatch(origin: string, settings: Record<string, string>, snapshots: StoredSnapshot[]): Promise<AppStateImported>;
+  /** Mark this origin's import complete. */
+  importDone(origin: string): Promise<void>;
+}
+
 export interface Host extends AiProvider {
+  readonly appState: AppStateHost;
   readonly shell: 'desktop' | 'browser';
   isWindowFullscreen?(): Promise<boolean>;
   setWindowFullscreen?(fullscreen: boolean): Promise<void>;

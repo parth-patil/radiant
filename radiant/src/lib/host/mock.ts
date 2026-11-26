@@ -1,10 +1,11 @@
 import { makeImagePreview, makeThumbnailLevels, type BrowserImagePreview } from './image-preview';
 import { THUMBNAIL_LEVELS, type ThumbnailLevels } from '../core/image-levels';
 /** Host for plain-browser development (`bun run dev`): localStorage documents, IndexedDB assets, offline AI replay. */
-import { localData } from './local-data';
+import { localData, MOCK_DOCUMENT_PREFIXES, onWebViewSettingChange, webViewSettings, webViewSnapshots, writeWebViewSetting } from './local-data';
 import { ReplayProvider } from './replay';
 import { browserDirectoryReader, browserDirectoryWriter } from './portable-directory';
 import type {
+  AppStateHost,
   AssetImageInfo,
   AssetMeta,
   Host,
@@ -16,9 +17,7 @@ import type {
   Unlisten
 } from './types';
 
-const DOC_PREFIX = 'radiant.doc:';
-const TEXT_PREFIX = 'radiant.text:';
-const AUTO_PREFIX = 'radiant.autosave:';
+const [DOC_PREFIX, TEXT_PREFIX, AUTO_PREFIX] = MOCK_DOCUMENT_PREFIXES;
 /** The presenter console and the document tab talk over this channel in a plain browser (PRS-40). */
 const PRESENTER_CHANNEL = 'radiant-presenter';
 
@@ -99,6 +98,19 @@ export class MockHost extends ReplayProvider implements Host {
   private assets = new Map<string, string>();
   private imageInfo = new Map<string, AssetImageInfo>();
   private baselines = new Map<string, string>();
+
+  /** Settings stay in localStorage and snapshots in IndexedDB, as before; there is nothing to import. */
+  readonly appState: AppStateHost = {
+    load: async () => ({ settings: webViewSettings(), imported: true }),
+    set: async (entries) => { for (const [key, value] of entries) writeWebViewSetting(key, value); },
+    onChanged: async (handler) => onWebViewSettingChange(handler),
+    snapshotList: (docId) => webViewSnapshots.list(docId),
+    snapshotGet: (id) => webViewSnapshots.get(id),
+    snapshotPut: (row) => webViewSnapshots.put(row),
+    snapshotDelete: (id) => webViewSnapshots.delete(id),
+    importBatch: async () => ({ settings: 0, snapshots: 0 }),
+    importDone: async () => {}
+  };
 
   constructor(textOnly = false) {
     super((bytes, mime) => this.assetPut(bytes, mime), undefined,
