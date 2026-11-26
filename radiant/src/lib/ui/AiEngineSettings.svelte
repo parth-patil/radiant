@@ -110,6 +110,9 @@
   {#if problem}
     <p class="warn" role="status">{problem} Until then, AI text actions are off.</p>
   {/if}
+  {#if engine === 'antigravity'}
+    <p class="note" role="note">Antigravity cannot be started without its tools (files, commands, browser). Radiant blocks every tool call it makes. Each request is also kept in Antigravity's own conversation history.</p>
+  {/if}
 
   <label class="stack">Model
     <select aria-label="Model" value={custom ? CUSTOM : pick.model ?? ''} onchange={(event) => chooseModel(event.currentTarget.value)}>
