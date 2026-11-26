@@ -7,6 +7,7 @@
  */
 
 import type { ThumbnailLevels } from './image-levels';
+import type { AiEffort, AiEngine } from './ai/provider';
 
 // ---------------------------------------------------------------- document model
 
@@ -90,7 +91,7 @@ export interface NodeArt {
   /** Editable artistic direction, distinct from the full provider prompt. */
   brief?: string;
   instructions?: string;
-  effort?: 'low' | 'medium' | 'high';
+  effort?: AiEffort;
   /** Untouched provider image, retained when fitting produces a derivative. */
   originalAsset?: string;
   templateVersion?: string;
@@ -246,8 +247,10 @@ export interface AiJobRecord {
   fallbackPrompt?: string;
   warnings?: string[];
   templateVersion?: string;
+  /** The engine that ran the job; absent on jobs saved before engines could be chosen, which all ran on Codex. */
+  engine?: AiEngine;
   model?: string;
-  effort?: 'low' | 'medium' | 'high';
+  effort?: AiEffort;
   created: string;
   scopeId?: NodeId;
   scope?: 'node' | 'branch' | 'map';

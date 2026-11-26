@@ -3,6 +3,8 @@ import type { AiJobRecord } from '../types';
 export const AI_JOB_WARNING_LIMIT = 24;
 export const AI_PROMPT_LIMIT = 1_000_000;
 const KINDS = ['generate', 'expand', 'refine'] as const;
+const ENGINES = ['codex', 'claude', 'antigravity'] as const;
+const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
 const ROUTES = ['stream', 'exec', 'replay'] as const;
 const STATES = ['running', 'done', 'cancelled', 'error'] as const;
 
@@ -31,7 +33,8 @@ export function parseAiJobRecord(raw: unknown): AiJobRecord | undefined {
   if (typeof raw.webSearch === 'boolean') value.webSearch = raw.webSearch;
   if (has(ROUTES, raw.route)) value.route = raw.route;
   if (has(['node', 'branch', 'map'] as const, raw.scope)) value.scope = raw.scope;
-  if (has(['low', 'medium', 'high'] as const, raw.effort)) value.effort = raw.effort;
+  if (has(EFFORTS, raw.effort)) value.effort = raw.effort;
+  if (has(ENGINES, raw.engine)) value.engine = raw.engine;
   for (const key of ['model', 'templateVersion', 'scopeId'] as const) {
     if (text(raw[key], 256)) value[key] = raw[key];
   }
@@ -79,7 +82,7 @@ export function captureAiJob(
     kind, scopeId, limits, status: 'running', created: new Date().toISOString(),
     prompt: request.prompt, instructions: request.instructions,
     fallbackPrompt: request.execFallbackPrompt, templateVersion: request.templateVersion,
-    webSearch: request.webSearch, model: request.model, effort: request.effort
+    webSearch: request.webSearch, engine: request.engine, model: request.model, effort: request.effort
   };
 }
 
