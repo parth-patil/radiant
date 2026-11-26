@@ -1446,6 +1446,7 @@ pub fn selftest_main() -> ! {
 ///   exec-cancel     starts the Codex fallback and cancels shortly after launch
 ///   status          only prints `ai_status` for the engine (no model call)
 ///   engines         only prints `ai_engines` (no model call)
+/// `--ai-force` starts the turn even when the status says the engine cannot be used; `--ai-web-search` allows web search.
 /// Prints every event with its time since the job started to stderr, then returns the exit code (0 on a clean
 /// terminal event).
 #[cfg(debug_assertions)]
@@ -1496,14 +1497,17 @@ async fn selftest(inner: Arc<Inner>, mode: String, engine: Option<String>, model
         eprintln!("[selftest] user MCP servers disabled per thread: {:?}", inner.iso.lock().map(|i| i.mcp_disabled.clone()).unwrap_or_default());
         eprintln!("[selftest] default model: {:?}", inner.iso.lock().map(|i| i.default_model.clone()).unwrap_or_default());
     }
-    if mode == "status" || (s["available"] != true && !(mode.starts_with("exec") && s["fallbackAvailable"] == true)) {
+    // --ai-force runs the turn even when the status says the engine is unavailable (to see the turn's own error).
+    let force = std::env::args().any(|arg| arg == "--ai-force");
+    if mode == "status" || (s["available"] != true && !force && !(mode.starts_with("exec") && s["fallbackAvailable"] == true)) {
         kill_codex().await;
         return if s["available"] == true { 0 } else { 1 };
     }
     let contract = "Output a mind map as JSON Lines: one compact JSON object per line, no code fence, no other text. \
                     Fields: id (n1,n2,...), parent (id of the parent or null for the root), title. Parents always before children.";
+    let web_search = std::env::args().any(|arg| arg == "--ai-web-search");
     let turn = |kind: &str, instructions: &str, prompt: &str| AiTurnRequest {
-        web_search: false, kind: kind.into(), instructions: instructions.into(), prompt: prompt.into(),
+        web_search, kind: kind.into(), instructions: instructions.into(), prompt: prompt.into(),
         engine: engine.clone(), model: model.clone(), effort: effort.clone(), output_schema: None, ref_images: vec![],
         map_limits: None, prefer_exec_fallback: false, repair_map: false, exec_fallback_prompt: None, template_version: None,
     };

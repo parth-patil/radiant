@@ -394,7 +394,7 @@ fn pick_effort(efforts: &[&'static str], wanted: &str) -> Option<&'static str> {
 }
 
 /// The `--model` (and possibly `--effort`) values for Antigravity, and a warning when the effort had to change.
-fn agy_model(families: &[Family], model: Option<&str>, effort: Option<&str>) -> (Vec<String>, Option<String>) {
+fn agy_model(families: &[Family], model: Option<&str>, effort: Option<&str>) -> Result<(Vec<String>, Option<String>), AiError> {
     let wanted = effort.unwrap_or(AGY_DEFAULT.1);
     let family = match model {
         Some(model) => families.iter().find(|family| family.id == model),
@@ -403,20 +403,23 @@ fn agy_model(families: &[Family], model: Option<&str>, effort: Option<&str>) -> 
     let Some(family) = family else {
         let model = model.unwrap_or(AGY_DEFAULT.0);
         let listed = families.iter().any(|family| family.efforts.iter().any(|effort| format!("{}-{effort}", family.id) == model));
+        if !families.is_empty() && !listed {
+            return Err(AiError::new("other", format!("Antigravity does not offer the model {model}. Choose another model.")));
+        }
         // A full listed id carries its own effort; anything else goes to agy as family and effort, and agy checks it.
-        return if listed || EFFORTS.iter().any(|effort| model.ends_with(&format!("-{effort}"))) {
+        return Ok(if listed || EFFORTS.iter().any(|effort| model.ends_with(&format!("-{effort}"))) {
             (vec![format!("--model={model}")], None)
         } else {
             (vec![format!("--model={model}"), format!("--effort={wanted}")], None)
-        };
+        });
     };
     if family.efforts.is_empty() || (effort.is_none() && family.plain) {
-        return (vec![format!("--model={}", family.id)], None);
+        return Ok((vec![format!("--model={}", family.id)], None));
     }
     let chosen = pick_effort(&family.efforts, wanted).unwrap_or(wanted);
     let warning = (effort.is_some() && chosen != wanted)
         .then(|| format!("Antigravity's {} has no {wanted} effort; using {chosen}.", family.label));
-    (vec![format!("--model={}-{chosen}", family.id)], warning)
+    Ok((vec![format!("--model={}-{chosen}", family.id)], warning))
 }
 
 struct Launch {
@@ -446,8 +449,13 @@ fn claude_launch(req: &AiTurnRequest) -> Launch {
 }
 
 async fn agy_launch(inner: &Inner, bin: &Path, req: &AiTurnRequest, cwd: &Path) -> Result<Launch, AiError> {
-    let families = agy_models(&inner.cli, bin).await.unwrap_or_default();
-    let (model_args, warning) = agy_model(&families, req.model.as_deref(), req.effort.as_deref());
+    let families = match agy_models(&inner.cli, bin).await {
+        Ok(families) => families,
+        // Without its model list agy cannot start a turn either; say why instead of a confusing model error.
+        Err(error) if matches!(error.code, "offline" | "not_logged_in") => return Err(error),
+        Err(_) => Vec::new(),
+    };
+    let (model_args, warning) = agy_model(&families, req.model.as_deref(), req.effort.as_deref())?;
     let model = model_args[0].trim_start_matches("--model=").to_string();
     // Every tool call is denied before it runs. The hook reads its input so the CLI never blocks writing it.
     let deny = json!({"radiant-no-tools": {"PreToolUse": [{"matcher": "*", "hooks": [{
