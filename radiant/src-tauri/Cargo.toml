@@ -59,6 +59,11 @@ objc2-app-kit = { version = "0.3", default-features = false, features = ["NSPast
 objc2-web-kit = { version = "0.3", features = ["WKWebView", "WKWebViewConfiguration", "WKPreferences"] }
 
 
+# Dependencies build without debug info in dev: it is most of what fills target/debug.
+# Radiant's own crate keeps full debug info.
+[profile.dev.package."*"]
+debug = false
+
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]
 codegen-units = 1
