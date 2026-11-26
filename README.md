@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/hero.png" alt="A mind map about coffee in Radiant's Soft clay theme: a dark central topic with six coloured clay branches and pill-shaped nodes" width="100%">
+  <img src="docs/images/hero.png" alt="A mind map about coffee in Radiant's Rope theme: a dark central topic with six branches drawn as coloured twisted rope" width="100%">
 </p>
 
 Radiant is a desktop mind-mapping app. Every branch is drawn by its own WebGL renderer, so maps can look like rope, rolled paper or soft clay and still pan smoothly at 50,000 nodes. Your maps are ordinary files on your own disk. AI drafting is there when you want it and absent when you don't.
@@ -39,7 +39,7 @@ Switch the theme and the whole map restyles: colours, branch shapes, node shapes
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/images/theme-rope.png" alt="The coffee map in the Rope theme"><br><p align="center">Rope</p></td>
+    <td width="50%"><img src="docs/images/theme-soft-clay.png" alt="The coffee map in the Soft clay theme"><br><p align="center">Soft clay</p></td>
     <td width="50%"><img src="docs/images/theme-midnight.png" alt="The coffee map in the dark Midnight theme"><br><p align="center">Midnight</p></td>
   </tr>
   <tr>
@@ -52,6 +52,27 @@ Switch the theme and the whole map restyles: colours, branch shapes, node shapes
   </tr>
 </table>
 
+## Sketch on the same canvas
+
+The map sits on an open canvas with a full set of whiteboard tools: sticky notes, hand-lettered text, rectangles, diamonds and ellipses with hatched fills, arrows that stay attached to shapes and to map nodes, freehand ink, frames, an eraser and a laser pointer. Excalidraw drawings can be imported, pasted in and exported again.
+
+<p align="center">
+  <img src="docs/images/sample-system-design.png" alt="A mind map of a URL shortener's requirements, API, data model, scaling and risks, with a hand-drawn request-path diagram below it: client, load balancer, API servers, cache, database, queue and click stats, plus two sticky notes" width="100%">
+  <br><i>Design review: the map holds the reasoning, the sketch holds the architecture.</i>
+</p>
+
+<p align="center">
+  <img src="docs/images/sample-launch-plan.png" alt="A launch-plan mind map beside a Now, Next and Later board made of frames and coloured sticky notes, with a small launch-day timeline drawn underneath" width="100%">
+  <br><i>Planning: a Now / Next / Later board in frames, tied to the plan with an arrow.</i>
+</p>
+
+<p align="center">
+  <img src="docs/images/sample-study-notes.png" alt="The coffee mind map with a handwritten title, two sticky notes, a freehand loop around one node and a small decision flowchart in a frame" width="100%">
+  <br><i>Study notes: reminders, ink and a decision sketch around the map.</i>
+</p>
+
+These three maps are in [`samples/`](samples) and open in the app.
+
 ## What you can do with it
 
 **Think**
@@ -60,14 +81,9 @@ Switch the theme and the whole map restyles: colours, branch shapes, node shapes
 - Work in the outline beside the canvas when a branch gets long, and find any node by text, note or tag.
 - Add notes (with Markdown and LaTeX maths), links, tags, tasks, pictures and stickers to any node.
 
-**Draw**
-- Sketch around the map with sticky notes, text, shapes, arrows, freehand ink and frames.
+**Style**
 - Restyle a single branch or the whole map from the inspector.
-
-**Draft with AI, if you want**
-- Generate a whole map from a topic, or expand and refine one branch.
-- Illustrate a subtree with generated vector artwork or pictures.
-- AI runs through the [Codex CLI](https://github.com/openai/codex) with your own login. Radiant never reads your credentials, and nothing is sent anywhere unless you start a generation.
+- Customise a theme and keep it for other maps.
 
 **Present and study**
 - Turn a map into a step-by-step talk, with a separate presenter console for your notes.
@@ -82,6 +98,21 @@ Switch the theme and the whole map restyles: colours, branch shapes, node shapes
 <p align="center">
   <img src="docs/images/workspace.png" alt="The Radiant window with the outline on the left, the map in the middle and the inspector on the right" width="100%">
 </p>
+
+## Draft with AI, when you want it
+
+<table>
+  <tr>
+    <td width="50%" valign="top"><img src="docs/images/ai-generate.png" alt="The Generate a map dialog: topic, style presets, depth and breadth, optional audience and source material, and a preview of what will be sent"><br><p align="center"><b>Generate a map</b> from a topic, your own source text or a file. You choose the style, depth and breadth, and can preview exactly what will be sent.</p></td>
+    <td width="50%" valign="top"><img src="docs/images/ai-refine.png" alt="The Refine branch dialog showing a proposal that lists the nodes to remove and to add, with Accept and Discard buttons"><br><p align="center"><b>Refine a branch</b>: regenerate it, rephrase to keywords, summarise, explain into a note, find gaps and cross-links, or write recall questions. Every change arrives as a proposal you accept or discard.</p></td>
+  </tr>
+</table>
+
+- Generated maps stream onto the canvas node by node, arrive as a draft you can review, and undo in a single step.
+- A subtree can be illustrated with generated vector artwork or pictures.
+- AI runs through the [Codex CLI](https://github.com/openai/codex) with your own login. Radiant never reads your credentials, and nothing is sent anywhere unless you start a generation.
+
+<sub>These two screenshots are from the browser preview, which shows built-in sample results instead of calling a model.</sub>
 
 ## Built for very large maps
 
@@ -99,7 +130,15 @@ How it gets there:
 
 - **Branches are expanded on the GPU.** One small record per branch is uploaded; the ribbon, rope twist or clay tube is built in the vertex shader.
 - **Edits are incremental.** Sizes, layout, branch geometry and the scene are recomputed only for the part of the map that changed.
-- **Heavy work stays off the main thread.** Layout and geometry run in a worker that keeps its own copy of the document and receives edits as small operations.
+- **Heavy work stays off the main thread.** On maps of 1,000 nodes or more, layout and geometry run in a worker that keeps its own copy of the document and receives edits as small operations.
+
+<p align="center">
+  <img src="docs/images/diagram-edit-pipeline.svg" alt="Flow diagram across four lanes (Rust host, main thread, layout worker, GPU): an edit becomes small operations; the worker applies them to its copy of the document and recomputes node sizes, layout, branch specs and scene, reusing untouched parts; it sends one result back; the main thread uploads the branch records to the GPU and draws the next frame. After a frame, the edit and document are written to the map's SQLite file in one commit." width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/diagram-gpu-branches.svg" alt="Before and after: previously the CPU built 66 to 100 vertices per branch into large mesh buffers. Now each branch is one 128-byte record (256 for Soft clay and Rope) in one integer texture, the vertex shader builds the shape, and the whole map is drawn in one or a few instanced calls. Bar chart: WebGL buffers 104 MB before, 5 MB plus about 6 MB of record texture now." width="100%">
+</p>
 
 The full write-up, with every experiment that was kept or discarded and its measurements, is in the [rendering research report](radiant/autoresearch/REPORT.md).
 
@@ -149,13 +188,9 @@ The AI features need the Codex CLI installed and signed in. Everything else work
 
 ## How it is put together
 
-```
-edits and AI streams
-        │  operations
-        ▼
-   document model ──► layout ──► branch geometry ──► scene ──► WebGL2 renderer
-   (undo, journal)    (worker)       (worker)                    (canvas)
-```
+<p align="center">
+  <img src="docs/images/diagram-architecture.svg" alt="Architecture diagram: the WebView holds the Svelte UI and controller on the main thread, a layout worker with its own copy of the document, and the WebGL2 renderer. It talks over IPC to the Rust host: document store, Codex AI client, agent access, and windows, menus and macOS. Map files are SQLite databases, and a command-line tool and MCP server reads map files or edits the open map once the user grants access." width="100%">
+</p>
 
 | Path | What lives there |
 |---|---|
