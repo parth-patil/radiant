@@ -1,5 +1,6 @@
 import type { Doc, NodeId, OutlineNode } from '../core/types';
-import type { RateLimits } from '../core/ai/provider';
+import type { AiEngine, RateLimits } from '../core/ai/provider';
+import { ENGINE_LABELS } from './ai-engine.svelte';
 
 export function basename(path: string): string {
   const p = path.replace(/\\/g, '/');
@@ -80,28 +81,46 @@ export function blockedAiAllowance(limits?: RateLimits): RateLimits['limitReason
   return full.length ? undefined : limits?.limitReason;
 }
 
-export function friendlyAiError(code: string, message: string, limits?: RateLimits): string {
+const INSTALL_HINTS: Record<AiEngine, [notInstalled: string, notSignedIn: string]> = {
+  codex: [
+    'Codex is not installed, so AI is off. Install it (npm i -g @openai/codex), then restart Radiant.',
+    'You are not signed in to Codex. Open Terminal, run "codex login", then try again.'
+  ],
+  claude: [
+    'Claude Code is not installed, so AI is off. Install it (npm i -g @anthropic-ai/claude-code), then try again.',
+    'You are not signed in to Claude Code. Open Terminal, run "claude", type /login and sign in, then try again.'
+  ],
+  antigravity: [
+    'The Antigravity CLI is not installed, so AI is off. Install the Antigravity CLI, then try again.',
+    'You are not signed in to Antigravity. Open Terminal, run "agy" and sign in, then try again.'
+  ]
+};
+
+/** Words for an AI error code. engine names the engine the turn ran on (pictures always run on Codex). */
+export function friendlyAiError(code: string, message: string, limits?: RateLimits, engine: AiEngine = 'codex'): string {
+  const name = ENGINE_LABELS[engine] ?? 'The AI engine';
   switch (code) {
     case 'not_installed':
-      return 'Codex is not installed, so AI is off. Install it (npm i -g @openai/codex), then restart Radiant.';
+      return INSTALL_HINTS[engine][0];
     case 'not_logged_in':
-      return 'You are not signed in to Codex. Open Terminal, run "codex login", then try again.';
+      return INSTALL_HINTS[engine][1];
     case 'offline':
       return 'No network connection. Reconnect to use AI.';
     case 'credits_depleted':
-      return 'Your Codex credits are depleted. Add credits or ask your workspace owner, then try again.';
+      return `Your ${name} credits are depleted. Add credits or ask your workspace owner, then try again.`;
     case 'rate_limited': {
       const reset = rateLimitReset(limits);
-      return `You have reached the Codex rate limit. ${reset ? `Try again after ${reset}.` : 'Wait a minute and try again.'}`;
+      return `You have reached the ${name} rate limit. ${reset ? `Try again after ${reset}.` : 'Wait a minute and try again.'}`;
     }
     case 'usage_exhausted': {
       const reset = rateLimitReset(limits);
-      return `Your Codex usage allowance is used up. ${reset ? `Try again after ${reset},` : 'Try again after your plan resets,'} or use credits if your plan supports them.`;
+      const when = reset ? `Try again after ${reset}` : 'Try again after your plan resets';
+      return `Your ${name} usage allowance is used up. ${when}${engine === 'codex' ? ', or use credits if your plan supports them.' : '.'}`;
     }
     case 'transient':
-      return 'Codex is temporarily overloaded or disconnected. Try again in a moment.';
+      return `${name} is temporarily overloaded or disconnected. Try again in a moment.`;
     case 'stream_interrupted':
-      return 'Codex disconnected. Reconnect and retry to start a new job.';
+      return `${name} disconnected. Reconnect and retry to start a new job.`;
     case 'timeout':
       return 'The AI took too long to answer. Try again, or use a smaller topic.';
     case 'process_exited':

@@ -2,6 +2,9 @@ import type { Host } from './types';
 import { TauriHost } from './tauri';
 import { MockHost } from './mock';
 
+/** Sample AI engines for hosts without native ones (the browser preview), to show the settings honestly as a preview. */
+export { SAMPLE_AI_ENGINES as sampleAiEngines } from './mock';
+
 let instance: Host | null = null;
 
 const inTauri = (): boolean => typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;

@@ -4,6 +4,7 @@ import { THUMBNAIL_LEVELS, type ThumbnailLevels } from '../core/image-levels';
 import { localData, MOCK_DOCUMENT_PREFIXES, onWebViewSettingChange, webViewSettings, webViewSnapshots, writeWebViewSetting } from './local-data';
 import { ReplayProvider } from './replay';
 import { browserDirectoryReader, browserDirectoryWriter } from './portable-directory';
+import type { AiEffort, AiEngineInfo } from '../core/ai/provider';
 import type {
   AppStateHost,
   AssetImageInfo,
@@ -18,6 +19,41 @@ import type {
 } from './types';
 
 const [DOC_PREFIX, TEXT_PREFIX, AUTO_PREFIX] = MOCK_DOCUMENT_PREFIXES;
+
+const levels = (...efforts: AiEffort[]) => efforts;
+/**
+ * Sample engines for the browser preview, which has no command-line agents: the AI engine settings render from
+ * this list, labelled as a preview. The desktop app lists what is installed (ai_engines).
+ */
+export const SAMPLE_AI_ENGINES: AiEngineInfo[] = [
+  {
+    engine: 'codex', label: 'Codex', installed: true, version: 'codex-cli 0.170.0', customModels: false,
+    defaultModel: 'gpt-5.5', defaultEffort: 'medium',
+    models: [
+      { id: 'gpt-5.5', label: 'GPT-5.5', efforts: levels('low', 'medium', 'high', 'xhigh') },
+      { id: 'gpt-5.5-mini', label: 'GPT-5.5 mini', efforts: levels('low', 'medium', 'high') }
+    ]
+  },
+  {
+    engine: 'claude', label: 'Claude Code', installed: true, version: '2.1.332 (Claude Code)', customModels: true,
+    defaultModel: 'sonnet', defaultEffort: 'high',
+    models: [
+      { id: 'opus', label: 'Opus', efforts: levels('low', 'medium', 'high', 'xhigh', 'max') },
+      { id: 'sonnet', label: 'Sonnet', efforts: levels('low', 'medium', 'high', 'max') },
+      { id: 'haiku', label: 'Haiku', efforts: [] }
+    ]
+  },
+  {
+    engine: 'antigravity', label: 'Antigravity', installed: false, customModels: false, errorCode: 'not_installed',
+    error: 'The Antigravity CLI is not installed. Install it, then run agy in Terminal to sign in.',
+    defaultModel: 'gemini-3.8-flash', defaultEffort: 'medium',
+    models: [
+      { id: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash', efforts: levels('low', 'medium', 'high') },
+      { id: 'gemini-4-hydrogen', label: 'Gemini 4 Hydrogen', efforts: levels('low', 'medium', 'high', 'xhigh') },
+      { id: 'claude-sonnet-5-5', label: 'Claude Sonnet 5.5 through Antigravity', efforts: levels('low', 'medium', 'high') }
+    ]
+  }
+];
 /** The presenter console and the document tab talk over this channel in a plain browser (PRS-40). */
 const PRESENTER_CHANNEL = 'radiant-presenter';
 

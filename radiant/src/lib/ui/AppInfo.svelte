@@ -3,6 +3,7 @@
   import type {AppController} from './controller.svelte';
   import type {PlatformInfo} from '../host/types';
   import {buildDiagnostics, recordDiagnostic} from './diagnostics';
+  import {aiChoice} from './ai-engine.svelte';
   let {c}:{c:AppController}=$props();
   let info=$state<PlatformInfo|null>(null),message=$state(''),busy=$state(false);
   let report = $state('');
@@ -31,7 +32,7 @@
     diagnosticsMessage = '';
     report = '';
     try {
-      report = await buildDiagnostics(c.host, c.diagnosticRenderSummary(), c.aiStatus);
+      report = await buildDiagnostics(c.host, c.diagnosticRenderSummary(), c.aiStatus, aiChoice.engine);
     } catch {
       diagnosticsMessage = 'Could not prepare diagnostics.';
     } finally {
