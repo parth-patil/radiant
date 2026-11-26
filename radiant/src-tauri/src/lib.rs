@@ -2,9 +2,11 @@
 //!   codex     – Codex app-server client and AI commands (ai_*)
 //!   store     – document files, autosave, crash recovery, asset store (doc_*, asset_*)
 //!   platform  – window setup, 120 Hz WebKit setting, platform_info
+//!   app_state – settings and History snapshots in <app data>/state.sqlite (state_*)
 //! The command names and payloads are fixed by src/lib/host/types.ts. Only the coordinator edits this file.
 
 mod agent_access;
+mod app_state;
 mod codex;
 mod capture;
 mod diagnostics;
@@ -30,6 +32,7 @@ pub fn run() {
         .manage(store::StoreState::default())
         .manage(reminders::ReminderLinks::default())
         .setup(|app| {
+            app_state::setup(app);
             if app.config().plugins.0.contains_key("updater") {
                 app.handle().plugin(tauri_plugin_updater::Builder::new().build())?;
             }
@@ -105,6 +108,14 @@ pub fn run() {
             reminders::reminders_disconnect,
             reminders::reminders_sync,
             reminders::reminders_ack,
+            app_state::state_load,
+            app_state::state_set,
+            app_state::state_snapshot_list,
+            app_state::state_snapshot_get,
+            app_state::state_snapshot_put,
+            app_state::state_snapshot_delete,
+            app_state::state_import,
+            app_state::state_import_done,
             diagnostics::diagnostic_record,
             diagnostics::diagnostic_recent,
             native_interop::prepare_drag_file,

@@ -25,6 +25,7 @@ pub enum Event {
     WebkitRefreshFallback,
     UpdateFailed,
     ArtworkUnavailable,
+    SettingsUnavailable,
     CodexNotInstalled,
     CodexNotLoggedIn,
     CodexRateLimit,
@@ -48,6 +49,7 @@ impl Event {
             Self::Started => Level::Info,
             Self::LayoutWorkerFallback
             | Self::WebkitRefreshFallback
+            | Self::SettingsUnavailable
             | Self::CodexNotInstalled
             | Self::CodexNotLoggedIn
             | Self::CodexRateLimit => Level::Warning,
