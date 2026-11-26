@@ -13,6 +13,8 @@ export class ArtTurnError extends Error {
 }
 
 interface ArtTurnCallbacks {
+  /** Starts the turn; the controller's startAiTurn, so text turns get the chosen engine. */
+  start(req: AiTurnRequest): Promise<string>;
   beforeStart(): void;
   onSubmitted(id: string): void;
   onWarning(message: string): void;
@@ -69,7 +71,7 @@ export async function runArtTurn(host: Host, req: AiTurnRequest, signal: AbortSi
   try {
     signal.throwIfAborted();
     callbacks.beforeStart();
-    id = await host.aiStartTurn(req);
+    id = await callbacks.start(req);
     callbacks.onSubmitted(id);
     if (signal.aborted) {
       cancelJob();

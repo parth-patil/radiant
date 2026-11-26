@@ -9,6 +9,7 @@ import { COLLECTION_LAYOUTS, isCollectionLayout } from '../core/layout/collectio
 import type { InkPlacement, InkSketch } from '../core/geometry/ink';
 import { codexDiagnostic, recordDiagnostic } from './diagnostics';
 import { getSetting, initSettings, setSetting } from './settings';
+import { aiChoice, ranWith } from './ai-engine.svelte';
 import { AI_JOB_WARNING_LIMIT, AI_PROMPT_LIMIT, captureAiJob, parseAiJobRecord } from '../core/model/ai-provenance';
 import { animateLayoutBetween, FOLD_DURATION, type LayoutFrame, type MembershipOptions } from './layout-animation';
 import { PresentationEngine } from './presentation.svelte';
@@ -103,7 +104,7 @@ import {
 import { StreamJournal } from '../core/ai/stream-journal';
 import { isMindNodeArchive, parseMindNode } from './mindnode-import';
 import { parseXmind, mapLink, parseMapLink, extractLinkedBranch, readPortableFiles, readPortableMap, parseJsonCanvas, parseFreeMind, parseMarkdownOutline, parseOpml, toMarkdownOutline } from '../core/io';
-import { getHost } from '../host';
+import { getHost, sampleAiEngines } from '../host';
 import { decodeImageAspect } from '../host/image-preview';
 import { readBranches } from './clipboard';
 import { parseNodeLink } from './node-link';
@@ -439,6 +440,7 @@ export class AppController {
   private refinementChanges: { job: string; changes: AiChanges } | null = null;
   jobs = $state.raw<AiJobs>({});
   aiStatus = $state.raw<AiStatus | null>(null);
+  private aiStatusCall = 0;
   isBrowser = $state(true);
   toast = $state.raw<{ text: string; kind: 'info' | 'error' } | null>(null);
   dialog = $state.raw<DialogState | null>(null);
@@ -552,6 +554,7 @@ export class AppController {
   async init(canvas: HTMLCanvasElement, textarea: HTMLTextAreaElement): Promise<void> {
     // The page awaits this before constructing the controller; awaiting again here costs nothing.
     await initSettings(this.host);
+    aiChoice.load();
     this.setInterfaceScale(Number(getSetting('radiant.interfaceScale') ?? 1));
     this.canvas = canvas;
     this.textarea = textarea;
@@ -651,6 +654,8 @@ export class AppController {
       window.removeEventListener('online', refreshConnectivity);
       window.removeEventListener('offline', refreshConnectivity);
     });
+    this.cleanups.push(aiChoice.listen(() => void this.refreshAiStatus()));
+    void aiChoice.loadEngines(this.host, sampleAiEngines);
     void this.refreshAiStatus();
     const timer = window.setInterval(() => void this.refreshAiStatus(), 60_000);
     this.cleanups.push(() => clearInterval(timer));
@@ -3793,19 +3798,38 @@ export class AppController {
     }
   }
 
+  /** Status of the chosen engine. A later call wins, so switching engines never shows the previous engine's answer. */
   async refreshAiStatus(refreshLimits = false): Promise<void> {
+    const call = ++this.aiStatusCall;
+    const engine = aiChoice.engine;
     const offline = () => !this.isBrowser && typeof navigator !== 'undefined' && navigator.onLine === false;
     const offlineStatus: AiStatus = { available: false, errorCode: 'offline', error: friendlyAiError('offline', '') };
     if (offline()) {
       this.aiStatus = offlineStatus;
       return;
     }
+    let status: AiStatus;
     try {
-      const status = await this.host.aiStatus(refreshLimits);
-      this.aiStatus = offline() ? offlineStatus : status;
+      status = await this.host.aiStatus(refreshLimits, engine);
     } catch (err) {
-      this.aiStatus = offline() ? offlineStatus : { available: false, error: err instanceof Error ? err.message : String(err) };
+      status = { available: false, error: err instanceof Error ? err.message : String(err) };
     }
+    if (call === this.aiStatusCall) this.aiStatus = offline() ? offlineStatus : status;
+  }
+
+  /** The request as it will be sent: the chosen engine, model and effort applied to a text turn. */
+  aiTurn(req: AiTurnRequest): AiTurnRequest {
+    return aiChoice.apply(req);
+  }
+
+  /** List the engines again and check the chosen one (opening the AI engine settings). */
+  async refreshAiEngines(): Promise<void> {
+    await Promise.all([aiChoice.loadEngines(this.host, sampleAiEngines), this.refreshAiStatus()]);
+  }
+
+  /** Start a turn through the engine choice. Every AI request in the window goes through here or aiTurn. */
+  startAiTurn(req: AiTurnRequest): Promise<string> {
+    return this.host.aiStartTurn(this.aiTurn(req));
   }
 
   // ====================================================================== AI
@@ -3818,7 +3842,7 @@ export class AppController {
 
   get aiAllowanceError(): string | undefined {
     const code = blockedAiAllowance(this.aiStatus?.rateLimits);
-    return code ? friendlyAiError(code, '', this.aiStatus?.rateLimits) : undefined;
+    return code ? friendlyAiError(code, '', this.aiStatus?.rateLimits, aiChoice.engine) : undefined;
   }
 
   private async aiReady(allowFallback = false): Promise<boolean> {
@@ -3835,7 +3859,9 @@ export class AppController {
         ? 'not_logged_in'
         : 'other');
     recordDiagnostic(this.host, codexDiagnostic(code));
-    this.say(friendlyAiError(code, err), 'error');
+    // The host's own words name the engine and how to fix it; the built-in hint is the fallback.
+    const hint = (code === 'not_installed' || code === 'not_logged_in') && err.trim() ? err.trim() : '';
+    this.say(hint || friendlyAiError(code, err, undefined, aiChoice.engine), 'error');
     return false;
   }
 
@@ -3878,10 +3904,9 @@ export class AppController {
       templateVersion: previous.job.templateVersion,
       execFallbackPrompt: previous.job.route === 'exec' ? previous.prompt
         : previous.prompt === previous.job.prompt ? previous.job.fallbackPrompt : undefined,
-      model: previous.job.route === 'replay' ? undefined : previous.job.model,
-      effort: previous.job.effort ?? 'low',
+      ...ranWith(previous.job),
       webSearch
-    } : { ...this.generationPrompt(), effort: 'low', webSearch };
+    } : { ...this.generationPrompt(), webSearch };
     const placeholder = empty ? this.doc.roots[0] : null;
     const position = empty ? { ...this.doc.rootInfo[this.doc.roots[0]].position } : this.nextFreePosition();
     const run: AiRun = {
@@ -3939,7 +3964,7 @@ export class AppController {
       },
       { request: root?.generatedStyle?.request || this.theme.name },
       count,
-      grow ? { depth: grow.depth, focus: grow.focus, audience: this.audience } : {}
+      { ...(grow ? { depth: grow.depth, focus: grow.focus, audience: this.audience } : {}), guidance: aiChoice.guidance }
     );
     return { count, request };
   }
@@ -3966,7 +3991,7 @@ export class AppController {
     }
     const request: Omit<AiTurnRequest, 'kind'> = previous ? {
       instructions: previous.job.instructions ?? '', prompt: previous.prompt, templateVersion: previous.job.templateVersion,
-      model: previous.job.route === 'replay' ? undefined : previous.job.model, effort: previous.job.effort ?? 'low'
+      ...ranWith(previous.job)
     } : planned.request;
     if (this.inspectMapRepairs) {
       const revision = this.rev;
@@ -4004,13 +4029,14 @@ export class AppController {
       fitTimer: 0,
       heuristicTheme: null
     };
-    await this.startRun(run, { kind: 'text', effort: 'low', ...request, mapLimits: run.limits });
+    await this.startRun(run, { kind: 'text', ...request, mapLimits: run.limits });
   }
 
   private async startRun(
     run: AiRun,
     req: AiTurnRequest
   ): Promise<void> {
+    req = this.aiTurn(req);
     run.provenance = parseAiJobRecord(captureAiJob(run.kind, req, run.targetId ?? undefined, run.limits));
     if (!run.provenance) {
       this.say('The AI prompt is too large to store with the map.', 'error');
@@ -4033,7 +4059,7 @@ export class AppController {
       this.canvas.removeEventListener('pointerdown', stop);
     };
     try {
-      const id = await this.host.aiStartTurn(req);
+      const id = await this.startAiTurn(req);
       if (this.run !== run) {
         await this.host.aiCancel(id);
         return;
@@ -4117,7 +4143,7 @@ export class AppController {
         }
         if (run.provenance) {
           run.provenance = {
-            ...run.provenance, model: e.model ?? run.provenance.model, route: e.route,
+            ...run.provenance, model: e.model ?? run.provenance.model, route: e.route, engine: e.engine ?? run.provenance.engine,
             templateVersion: e.templateVersion ?? run.provenance.templateVersion,
             ...(e.route === 'exec' && run.provenance.fallbackPrompt
               ? { prompt: run.provenance.fallbackPrompt, instructions: undefined } : {})
@@ -4381,7 +4407,7 @@ export class AppController {
     if (code === 'stream_interrupted' && run.provenance) run.provenance.interrupted = true;
     this.endRun(run, 'error');
     this.showAiChanges(run.changes, streamSummaryTitle(run.kind, true));
-    const text = friendlyAiError(code, message, this.aiStatus?.rateLimits);
+    const text = friendlyAiError(code, message, this.aiStatus?.rateLimits, run.provenance?.engine ?? aiChoice.engine);
     const unrepaired = run.repair?.unrepaired ?? 0;
     const repairSummary = unrepaired ? ` ${unrepaired} rejected ${unrepaired === 1 ? 'line remains' : 'lines remain'} unrepaired.` : '';
     this.say((count ? `${text} Kept the ${count} nodes that arrived.` : text) + repairSummary, 'error');

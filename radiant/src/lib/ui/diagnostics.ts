@@ -1,4 +1,5 @@
 import type { AiErrorCode, AiStatus, DiagnosticEntry, DiagnosticEvent, Host } from '../host/types';
+import type { AiEngine } from '../core/ai/provider';
 import { getSetting, setSetting } from './settings';
 
 const STORE_KEY = 'radiant.diagnostics.v1';
@@ -104,7 +105,7 @@ function refreshSample(): Promise<{ intervals: number; p50Ms: number | null; p95
 }
 
 /** Keep this allowlisted projection independent of any document, exception, profile or raw AI trace. */
-export async function buildDiagnostics(host: Host, render: RenderSummary, codex: AiStatus | null): Promise<string> {
+export async function buildDiagnostics(host: Host, render: RenderSummary, ai: AiStatus | null, engine: AiEngine): Promise<string> {
   await pending.get(host);
   const [platform, frameSample, entries] = await Promise.all([
     host.platformInfo().catch(() => null),
@@ -115,7 +116,7 @@ export async function buildDiagnostics(host: Host, render: RenderSummary, codex:
   const displayHz = platform?.displayHz;
   const recent = (entries ?? []).slice(0, RECENT_LIMIT);
   const data = {
-    formatVersion: 1,
+    formatVersion: 2,
     createdAt: new Date().toISOString(),
     build: {
       version: version(platform?.appVersion),
@@ -126,10 +127,11 @@ export async function buildDiagnostics(host: Host, render: RenderSummary, codex:
       reportedHz: typeof displayHz === 'number' && Number.isInteger(displayHz) && displayHz > 0 && displayHz <= 1000 ? displayHz : null,
       refreshMode: os === 'macos' && platform?.highRefreshEnabled === true ? 'webkit-high-refresh' : 'system-default'
     },
-    codex: {
-      version: codex?.provider === 'replay' ? null : version(codex?.version, 'codex-cli '),
-      status: codex?.provider === 'replay' ? 'replay' : codex?.available === true ? 'streaming' :
-        codex?.fallbackAvailable === true ? 'exec-fallback' : 'unavailable'
+    ai: {
+      engine,
+      version: ai?.provider === 'replay' ? null : version(/\d+\.\d+\.\d+(?:-(?:alpha|beta|rc)(?:\.\d+)?)?/.exec(ai?.version ?? '')?.[0]),
+      status: ai?.provider === 'replay' ? 'replay' : ai?.available === true ? 'streaming' :
+        ai?.fallbackAvailable === true ? 'exec-fallback' : 'unavailable'
     },
     harness: {
       type: 'foreground-animation-callbacks',

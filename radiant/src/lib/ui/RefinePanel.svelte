@@ -12,6 +12,7 @@
   import type { AiEvent } from '../host/types';
   import type { AppController } from './controller.svelte';
   import { friendlyAiError } from './util';
+  import { ranWith } from './ai-engine.svelte';
 
   let { c }: { c: AppController } = $props();
 
@@ -77,13 +78,9 @@
     const scope = mode === 'chat' ? chatScope : mode === 'explain' ? 'node' : 'branch';
     const context = refinementContext(c.doc, root, scope);
     if (!context) return undefined;
-    const request = refinementRequest(context, mode, instruction.trim(), source.trim(), mode === 'chat' ? chatHistory : []);
-    if (savedPrompt !== undefined && savedJob) {
-      request.prompt = savedPrompt;
-      request.model = savedJob.route === 'replay' ? undefined : savedJob.model;
-      request.effort = savedJob.effort ?? request.effort;
-    }
-    return { scope, context, request };
+    let request = refinementRequest(context, mode, instruction.trim(), source.trim(), mode === 'chat' ? chatHistory : []);
+    if (savedPrompt !== undefined && savedJob) request = { ...request, prompt: savedPrompt, ...ranWith(savedJob) };
+    return { scope, context, request: c.aiTurn(request) };
   });
   let lastRequest = $state.raw<typeof requestPreview>(undefined);
   const scopeLabel = (scope: ChatScope) => scope === 'node' ? 'Selected node' : scope === 'map' ? 'Whole map' : 'Selected branch';
@@ -155,7 +152,7 @@
     }
     if (event.jobId !== run.id) return;
     if (event.kind === 'started') {
-      run.provenance = { ...run.provenance, route: event.route, model: event.model ?? run.provenance.model };
+      run.provenance = { ...run.provenance, route: event.route, model: event.model ?? run.provenance.model, engine: event.engine ?? run.provenance.engine };
     } else if (event.kind === 'warning') {
       status = event.message;
     } else if (event.kind === 'delta') {
@@ -168,7 +165,7 @@
       status = 'Refinement cancelled.';
     } else if (event.kind === 'error') {
       stop(run);
-      error = friendlyAiError(event.code, event.message, c.aiStatus?.rateLimits);
+      error = friendlyAiError(event.code, event.message, c.aiStatus?.rateLimits, run.provenance.engine);
     } else if (event.kind === 'done') {
       stop(run);
       const text = event.text ?? run.text;
@@ -237,7 +234,7 @@
         error = 'The map changed. Review the updated request and try again.';
         return;
       }
-      run.id = await c.host.aiStartTurn(request);
+      run.id = await c.startAiTurn(request);
       lastRequest = preview;
       c.trackAiJob(run.id, 'refine');
       if (run.cancelled) {

@@ -2,6 +2,7 @@
   import type { AppController } from './controller.svelte';
   import { SOURCE_BYTE_LIMIT } from '../core/ai/source';
   import Icon from './Icon.svelte';
+  import { aiChoice } from './ai-engine.svelte';
 
   let { c }: { c: AppController } = $props();
   const chips = ['Buzan organic', 'Clean', 'Ink', 'Midnight', 'Hand-drawn', 'Colourful for kids', 'Minimal business'];
@@ -226,7 +227,7 @@
     {/if}
     {#if c.aiStatus && !c.aiStatus.available && c.aiStatus.error}
       <p role="status">{c.aiStatus.error}{c.aiStatus.fallbackAvailable ? ' Map generation will use JSON fallback.' : ''}</p>
-      <button class="btn bordered" onclick={() => void c.refreshAiStatus()}>Check Codex again</button>
+      <button class="btn bordered" onclick={() => void c.refreshAiStatus()}>Check {aiChoice.label()} again</button>
     {/if}
     {#if c.aiStatus?.versionWarning}
       <p>{c.aiStatus.versionWarning}</p>

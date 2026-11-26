@@ -1,5 +1,6 @@
 <script lang="ts">
   import AiQueuePanel from './AiQueuePanel.svelte';
+  import { aiChoice } from './ai-engine.svelte';
   import type { AiJobKind } from '../core/ai/jobs';
   import type { AppController } from './controller.svelte';
 
@@ -22,6 +23,13 @@
     return () => { active = false; clearInterval(timer); };
   });
   const ai = $derived(c.aiStatus);
+  /** "Claude Code 2.1.3", or the version alone when it already names the engine ("codex-cli 0.170.0"). */
+  const engineVersion = $derived.by(() => {
+    const name = aiChoice.label();
+    const version = ai?.version?.trim();
+    if (!version) return name;
+    return version.toLowerCase().includes(name.split(' ')[0].toLowerCase()) ? version : `${name} ${version}`;
+  });
   const usage = $derived.by(() => {
     const r = ai?.capabilities?.rateLimits ? ai.rateLimits : undefined;
     if (!r) return '';
@@ -58,7 +66,7 @@
     if (ai.provider === 'replay') return 'AI replay preview';
     if (!ai.available && ai.fallbackAvailable) return 'AI ready for JSON map generation';
     if (c.aiAllowanceError) return c.aiAllowanceError;
-    if (ai.available) return `AI ready${ai.version ? ' · ' + ai.version : ''}`;
+    if (ai.available) return `AI ready · ${engineVersion}`;
     return ai.error ? `AI off: ${ai.error}` : 'AI unavailable';
   });
   const sel = $derived.by(() => {

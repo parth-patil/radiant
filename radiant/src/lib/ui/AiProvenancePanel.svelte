@@ -2,6 +2,7 @@
   import type { AiJobRecord, MapNode } from '../core/types';
   import { AI_PROMPT_LIMIT } from '../core/model/ai-provenance';
   import type { AppController } from './controller.svelte';
+  import { EFFORT_LABELS, ENGINE_LABELS } from './ai-engine.svelte';
 
   let { c, node, openRefinement }: { c: AppController; node: MapNode; openRefinement: (job: AiJobRecord, prompt: string) => void } = $props();
   const original = $derived(node.origin?.by === 'ai' ? node.origin.job : undefined);
@@ -45,8 +46,9 @@
         <summary>{job.kind === 'generate' ? 'Map generation' : job.kind === 'expand' ? 'Node expansion' : 'Branch refinement'}</summary>
         {#if job.interrupted}<p>Interrupted. The work received so far was kept.</p>{/if}
         <dl>
+          <dt>Engine</dt><dd>{job.route === 'replay' ? 'Replay preview' : ENGINE_LABELS[job.engine ?? 'codex']}</dd>
           <dt>Model</dt><dd>{job.model ?? 'Unreported'}</dd>
-          <dt>Effort</dt><dd>{job.effort ?? 'Unreported'}</dd>
+          <dt>Effort</dt><dd>{job.effort ? EFFORT_LABELS[job.effort] : 'Unreported'}</dd>
           <dt>Template</dt><dd>{job.templateVersion ?? 'Unversioned'}</dd>
           {#if job.webSearch !== undefined}<dt>Web search</dt><dd>{job.webSearch ? 'Live' : 'Disabled'}</dd>{/if}
           {#if job.warnings?.length}

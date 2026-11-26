@@ -5,6 +5,7 @@
 """Exercise Radiant's normal browser entry point with the offline host."""
 
 import argparse
+import re
 from contextlib import contextmanager
 from pathlib import Path
 import socket
@@ -177,6 +178,42 @@ def replay_and_worker(context, origin):
     print("PASS built-in offline AI replay, worker layout and WebGL rendering")
 
 
+def ai_engine_settings(context, origin):
+    page = launch_app(context, origin)
+    inspector = page.get_by_role("complementary", name="Inspector")
+    if not inspector.is_visible():
+        page.get_by_title("Show or hide the inspector", exact=False).click()
+
+    def open_section():
+        section = inspector.locator("details", has=page.locator("summary", has_text="AI engine"))
+        section.locator("summary").click()
+        expect(section.get_by_role("note")).to_contain_text("sample data")
+        return section
+
+    guidance = "You extend one branch of a study map for a curious ten-year-old.\nPrefer concrete examples."
+    section = open_section()
+    section.get_by_role("radio", name="Claude Code").check()
+    section.get_by_label("Effort").select_option("max")
+    prompt = section.get_by_role("textbox", name="Expansion prompt")
+    prompt.fill(guidance)
+    prompt.blur()
+    expect(section.get_by_role("button", name="Reset to default")).to_be_enabled()
+    page.wait_for_function("() => localStorage.getItem('radiant.expandGuidance') !== null")
+    page.reload()
+    page.wait_for_function("window.__radiant?.c.ready")
+    inspector = page.get_by_role("complementary", name="Inspector")
+    if not inspector.is_visible():
+        page.get_by_title("Show or hide the inspector", exact=False).click()
+    section = open_section()
+    expect(section.get_by_role("radio", name="Claude Code")).to_be_checked()
+    expect(section.get_by_label("Effort")).to_have_value("max")
+    expect(section.get_by_role("textbox", name="Expansion prompt (customised)")).to_have_value(guidance)
+    section.get_by_role("button", name="Reset to default").click()
+    expect(section.get_by_role("textbox", name="Expansion prompt")).to_have_value(re.compile(r"^You extend one branch of an existing mind map\."))
+    section.get_by_role("radio", name="Codex").check()
+    print("PASS AI engine, effort and expansion prompt settings survive a reload")
+
+
 def run(origin):
     parsed = urlsplit(origin)
     errors = []
@@ -193,7 +230,7 @@ def run(origin):
     with sync_playwright() as driver:
         flags = ["--use-angle=metal"] if sys.platform == "darwin" else []
         browser = driver.chromium.launch(channel="chrome", args=flags)
-        for workflow in (edit_save_and_reopen, replay_and_worker):
+        for workflow in (edit_save_and_reopen, replay_and_worker, ai_engine_settings):
             context = browser.new_context(viewport={"width": 1440, "height": 900}, service_workers="block")
             context.on("page", lambda page: page.on("pageerror", lambda error: errors.append(str(error))))
             context.route("http*://**/*", protect)

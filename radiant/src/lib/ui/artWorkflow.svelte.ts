@@ -10,7 +10,8 @@ import {
   buildSvgSubtreePrompt, completeCustomPictureBrief, DEFAULT_PICTURE_CONCURRENCY, describeStyle, extractSvg, fitSvgGroups, IMAGE_INSTRUCTIONS, PICTURE_TEMPLATE_VERSION, planPictureBatch, planSvgRegions, resolvePalette,
   SVG_REGION_SIZE, svgNodeAssets, svgRegionCount, validateSvg, type ArtStyleSheet, type PictureJob, type SvgReport, type SvgSubtreeRequest
 } from '../core/art';
-import type { AiTurnRequest } from '../core/ai/provider';
+import type { AiEffort, AiEngine, AiTurnRequest } from '../core/ai/provider';
+import { aiChoice } from './ai-engine.svelte';
 import imageTurnPrefix from '../core/ai/image-turn-prefix.txt?raw';
 import type { PromptPair } from '../core/ai/prompts';
 import { createStyleResolver } from '../core/geometry';
@@ -197,6 +198,8 @@ export class ArtWorkflow {
   }
 
   private async sendTurn(run: ArtworkRun, request: AiTurnRequest, signal = run.abort.signal) {
+    // SVG artwork is a text turn on the chosen engine; pictures stay on Codex.
+    request = this.c.aiTurn(request);
     const refs = await Promise.all((request.refImages ?? []).map(async (hash) => ({
       hash, url: await this.c.host.assetUrl(hash)
     })));
@@ -224,7 +227,8 @@ export class ArtWorkflow {
         this.pendingRequests = [...this.pendingRequests, preview];
       });
     }
-    return runArtTurn(this.c.host, request, signal, {
+    const result = await runArtTurn(this.c.host, request, signal, {
+      start: (req) => this.c.startAiTurn(req),
       beforeStart: () => {
         if (!this.current(run) || snapshot(run.doc, run.root, run.depth) !== run.expected) {
           throw new DOMException('The artwork target changed.', 'AbortError');
@@ -240,6 +244,7 @@ export class ArtWorkflow {
         if (this.run === run && !signal.aborted) this.message = message;
       }
     });
+    return { ...result, effort: request.effort };
   }
 
   checkDocument(doc: Doc, focusId: NodeId | null): void {
@@ -851,7 +856,7 @@ export class ArtWorkflow {
         if (cached) {
           artwork = cached;
         } else {
-          const result = await this.sendTurn(run, { kind: 'text', ...job.next, effort: 'low' });
+          const result = await this.sendTurn(run, { kind: 'text', ...job.next });
           if (!this.current(run) || snapshot(run.doc, run.root, run.depth) !== run.expected) {
             return this.complete(run, 'The subtree changed. Completed artwork was kept.');
           }
@@ -868,7 +873,7 @@ export class ArtWorkflow {
             job.next = buildSvgRepairPrompt(svg, report, job.request);
             continue;
           }
-          artwork = await this.storeSvgGroups(run, job, svg, report, !!fitted, result.model);
+          artwork = await this.storeSvgGroups(run, job, svg, report, !!fitted, result.model, result.effort);
         }
       } catch (error) {
         if (!this.current(run) || this.isRateError(error) ||
@@ -985,7 +990,7 @@ export class ArtWorkflow {
   }
 
   private async storeSvgGroups(
-    run: ArtworkRun, job: SvgJob, svg: string, report: SvgReport, fitted: boolean, model?: string
+    run: ArtworkRun, job: SvgJob, svg: string, report: SvgReport, fitted: boolean, model?: string, effort?: AiEffort
   ): Promise<Map<NodeId, NodeArt>> {
     const assets = new Map<NodeId, NodeArt>();
     const failed = new Set<NodeId>();
@@ -1028,7 +1033,7 @@ export class ArtWorkflow {
         .slice(0, 10).map((issue) => issue.message);
       const art: Omit<NodeArt, 'assetHash'> = {
         inputHash: await artInputHash(job.original.prompt, spec.id), prompt: job.next.prompt,
-        brief: job.request.brief, instructions: job.next.instructions, effort: 'low',
+        brief: job.request.brief, instructions: job.next.instructions, effort,
         sourceHash: await sourceHash(run.doc.nodes[spec.id], run.style, run.branchColour), model,
         templateVersion: job.next.templateVersion, styleId: run.style.id, styleVersion: ART_STYLE_VERSION,
         styleSnapshot: run.style, svgSeed: job.request.style.seed, parentAsset, generatedAt: new Date().toISOString(),
@@ -1064,7 +1069,7 @@ export class ArtWorkflow {
       this.c.refreshLayout();
     }
     this.phase = 'paused';
-    this.message = friendlyAiError(code, '', this.c.aiStatus?.rateLimits);
+    this.message = friendlyAiError(code, '', this.c.aiStatus?.rateLimits, this.runEngine());
   }
 
   private fail(run: ArtworkRun, error: unknown): void {
@@ -1074,9 +1079,14 @@ export class ArtWorkflow {
     this.complete(run, this.errorMessage(error));
   }
 
+  /** The engine the current run's turns use: pictures always Codex, SVG artwork the chosen engine. */
+  private runEngine(): AiEngine {
+    return this.run?.kind === 'picture' ? 'codex' : aiChoice.engine;
+  }
+
   private errorMessage(error: unknown): string {
     return error instanceof ArtTurnError
-      ? friendlyAiError(error.code, error.message, this.c.aiStatus?.rateLimits)
+      ? friendlyAiError(error.code, error.message, this.c.aiStatus?.rateLimits, this.runEngine())
       : error instanceof Error ? error.message : String(error);
   }
 }

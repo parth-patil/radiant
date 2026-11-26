@@ -159,9 +159,26 @@ export interface ExpandOptions {
   audience?: string;
   /** What the new nodes should cover, when the user narrows it. */
   focus?: string;
+  /** The user's own guidance in place of DEFAULT_EXPAND_GUIDANCE; empty or blank means the default. */
+  guidance?: string;
 }
 
-/** Adds new children (and optionally grandchildren) under one existing node. Never changes other nodes. */
+/** The editable part of the expansion instructions as built in: the role, the style and the choice of branches. */
+export const DEFAULT_EXPAND_GUIDANCE: string = expandTemplate.guidance;
+/** Longest guidance a user may set, in characters. */
+export const EXPAND_GUIDANCE_LIMIT = 4000;
+
+/** The guidance to send: the user's text when it is set and differs from the default, else undefined. */
+export function customExpandGuidance(text: string | undefined): string | undefined {
+  const value = text?.trim().slice(0, EXPAND_GUIDANCE_LIMIT).trim();
+  return value && value !== DEFAULT_EXPAND_GUIDANCE ? value : undefined;
+}
+
+/**
+ * Adds new children (and optionally grandchildren) under one existing node. Never changes other nodes. The
+ * guidance comes first and may be the user's; the output contract, the parent and count rules, the title rules and
+ * the example always follow it, so the parser can read the answer whatever the guidance says.
+ */
 export function buildExpandPrompt(
   ctx: ExpandContext,
   style: StyleSheet,
@@ -173,10 +190,11 @@ export function buildExpandPrompt(
   const maxWords = opts.maxTitleWords ?? DEFAULT_MAX_TITLE_WORDS;
   const parent = JSON.stringify(ctx.nodeId);
   const contract = lineFormat({ allowStyleLine: false, withNotes: false, withImageHints: false });
+  const custom = customExpandGuidance(opts.guidance);
   return {
-    templateVersion: expandTemplate.version,
+    templateVersion: expandTemplate.version + (custom ? '+custom' : ''),
     instructions: parts(
-      expandTemplate.role, fill(expandTemplate.output, { contract }), expandTemplate.style,
+      custom ?? DEFAULT_EXPAND_GUIDANCE, fill(expandTemplate.output, { contract }),
       fill(expandTemplate.rules, {
         parent, count: n, titleRules: titleRules(maxWords),
         children: depth > 1 ? fill(expandTemplate.children, { depth }) : ''

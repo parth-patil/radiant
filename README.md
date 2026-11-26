@@ -110,7 +110,8 @@ These three maps are in [`samples/`](samples) and open in the app.
 
 - Generated maps stream onto the canvas node by node, arrive as a draft you can review, and undo in a single step.
 - A subtree can be illustrated with generated vector artwork or pictures.
-- AI runs through the [Codex CLI](https://github.com/openai/codex) with your own login. Radiant never reads your credentials, and nothing is sent anywhere unless you start a generation.
+- AI runs through a command-line agent with your own login: the [Codex CLI](https://github.com/openai/codex), [Claude Code](https://github.com/anthropics/claude-code) or the Antigravity CLI. You pick the engine, its model and effort, and the guidance used to expand a branch under **Inspector → AI engine**. Pictures are always drawn with Codex.
+- Radiant never reads your credentials, and nothing is sent anywhere unless you start a generation.
 
 <sub>These two screenshots are from the browser preview, which shows built-in sample results instead of calling a model.</sub>
 
@@ -184,7 +185,7 @@ Other useful commands, all from `radiant/radiant`:
 | `bun run check` | Type-check the frontend |
 | `bun run test` | Run the offline browser checks (needs [uv](https://docs.astral.sh/uv/) and Chrome) |
 
-The AI features need the Codex CLI installed and signed in. Everything else works without it.
+The AI features need Codex, Claude Code or the Antigravity CLI installed and signed in, and pictures need Codex. Everything else works without them.
 
 ## How it is put together
 
@@ -197,7 +198,7 @@ The AI features need the Codex CLI installed and signed in. Everything else work
 | `radiant/src/lib/core` | Document model, layout and geometry in plain TypeScript, with no DOM or WebGL |
 | `radiant/src/lib/render` | The WebGL2 renderer, shaders, camera and text |
 | `radiant/src/lib/ui` | Svelte components, the controller and the layout worker |
-| `radiant/src-tauri` | The Rust host: files and crash recovery, the Codex client, windows, menus and macOS integration |
+| `radiant/src-tauri` | The Rust host: files and crash recovery, the AI engine clients, windows, menus and macOS integration |
 | `radiant/tools` | The command-line tool, the MCP server and the project's checks |
 | `radiant/autoresearch` | The benchmark harness and the rendering research report |
 | `research_notes`, `report`, `design`, `spikes` | The research, design studies and prototypes behind the app |

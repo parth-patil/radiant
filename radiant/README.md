@@ -6,9 +6,15 @@ The [SQLite and portable file format](docs/file-format.md) includes a standalone
 
 ### Offline browser checks
 
-From `radiant/`, run `bun run test` with Bun, uv and Chrome installed. The default suite checks the shell import boundary and starts a temporary Vite server. It opens the normal editor in a fresh browser, blocks remote requests and exercises editing, undo and redo, search, picture persistence, save and reopen, Markdown download, offline AI replay and worker rendering. It uses the browser host selected by the app on startup.
+From `radiant/`, run `bun run test` with Bun, uv and Chrome installed. The default suite checks the shell import boundary and starts a temporary Vite server. It opens the normal editor in a fresh browser, blocks remote requests and exercises editing, undo and redo, search, picture persistence, save and reopen, Markdown download, offline AI replay, worker rendering and the AI engine settings surviving a reload. It uses the browser host selected by the app on startup.
 
 The separate visual and performance gates can run with the browser host too. Start `bun run dev`, then run `uv run tools/check-performance.py` for the Chromium performance gate. On macOS, run `uv run tools/check-visuals.py` for the WebKit visual comparison.
+
+### AI engines
+
+Text requests (generating a map, expanding a branch, refining and SVG artwork) run on the engine chosen under **Inspector → AI engine**: Codex, the default, Claude Code or Antigravity. Each runs through its own command-line tool and the user's own sign-in. Every engine keeps its own model and effort. Automatic leaves them to the host, except that Codex keeps its usual low effort. Pictures always use Codex.
+
+The choice is app-wide (`radiant.aiEngine`, `radiant.aiModel.<engine>`, `radiant.aiEffort.<engine>`) and `AppController.aiTurn` applies it to every text request. Retrying a saved job reuses its model and effort only when it ran on the chosen engine. The expansion guidance (`radiant.expandGuidance`) can be replaced in the same section. The output format, the parent and count rules, the title rules and the example always follow it, and a customised request reports the template version `expand/4+custom`. The browser preview lists sample engines and answers with built-in replays.
 
 ### Inspect maps from a terminal or an assistant
 
