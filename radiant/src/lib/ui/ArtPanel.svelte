@@ -7,6 +7,7 @@
   import type { AppController } from './controller.svelte';
   import { artIsStale, artPaletteAt, artStyleAt, ArtWorkflow, type ArtRequestPreview } from './artWorkflow.svelte';
   import { getSetting, setSetting } from './settings';
+  import { aiChoice } from './ai-engine.svelte';
 
   let { c }: { c: AppController } = $props();
   const workflow = new ArtWorkflow(untrack(() => c));
@@ -63,6 +64,8 @@
   const unavailable = $derived(art && c.failedImages.has(art.assetHash));
   const available = $derived(c.aiStatus?.available === true && !c.aiAllowanceError);
   const images = $derived(c.aiStatus?.capabilities?.images === true);
+  /** Pictures always use Codex: with another engine chosen, they need only Codex's image tool, not that engine. */
+  const pictureReady = $derived(images && !c.aiAllowanceError && (available || aiChoice.engine !== 'codex'));
   const completedPictures = $derived(workflow.pictureProgress.filter(row => row.state === 'Complete').length);
   const locked = $derived(workflow.phase !== 'idle');
   const limits = $derived(c.aiStatus?.capabilities?.rateLimits ? c.aiStatus.rateLimits : undefined);
@@ -177,7 +180,7 @@
           <label for="art-picture-estimate">Show a time estimate above this many images</label>
           <input id="art-picture-estimate" class="field" type="number" min="0" step="1" value={estimateAbove}
             onchange={(event) => setEstimateThreshold(event.currentTarget)} />
-          <button class="btn bordered" disabled={!available || c.busy}
+          <button class="btn bordered" disabled={!pictureReady || c.busy}
             onclick={() => void workflow.start(node.id, 'picture', { depth, concurrency, pictureEstimateAbove: estimateAbove })}>
             Generate picture subtree
           </button>
@@ -202,7 +205,7 @@
               <textarea id="art-custom-prompt" class="field" bind:value={customPrompt}></textarea>
             {/if}
           {/if}
-          <button class="btn bordered" disabled={!available || c.busy || (editingPrompt && !customPrompt.trim())}
+          <button class="btn bordered" disabled={!(representation === 'picture' ? pictureReady : available) || c.busy || (editingPrompt && !customPrompt.trim())}
             onclick={() => void workflow.start(node.id, representation, { rework: true, single: true, svgRepairs, prompt: editingPrompt ? customPrompt : undefined, pictureEstimateAbove: estimateAbove })}>
             {art ? 'Regenerate this node' : 'Generate this node'}
           </button>
@@ -279,7 +282,7 @@
         <p>{workflow.refreshingUsage ? 'Checking current usage…' : weekly === undefined ? 'Current weekly usage is unavailable.' : `Current weekly usage is ${Math.round(weekly)}%.`}</p>
         <div class="confirm-actions">
           <button class="btn bordered" onclick={() => workflow.cancel()}>Decline</button>
-          <button class="btn bordered primary" disabled={!available || c.busy || workflow.refreshingUsage} onclick={() => void workflow.confirm()}>Confirm generation</button>
+          <button class="btn bordered primary" disabled={!(plan.imageCount !== undefined ? pictureReady : available) || c.busy || workflow.refreshingUsage} onclick={() => void workflow.confirm()}>Confirm generation</button>
         </div>
       </div>
     {/if}
