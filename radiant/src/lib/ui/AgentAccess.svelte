@@ -1,6 +1,7 @@
 <script lang="ts">
   // The Inspector's view of the window's agent session (ui/agent-session.svelte.ts owns the grant and its work).
   import type { AppController } from './controller.svelte';
+  import { getSetting, setSetting } from './settings';
 
   let { c }: { c: AppController } = $props();
 
@@ -30,9 +31,7 @@
   }
 
   function requestGrant(writable: boolean) {
-    let seen = false;
-    try { seen = localStorage.getItem(INTRO_KEY) === '1'; }
-    catch { /* Show consent when storage is unavailable. */ }
+    const seen = getSetting(INTRO_KEY) === '1';
     requestedWritable = writable;
     if (seen) void allow(writable);
     else openExplanation(true);
@@ -41,8 +40,7 @@
   function acknowledge() {
     intro.close();
     if (enabling) {
-      try { localStorage.setItem(INTRO_KEY, '1'); }
-      catch { /* The grant is still session-local. */ }
+      setSetting(INTRO_KEY, '1');
       void allow(requestedWritable);
     }
   }

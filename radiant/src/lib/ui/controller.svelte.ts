@@ -8,6 +8,7 @@ import { MapRepair } from '../core/ai/map-repair';
 import { COLLECTION_LAYOUTS, isCollectionLayout } from '../core/layout/collections';
 import type { InkPlacement, InkSketch } from '../core/geometry/ink';
 import { codexDiagnostic, recordDiagnostic } from './diagnostics';
+import { getSetting, initSettings, setSetting } from './settings';
 import { AI_JOB_WARNING_LIMIT, AI_PROMPT_LIMIT, captureAiJob, parseAiJobRecord } from '../core/model/ai-provenance';
 import { animateLayoutBetween, FOLD_DURATION, type LayoutFrame, type MembershipOptions } from './layout-animation';
 import { PresentationEngine } from './presentation.svelte';
@@ -287,7 +288,7 @@ export class AppController {
   setInterfaceScale(value:number) {
     if(!Number.isFinite(value))return;
     this.interfaceScale=Math.min(1.5,Math.max(1,value));
-    try{localStorage.setItem('radiant.interfaceScale',String(this.interfaceScale));}catch{ /* storage unavailable */ }
+    setSetting('radiant.interfaceScale',String(this.interfaceScale));
   }
   showInspector = $state(false);
   exportRequest = $state.raw<'export' | 'print' | { format: 'opml'; scope: 'map' | 'selection' } | null>(null);
@@ -364,7 +365,7 @@ export class AppController {
     await this.host.setMenuKeys?.(bindings);
     this.shortcuts = bindings;
     this.shortcutPreset = name;
-    try { localStorage.setItem('radiant.shortcuts', JSON.stringify({name,bindings})); } catch { /* storage unavailable */ }
+    setSetting('radiant.shortcuts', JSON.stringify({name,bindings}));
   }
   nodeMenu = $state<{x?:number;y?:number} | null>(null);
   /** Notes shown open on the canvas, in the order they were opened, and the one being written. Not saved with the map. */
@@ -549,7 +550,9 @@ export class AppController {
   // ====================================================================== lifecycle
 
   async init(canvas: HTMLCanvasElement, textarea: HTMLTextAreaElement): Promise<void> {
-    try{this.setInterfaceScale(Number(localStorage.getItem('radiant.interfaceScale') ?? 1));}catch{ /* storage unavailable */ }
+    // The page awaits this before constructing the controller; awaiting again here costs nothing.
+    await initSettings(this.host);
+    this.setInterfaceScale(Number(getSetting('radiant.interfaceScale') ?? 1));
     this.canvas = canvas;
     this.textarea = textarea;
     this.isBrowser = this.host.shell === 'browser';
@@ -560,7 +563,7 @@ export class AppController {
     this.cleanups.push(() => window.removeEventListener('error', onError), () => window.removeEventListener('unhandledrejection', onRejection));
     recordDiagnostic(this.host, 'started');
     try {
-      const saved = JSON.parse(localStorage.getItem('radiant.shortcuts') ?? 'null');
+      const saved = JSON.parse(getSetting('radiant.shortcuts') ?? 'null');
       if (saved?.bindings) {
         const bindings = preset(saved.name);
         if (saved.name === 'Custom') {
@@ -569,8 +572,8 @@ export class AppController {
         await this.setShortcuts(saved.name, bindings);
       }
     } catch (error) { this.say('Could not restore keyboard shortcuts: ' + String(error), 'error'); }
-    try { this.leanDefault = localStorage.getItem('radiant.leanDefault') === 'true'; } catch { /* preference unavailable */ }
-    try { this.showGeneratedArtwork = localStorage.getItem('radiant.generatedArtwork') !== 'hidden'; } catch { /* preference unavailable */ }
+    this.leanDefault = getSetting('radiant.leanDefault') === 'true';
+    this.showGeneratedArtwork = getSetting('radiant.generatedArtwork') !== 'hidden';
     try {
       await document.fonts?.ready;
     } catch {
@@ -936,7 +939,7 @@ export class AppController {
       this.pipeline.placements = this.artworkPlacements ?? this.doc.layoutPlacements;
     }
     this.showGeneratedArtwork = visible;
-    try { localStorage.setItem('radiant.generatedArtwork', visible ? 'visible' : 'hidden'); } catch { /* preference unavailable */ }
+    setSetting('radiant.generatedArtwork', visible ? 'visible' : 'hidden');
     this.markLayout();
   }
 
@@ -1645,7 +1648,7 @@ export class AppController {
 
   setLeanDefault(enabled: boolean): void {
     this.leanDefault = enabled;
-    try { localStorage.setItem('radiant.leanDefault', String(enabled)); } catch { /* preference unavailable */ }
+    setSetting('radiant.leanDefault', String(enabled));
     this.markLayout();
   }
 

@@ -5,6 +5,7 @@
     alreadyReminded, markReminded, readReviews, reviewReminderEvent, reviewRemindersEnabled
   } from './reviewStore';
   import type { AppController } from './controller.svelte';
+  import { onSettingChange } from './settings';
 
   let { c }: { c: AppController } = $props();
 
@@ -46,14 +47,14 @@
     const timer = window.setInterval(update, 30_000);
     window.addEventListener(reviewReminderEvent, update);
     window.addEventListener('focus', update);
-    window.addEventListener('storage', update);
+    const stopSettings = onSettingChange(update);
     update();
     return () => {
       active = false;
       clearInterval(timer);
       window.removeEventListener(reviewReminderEvent, update);
       window.removeEventListener('focus', update);
-      window.removeEventListener('storage', update);
+      stopSettings();
     };
   });
 </script>

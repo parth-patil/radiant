@@ -1,10 +1,11 @@
 import { initialStudyProgress, type StudyKind, type StudyProgress } from '../core/review/study';
 import type { ReviewData, ReviewScope } from '../core/review';
+import { getSetting, onSettingChange, setSetting } from './settings';
 
 const STORAGE_KEY = 'radiant:reviews:v1';
 
 export function readReviews(): ReviewData {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const raw = getSetting(STORAGE_KEY);
   if (raw === null) return { history: [], schedules: [] };
   const data = JSON.parse(raw) as ReviewData | null;
   if (!data || !Array.isArray(data.history) || !Array.isArray(data.schedules)) {
@@ -15,16 +16,12 @@ export function readReviews(): ReviewData {
 
 export function saveReviews(change: (data: ReviewData) => ReviewData): ReviewData {
   const next = change(readReviews());
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  setSetting(STORAGE_KEY, JSON.stringify(next));
   return next;
 }
 
 export function subscribeReviews(callback: () => void): () => void {
-  const listener = (event: StorageEvent) => {
-    if (event.key === STORAGE_KEY || event.key === null) callback();
-  };
-  window.addEventListener('storage', listener);
-  return () => window.removeEventListener('storage', listener);
+  return onSettingChange((key) => { if (key === STORAGE_KEY) callback(); });
 }
 
 /** Refresh the path independently of whether the Review panel is mounted. */
@@ -46,11 +43,11 @@ const LEARNED_PREFIX = 'radiant:learned:';
 const STUDY_PREFIX = 'radiant:study:';
 
 export function reviewPreference(key: string): boolean {
-  try { return localStorage.getItem(key) === '1'; } catch { return false; }
+  return getSetting(key) === '1';
 }
 
 export function setReviewPreference(key: string, enabled: boolean): void {
-  try { localStorage.setItem(key, enabled ? '1' : '0'); } catch { /* Preference is optional. */ }
+  setSetting(key, enabled ? '1' : '0');
 }
 
 export function learnedMap(docId: string): boolean {
@@ -63,7 +60,7 @@ export function markLearned(docId: string, enabled: boolean): void {
 
 export function readStudyProgress(scope: ReviewScope, kind: StudyKind) {
   try {
-    const record = JSON.parse(localStorage.getItem(STUDY_PREFIX + JSON.stringify([scope.docId, scope.nodeId, kind])) ?? 'null');
+    const record = JSON.parse(getSetting(STUDY_PREFIX + JSON.stringify([scope.docId, scope.nodeId, kind])) ?? 'null');
     if (record && Number.isInteger(record.percent) && record.percent >= 5 && record.percent <= 90 &&
       Number.isInteger(record.streak) && record.streak >= 0 && record.streak < 2) {
       return { percent: record.percent as number, streak: record.streak as number };
@@ -73,8 +70,7 @@ export function readStudyProgress(scope: ReviewScope, kind: StudyKind) {
 }
 
 export function writeStudyProgress(scope: ReviewScope, kind: StudyKind, progress: StudyProgress) {
-  try { localStorage.setItem(STUDY_PREFIX + JSON.stringify([scope.docId, scope.nodeId, kind]), JSON.stringify(progress)); }
-  catch { /* Study feedback remains available for this session. */ }
+  setSetting(STUDY_PREFIX + JSON.stringify([scope.docId, scope.nodeId, kind]), JSON.stringify(progress));
 }
 
 const REMINDERS_KEY = 'radiant:review-reminders';
@@ -91,11 +87,9 @@ export function setReviewReminders(enabled: boolean): void {
 }
 
 export function alreadyReminded(day: string): boolean {
-  try { return localStorage.getItem(LAST_REMINDER_KEY) === day; }
-  catch { return false; }
+  return getSetting(LAST_REMINDER_KEY) === day;
 }
 
 export function markReminded(day: string): void {
-  try { localStorage.setItem(LAST_REMINDER_KEY, day); }
-  catch { /* This run retains its recent notification in memory. */ }
+  setSetting(LAST_REMINDER_KEY, day);
 }

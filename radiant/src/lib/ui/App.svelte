@@ -32,6 +32,7 @@
   import ReviewReminders from './ReviewReminders.svelte';
   import Dialog from './Dialog.svelte';
   import { basename } from './util';
+  import { finishWebViewImport } from './settings';
 
   const c = new AppController();
   let canvas: HTMLCanvasElement;
@@ -85,6 +86,8 @@
         await c.checkRecovery();
         await c.checkDesktopSession();
       }
+      // One-time copy of the WebView's old History snapshots into the host's state file.
+      void finishWebViewImport(c.host);
     })();
     return () => {
       stopReminders();

@@ -1,4 +1,5 @@
 import type { AiErrorCode, AiStatus, DiagnosticEntry, DiagnosticEvent, Host } from '../host/types';
+import { getSetting, setSetting } from './settings';
 
 const STORE_KEY = 'radiant.diagnostics.v1';
 const BROWSER_KEEP = 384;
@@ -7,7 +8,7 @@ const pending = new WeakMap<Host, Promise<void>>();
 const levels: Record<DiagnosticEvent, DiagnosticEntry['level']> = {
   started: 'info',
   ui_error: 'error', window_error: 'error', unhandled_rejection: 'error',
-  layout_worker_fallback: 'warning', webkit_refresh_fallback: 'warning', update_failed: 'error', artwork_unavailable: 'error',
+  layout_worker_fallback: 'warning', webkit_refresh_fallback: 'warning', update_failed: 'error', artwork_unavailable: 'error', settings_unavailable: 'warning',
   codex_not_installed: 'warning', codex_not_logged_in: 'warning',
   codex_rate_limit: 'warning', codex_protocol: 'error', codex_timeout: 'error',
   codex_interrupted: 'error', codex_error: 'error'
@@ -26,7 +27,7 @@ function sanitize(rows: unknown): DiagnosticEntry[] {
 
 function localEntries(): DiagnosticEntry[] {
   try {
-    return sanitize(JSON.parse(localStorage.getItem(STORE_KEY) ?? 'null'));
+    return sanitize(JSON.parse(getSetting(STORE_KEY) ?? 'null'));
   } catch {
     return [];
   }
@@ -41,11 +42,9 @@ export function recordDiagnostic(host: Host, event: DiagnosticEvent): void {
       .catch(() => { /* diagnostics must never affect the action being recorded */ });
     pending.set(host, next);
   } else {
-    try {
-      const local = localEntries().slice(0, BROWSER_KEEP - 1);
-      local.unshift({ timeMs: Date.now(), level: levels[event], event });
-      localStorage.setItem(STORE_KEY, JSON.stringify(local));
-    } catch { /* optional browser storage unavailable */ }
+    const local = localEntries().slice(0, BROWSER_KEEP - 1);
+    local.unshift({ timeMs: Date.now(), level: levels[event], event });
+    setSetting(STORE_KEY, JSON.stringify(local));
   }
 }
 

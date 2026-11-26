@@ -6,6 +6,7 @@
   import type { MapNode, NodeArt, PictureLabelPlacement, Representation } from '../core/types';
   import type { AppController } from './controller.svelte';
   import { artIsStale, artPaletteAt, artStyleAt, ArtWorkflow, type ArtRequestPreview } from './artWorkflow.svelte';
+  import { getSetting, setSetting } from './settings';
 
   let { c }: { c: AppController } = $props();
   const workflow = new ArtWorkflow(untrack(() => c));
@@ -74,10 +75,8 @@
   });
 
   onMount(() => {
-    try {
-      const saved = localStorage.getItem(estimatePreference);
-      if (saved !== null) estimateAbove = validatedThreshold(Number(saved));
-    } catch { /* Preference unavailable. */ }
+    const saved = getSetting(estimatePreference);
+    if (saved !== null) estimateAbove = validatedThreshold(Number(saved));
   });
 
   function validatedThreshold(value: number): number {
@@ -87,7 +86,7 @@
   function setEstimateThreshold(input: HTMLInputElement) {
     estimateAbove = validatedThreshold(input.valueAsNumber);
     input.value = String(estimateAbove);
-    try { localStorage.setItem(estimatePreference, String(estimateAbove)); } catch { /* Preference unavailable. */ }
+    setSetting(estimatePreference, String(estimateAbove));
   }
 
   function estimatedDuration(seconds: number): string {

@@ -1,11 +1,12 @@
 import { DEFAULT_CANVAS_GESTURES, type CanvasGestures } from '../render/camera';
+import { getSetting, setSetting } from './settings';
 
 const KEY = 'radiant.canvasGestures';
 
 export function loadCanvasGestures(): CanvasGestures {
   const result = { ...DEFAULT_CANVAS_GESTURES };
   try {
-    const input = JSON.parse(localStorage.getItem(KEY) ?? 'null');
+    const input = JSON.parse(getSetting(KEY) ?? 'null');
     if (!input) return result;
     if (['pan', 'zoom', 'off'].includes(input.wheel)) result.wheel = input.wheel;
     if (['command-or-option', 'command', 'option', 'shift', 'off'].includes(input.zoomModifier)) result.zoomModifier = input.zoomModifier;
@@ -17,5 +18,5 @@ export function loadCanvasGestures(): CanvasGestures {
 }
 
 export function saveCanvasGestures(settings: CanvasGestures): void {
-  try { localStorage.setItem(KEY, JSON.stringify(settings)); } catch { /* Keep the current session’s settings. */ }
+  setSetting(KEY, JSON.stringify(settings));
 }

@@ -6,6 +6,7 @@
   import type { AppController } from './controller.svelte';
   import { parseThemeSettings, THEME_BRANCH_MATERIALS, THEME_BRANCHES, THEME_FONT_FAMILIES, THEME_SHAPES, type ThemeSettings } from '../core/model/theme-settings';
   import { shapeName, branchName, branchMaterialName } from './style-labels';
+  import { getSetting, setSetting } from './settings';
 
   let { c }: { c: AppController } = $props();
   type Profile = { version: 1; name: string; base: string; settings?: ThemeSettings };
@@ -51,7 +52,7 @@
   }
   onMount(() => {
     try {
-      const saved = JSON.parse(localStorage.getItem('radiant.themes') ?? '[]');
+      const saved = JSON.parse(getSetting('radiant.themes') ?? '[]');
       if (Array.isArray(saved)) profiles = saved.map(parseProfile).filter((p): p is Profile => !!p);
     } catch { /* no saved profiles */ }
   });
@@ -90,7 +91,7 @@
   }
   function addProfile(item: Profile) {
     const next = [...profiles.filter((p) => p.name !== item.name), item];
-    localStorage.setItem('radiant.themes', JSON.stringify(next));
+    setSetting('radiant.themes', JSON.stringify(next));
     profiles = next;
     title = item.name;
   }

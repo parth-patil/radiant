@@ -4,6 +4,7 @@
   import { THEME_FONT_FAMILIES } from '../core/model/theme-settings';
   import type { MapNode, NodeStyle } from '../core/types';
   import type { AppController } from './controller.svelte';
+  import { getSetting, setSetting } from './settings';
 
   let { c }: { c: AppController } = $props();
   let open = $state(false);
@@ -39,15 +40,13 @@
   }
   function readPrefs() {
     try {
-      const data = JSON.parse(localStorage.getItem('radiant.styleHints.' + docId) ?? '{}');
+      const data = JSON.parse(getSetting('radiant.styleHints.' + docId) ?? '{}');
       hints = data.hints !== false;
       dismissed = Array.isArray(data.dismissed) ? data.dismissed.filter((key: unknown) => typeof key === 'string') : [];
     } catch { hints = true; dismissed = []; }
   }
   function savePrefs() {
-    try {
-      localStorage.setItem('radiant.styleHints.' + docId, JSON.stringify({ hints, dismissed }));
-    } catch { /* preference unavailable */ }
+    setSetting('radiant.styleHints.' + docId, JSON.stringify({ hints, dismissed }));
   }
   $effect(() => { void docId; readPrefs(); });
   $effect(() => {

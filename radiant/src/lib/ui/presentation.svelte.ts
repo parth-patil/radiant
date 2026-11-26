@@ -8,6 +8,7 @@ import { createStyleResolver } from '../core/geometry';
 import { DEFAULT_ELEMENT_FONT_SIZE } from '../core/geometry/canvas-scene';
 import type { CameraState, Doc, NodeBox, NodeId, Presentation, PresentationStep, Rect, Transaction } from '../core/types';
 import type { PresenterCommand, PresenterState } from '../host/types';
+import { getSetting, setSetting } from './settings';
 import { FOLD_DURATION, type MembershipOptions } from './layout-animation';
 import type { PresentScope } from './pipeline';
 import type { AppController } from './controller.svelte';
@@ -182,8 +183,8 @@ export class PresentationEngine {
 
   constructor(private c: AppController, private hooks: PresentationHooks) {
     try {
-      this.fullscreenDefault = localStorage.getItem(FULLSCREEN_KEY) !== 'false';
-      const tour = JSON.parse(localStorage.getItem(TOUR_KEY) ?? 'null');
+      this.fullscreenDefault = getSetting(FULLSCREEN_KEY) !== 'false';
+      const tour = JSON.parse(getSetting(TOUR_KEY) ?? 'null');
       if (tour && ['branches', 'levels', 'nodes'].includes(tour.granularity) && ['dim', 'hide'].includes(tour.context)) this.tour = tour;
     } catch { /* preferences unavailable */ }
     // Commands from a presenter console; the host is ready once the controller has finished constructing.
@@ -208,12 +209,12 @@ export class PresentationEngine {
 
   setTour(tour: Partial<TourSettings>): void {
     this.tour = { ...this.tour, ...tour };
-    try { localStorage.setItem(TOUR_KEY, JSON.stringify(this.tour)); } catch { /* storage unavailable */ }
+    setSetting(TOUR_KEY, JSON.stringify(this.tour));
   }
 
   setFullscreenDefault(on: boolean): void {
     this.fullscreenDefault = on;
-    try { localStorage.setItem(FULLSCREEN_KEY, String(on)); } catch { /* storage unavailable */ }
+    setSetting(FULLSCREEN_KEY, String(on));
   }
 
   /** The automatic tour of the current document with the chosen settings. */

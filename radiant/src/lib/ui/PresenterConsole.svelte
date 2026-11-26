@@ -3,6 +3,7 @@
   import { getHost } from '../host';
   import type { DisplayInfo, PresenterCommand, PresenterState } from '../host/types';
   import './app.css';
+  import { getSetting, setSetting } from './settings';
 
   // Presenter console (implementation spec 6.3, PRS-40 to 44). A DOM-only window: it never loads the document or
   // the render pipeline. The document window sends the talk's state when the step changes; this window sends
@@ -73,7 +74,7 @@
 
   function loadRun(s: PresenterState) {
     try {
-      const stored = JSON.parse(localStorage.getItem(rehearsalKey(s)) ?? 'null');
+      const stored = JSON.parse(getSetting(rehearsalKey(s)) ?? 'null');
       lastRun = stored && typeof stored.times === 'object' ? stored.times : {};
     } catch { lastRun = {}; }
   }
@@ -87,7 +88,7 @@
   function saveRun(s: PresenterState) {
     if (!Object.keys(runTimes).length) return;
     const times = Object.fromEntries(Object.entries(runTimes).map(([id, t]) => [id, Math.round(t)]));
-    try { localStorage.setItem(rehearsalKey(s), JSON.stringify({ at: new Date().toISOString(), times })); } catch { /* storage unavailable */ }
+    setSetting(rehearsalKey(s), JSON.stringify({ at: new Date().toISOString(), times }));
     lastRun = times;
     runTimes = {};
   }
