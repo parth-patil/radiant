@@ -3,8 +3,9 @@
  * directly; only src/lib/host/tauri.ts imports @tauri-apps/*). Only the coordinator edits this file.
  *
  * Rust commands (snake_case in Rust, called with camelCase args from JS):
- *   ai_status() -> AiStatus
- *   ai_start_turn(req: AiTurnRequest) -> string (job id)
+ *   ai_status(refreshLimits: boolean, engine: AiEngine | null) -> AiStatus (of that engine; null means Codex)
+ *   ai_engines() -> AiEngineInfo[] (codex, claude, antigravity, in that order)
+ *   ai_start_turn(req: AiTurnRequest) -> string (job id; req.engine picks Codex, Claude Code or Antigravity for text)
  *   ai_cancel(jobId: string) -> ()
  *   doc_save(path: string, docJson: string) -> ()
  *   doc_load(path: string) -> string (doc JSON)
