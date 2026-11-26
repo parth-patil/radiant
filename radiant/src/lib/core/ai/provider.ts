@@ -1,4 +1,41 @@
 /** Platform-independent provider contract for text requests, image requests, and streamed results. */
+/**
+ * The command-line agents Radiant can drive for text turns. Pictures always go through Codex, the only one with an
+ * image tool, whatever engine is chosen.
+ */
+export type AiEngine = 'codex' | 'claude' | 'antigravity';
+
+/** Reasoning effort, lowest first. Not every model of every engine accepts every level (see AiModel.efforts). */
+export type AiEffort = 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+
+export interface AiModel {
+  /** What AiTurnRequest.model carries. For Antigravity: the family id without its effort suffix ("gemini-3.8-flash"). */
+  id: string;
+  label: string;
+  /** Effort levels this model accepts, lowest first; empty when the model has no effort setting. */
+  efforts: AiEffort[];
+}
+
+/** One engine as the host found it on this machine (ai_engines). */
+export interface AiEngineInfo {
+  engine: AiEngine;
+  /** "Codex", "Claude Code", "Antigravity". */
+  label: string;
+  installed: boolean;
+  version?: string;
+  /** Why it cannot be used, in words for the user (how to install or sign in). */
+  error?: string;
+  errorCode?: AiErrorCode;
+  /** Models the user can pick; may be empty when the engine is not installed or listing failed. */
+  models: AiModel[];
+  /** What a request without a model runs on. */
+  defaultModel?: string;
+  /** What a request without an effort runs at. */
+  defaultEffort?: AiEffort;
+  /** Whether a model id outside `models` may be sent (Claude Code accepts any full model name). */
+  customModels: boolean;
+}
+
 export interface AiCapabilities {
   streaming: boolean;
   images: boolean;
@@ -9,7 +46,7 @@ export interface AiStatus {
   capabilities?: AiCapabilities; // absent when provider discovery fails
   available: boolean; // codex binary found and app-server initialised
   fallbackAvailable?: boolean;
-  provider?: 'codex' | 'replay';
+  provider?: AiEngine | 'replay';
   versionWarning?: string;
   version?: string; // e.g. "codex-cli 0.167.0"
   error?: string; // human-readable reason when not available
@@ -40,8 +77,10 @@ export interface AiTurnRequest {
   instructions: string;
   /** The user-facing task, e.g. "Topic: Photosynthesis. Style: watercolour, Buzan". */
   prompt: string;
+  /** Engine for a text turn; omitted means Codex. Image turns ignore it and use Codex. */
+  engine?: AiEngine;
   model?: string; // default chosen by host
-  effort?: 'low' | 'medium' | 'high';
+  effort?: AiEffort;
   /** Optional JSON schema for structured output (non-streaming fallback). */
   outputSchema?: unknown;
   /** For whole-map requests only. The host chooses this schema prompt before dispatching a model turn. */
@@ -58,7 +97,7 @@ export interface AiTurnRequest {
 export interface AiUsage { inputTokens?: number; outputTokens?: number }
 
 export type AiEvent =
-  | { jobId: string; kind: 'started'; route?: 'stream' | 'exec' | 'replay'; templateVersion?: string; model?: string }
+  | { jobId: string; kind: 'started'; route?: 'stream' | 'exec' | 'replay'; templateVersion?: string; model?: string; engine?: AiEngine }
   | { jobId: string; kind: 'delta'; text: string } // streamed text chunk, in order
   | { jobId: string; kind: 'image'; assetHash: string; revisedPrompt?: string; seed?: number }
   | { jobId: string; kind: 'warning'; message: string }
@@ -97,7 +136,10 @@ export interface AiQueue {
 
 /** The only route to AI operations. */
 export interface AiProvider {
-  aiStatus(refreshLimits?: boolean): Promise<AiStatus>;
+  /** Status of one engine (omitted: Codex). capabilities.images says whether Codex can draw pictures, whatever the engine. */
+  aiStatus(refreshLimits?: boolean, engine?: AiEngine): Promise<AiStatus>;
+  /** Every engine with what is installed and which models it offers. Absent on hosts without native engines. */
+  aiEngines?(): Promise<AiEngineInfo[]>;
   aiStartTurn(req: AiTurnRequest): Promise<string>;
   aiCancel(jobId: string): Promise<void>;
   aiResolveMapRound?(jobId: string, prompt?: string): Promise<void>;
