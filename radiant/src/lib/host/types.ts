@@ -18,9 +18,10 @@
  *   text_write(path: string, text: string) -> ()
  *   state_load(origin: string) -> AppStateLoad
  *   state_set(entries: SettingEntry[]) -> ()   (one transaction; then "state-changed" to every other window)
- *   state_snapshot_list(docId: string) -> StoredSnapshot[] (newest first)
- *   state_snapshot_get(id: string) -> StoredSnapshot | null
- *   state_snapshot_put(row: StoredSnapshot) -> ()
+ *   state_snapshot_list(docId: string) -> SnapshotInfo[] (newest first; metadata only, no map JSON)
+ *   state_snapshot_get(id: string) -> StoredSnapshot | null (with its map JSON)
+ *   state_snapshot_put(row: StoredSnapshot, keepAutomatic: number | null) -> ()   (an automatic row with keepAutomatic
+ *     1..100 also deletes that document's automatic snapshots beyond the newest keepAutomatic, in one transaction)
  *   state_snapshot_delete(id: string) -> ()
  *   state_import(origin: string, settings: Record<string, string>, snapshots: StoredSnapshot[]) -> AppStateImported
  *   state_import_done(origin: string) -> ()
@@ -182,16 +183,20 @@ export type PresenterCommand =
 /** A setting write: a value, or null to delete the key. Keys start with "radiant." or "radiant:". */
 export type SettingEntry = [key: string, value: string | null];
 
-/** One History snapshot (the rows of the former IndexedDB "snapshots" store). */
-export interface StoredSnapshot {
+/** A History snapshot without its map JSON, as lists return it. */
+export interface SnapshotInfo {
   id: string;
   docId: string;
   name: string;
   /** Epoch ms. */
   at: number;
-  json: string;
   automatic: boolean;
   change?: import('../core/model/editor').ChangeSummary;
+}
+
+/** One History snapshot with its map JSON (the rows of the former IndexedDB "snapshots" store). */
+export interface StoredSnapshot extends SnapshotInfo {
+  json: string;
 }
 
 export interface AppStateLoad {
@@ -211,9 +216,11 @@ export interface AppStateHost {
   set(entries: SettingEntry[]): Promise<void>;
   /** Settings written by another window. */
   onChanged(handler: (entries: SettingEntry[]) => void): Promise<Unlisten>;
-  snapshotList(docId: string): Promise<StoredSnapshot[]>;
+  /** Newest first, without map JSON; fetch one with snapshotGet when its JSON is needed. */
+  snapshotList(docId: string): Promise<SnapshotInfo[]>;
   snapshotGet(id: string): Promise<StoredSnapshot | null>;
-  snapshotPut(row: StoredSnapshot): Promise<void>;
+  /** For an automatic row, keepAutomatic (1..100) prunes that document's older automatic snapshots in the same write. */
+  snapshotPut(row: StoredSnapshot, keepAutomatic?: number): Promise<void>;
   snapshotDelete(id: string): Promise<void>;
   /** Insert-if-missing import of WebView data; callable several times with batches. */
   importBatch(origin: string, settings: Record<string, string>, snapshots: StoredSnapshot[]): Promise<AppStateImported>;

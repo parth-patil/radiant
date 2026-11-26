@@ -17,23 +17,36 @@ export function setAutomaticSnapshotLimit(value: number): void {
   }
 }
 
+/** Used when the limit changes; new automatic snapshots are pruned by the host as they are stored. */
 export async function pruneAutomaticSnapshots(docId: string): Promise<void> {
   const expired = (await listSnapshots(docId)).filter((entry) => entry.automatic).slice(automaticSnapshotLimit());
   for (const row of expired) await getHost().appState.snapshotDelete(row.id);
 }
 
-export interface Snapshot {
+/** A listed snapshot: everything but the map JSON (see loadSnapshot). */
+export interface SnapshotInfo {
   id: string;
   docId: string;
   name: string;
   at: number;
-  json: string;
   automatic: boolean;
   change?: ChangeSummary;
 }
-export async function listSnapshots(docId: string):Promise<Snapshot[]> {
-  const rows: Snapshot[] = await getHost().appState.snapshotList(docId);
+export interface Snapshot extends SnapshotInfo {
+  json: string;
+}
+/** Newest first, without map JSON. */
+export async function listSnapshots(docId: string):Promise<SnapshotInfo[]> {
+  const rows: SnapshotInfo[] = await getHost().appState.snapshotList(docId);
   return rows.sort((a,b)=>b.at-a.at);
+}
+
+/** The snapshot with its map JSON, fetched only when it is needed. */
+export async function loadSnapshot(snapshot: SnapshotInfo | Snapshot): Promise<Snapshot> {
+  if ('json' in snapshot && typeof snapshot.json === 'string') return snapshot;
+  const row = await getHost().appState.snapshotGet(snapshot.id);
+  if (!row) throw new Error('The snapshot is no longer available.');
+  return row;
 }
 function snapshotPathKey(path: string): string {
   return 'radiant:snapshot-path:' + path;
@@ -52,9 +65,9 @@ export function addSnapshot(doc: Doc, name: string, automatic = false, change?: 
 
 export async function storeSnapshot(docId: string, json: string, name: string, automatic = false, change?: ChangeSummary, path?: string): Promise<void> {
   const snapshot: Snapshot = { id: newId(), docId, name, at: Date.now(), json, automatic, change };
-  await getHost().appState.snapshotPut(snapshot);
+  // The host prunes this document's older automatic snapshots in the same write.
+  await getHost().appState.snapshotPut(snapshot, automatic ? automaticSnapshotLimit() : undefined);
   if (path) setSetting(snapshotPathKey(path), snapshot.id);
-  if (automatic) await pruneAutomaticSnapshots(docId);
   window.dispatchEvent(new CustomEvent('radiant-snapshot-saved', { detail: docId }));
 }
 

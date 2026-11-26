@@ -81,6 +81,19 @@ pub struct SnapshotRow {
     pub change: Option<Value>,
 }
 
+/// A History snapshot without its map JSON: what lists return, so listing never ships whole maps.
+#[derive(Clone, Debug, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct SnapshotInfo {
+    pub id: String,
+    pub doc_id: String,
+    pub name: String,
+    pub at: i64,
+    pub automatic: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub change: Option<Value>,
+}
+
 #[derive(Serialize)]
 pub struct Loaded {
     settings: HashMap<String, String>,
@@ -297,15 +310,29 @@ fn read_row(r: &rusqlite::Row<'_>) -> rusqlite::Result<SnapshotRow> {
 }
 
 const ROW_COLUMNS: &str = "id, doc_id, name, at, automatic, change, json";
+/// Newest first; the same order decides which automatic snapshots are kept.
+const NEWEST_FIRST: &str = "ORDER BY at DESC, rowid DESC";
+const MAX_KEEP_AUTOMATIC: i64 = 100;
 
-pub fn snapshot_list(c: &Connection, doc_id: &str) -> Result<Vec<SnapshotRow>, String> {
+/// Metadata only (no map JSON), newest first.
+pub fn snapshot_list(c: &Connection, doc_id: &str) -> Result<Vec<SnapshotInfo>, String> {
     check_text("snapshot document id", doc_id, MAX_KEY_BYTES)?;
     let mut statement = c
-        .prepare_cached(&format!("SELECT {ROW_COLUMNS} FROM snapshots WHERE doc_id = ?1 ORDER BY at DESC, rowid DESC"))
+        .prepare_cached(&format!("SELECT id, doc_id, name, at, automatic, change FROM snapshots WHERE doc_id = ?1 {NEWEST_FIRST}"))
         .map_err(db_error)?;
-    statement.query_map([doc_id], read_row)
-        .and_then(|rows| rows.collect::<rusqlite::Result<Vec<_>>>())
-        .map_err(db_error)
+    statement.query_map([doc_id], |r| {
+        let change: Option<String> = r.get(5)?;
+        Ok(SnapshotInfo {
+            id: r.get(0)?,
+            doc_id: r.get(1)?,
+            name: r.get(2)?,
+            at: r.get(3)?,
+            automatic: r.get::<_, i64>(4)? != 0,
+            change: change.and_then(|text| serde_json::from_str(&text).ok()),
+        })
+    })
+    .and_then(|rows| rows.collect::<rusqlite::Result<Vec<_>>>())
+    .map_err(db_error)
 }
 
 pub fn snapshot_get(c: &Connection, id: &str) -> Result<Option<SnapshotRow>, String> {
@@ -328,8 +355,25 @@ fn insert_snapshot(c: &Connection, row: &SnapshotInput, replace: bool) -> Result
     ).map_err(db_error)
 }
 
-pub fn snapshot_put(c: &Connection, row: &SnapshotInput) -> Result<(), String> {
-    insert_snapshot(c, row, true).map(|_| ())
+/// Insert or replace a snapshot. For an automatic row with keep_automatic set, also delete that document's
+/// automatic snapshots beyond the newest keep_automatic, in the same transaction. Manual snapshots are never pruned.
+pub fn snapshot_put(c: &mut Connection, row: &SnapshotInput, keep_automatic: Option<i64>) -> Result<(), String> {
+    if let Some(keep) = keep_automatic
+        && !(1..=MAX_KEEP_AUTOMATIC).contains(&keep)
+    {
+        return Err(format!("The number of automatic snapshots to keep must be 1 to {MAX_KEEP_AUTOMATIC}."));
+    }
+    check_snapshot(row)?;
+    let tx = c.transaction_with_behavior(TransactionBehavior::Immediate).map_err(db_error)?;
+    insert_snapshot(&tx, row, true)?;
+    if let (true, Some(keep)) = (row.automatic, keep_automatic) {
+        tx.execute(
+            &format!("DELETE FROM snapshots WHERE doc_id = ?1 AND automatic = 1 AND id NOT IN (
+                 SELECT id FROM snapshots WHERE doc_id = ?1 AND automatic = 1 {NEWEST_FIRST} LIMIT ?2)"),
+            params![row.doc_id, keep],
+        ).map_err(db_error)?;
+    }
+    tx.commit().map_err(db_error)
 }
 
 pub fn snapshot_delete(c: &Connection, id: &str) -> Result<(), String> {
@@ -409,7 +453,7 @@ pub async fn state_set(window: tauri::WebviewWindow, entries: Vec<Entry>, state:
 }
 
 #[tauri::command]
-pub async fn state_snapshot_list(doc_id: String, state: State<'_, AppState>) -> Result<Vec<SnapshotRow>, String> {
+pub async fn state_snapshot_list(doc_id: String, state: State<'_, AppState>) -> Result<Vec<SnapshotInfo>, String> {
     blocking(&state, move |c| snapshot_list(c, &doc_id)).await
 }
 
@@ -419,8 +463,8 @@ pub async fn state_snapshot_get(id: String, state: State<'_, AppState>) -> Resul
 }
 
 #[tauri::command]
-pub async fn state_snapshot_put(row: SnapshotInput, state: State<'_, AppState>) -> Result<(), String> {
-    blocking(&state, move |c| snapshot_put(c, &row)).await
+pub async fn state_snapshot_put(row: SnapshotInput, keep_automatic: Option<i64>, state: State<'_, AppState>) -> Result<(), String> {
+    blocking(&state, move |c| snapshot_put(c, &row, keep_automatic)).await
 }
 
 #[tauri::command]
@@ -482,10 +526,10 @@ fn selftest(base: &Path) -> bool {
                 ("radiant.gone".into(), Some("x".into())),
             ]).and_then(|_| set(&mut c, &[("radiant.gone".into(), None)]));
             check("set and delete settings", written.is_ok(), format!("{written:?}"));
-            let puts = snapshot_put(&c, &row("a", 1000.0, "{\"v\":1}"))
-                .and_then(|_| snapshot_put(&c, &row("b", 3000.0, "{\"v\":2}")))
-                .and_then(|_| snapshot_put(&c, &row("c", 2000.0, "{\"v\":3}")))
-                .and_then(|_| snapshot_put(&c, &row("d", 4000.0, "{\"v\":4}")))
+            let puts = snapshot_put(&mut c, &row("a", 1000.0, "{\"v\":1}"), None)
+                .and_then(|_| snapshot_put(&mut c, &row("b", 3000.0, "{\"v\":2}"), None))
+                .and_then(|_| snapshot_put(&mut c, &row("c", 2000.0, "{\"v\":3}"), None))
+                .and_then(|_| snapshot_put(&mut c, &row("d", 4000.0, "{\"v\":4}"), None))
                 .and_then(|_| snapshot_delete(&c, "d"));
             check("put and delete snapshots", puts.is_ok(), format!("{puts:?}"));
         }
@@ -501,6 +545,9 @@ fn selftest(base: &Path) -> bool {
             let list = snapshot_list(&c, "doc-1").unwrap_or_default();
             let order: Vec<&str> = list.iter().map(|r| r.id.as_str()).collect();
             check("snapshots newest first", order == ["b", "c", "a"], format!("{order:?}"));
+            let listed = serde_json::to_value(&list).unwrap_or_default();
+            check("list carries no json", listed.as_array().is_some_and(|rows| rows.len() == 3
+                && rows.iter().all(|r| r.get("json").is_none() && r.get("name").is_some() && r.get("change").is_some())), listed.to_string());
             let got = snapshot_get(&c, "a").ok().flatten();
             check("snapshot round trip", got.as_ref().is_some_and(|r| r.at == 1000 && r.automatic && r.json == "{\"v\":1}"
                 && r.change.as_ref().is_some_and(|v| v["applied"][0]["label"] == "Edit")), format!("{got:?}"));
@@ -536,16 +583,43 @@ fn selftest(base: &Path) -> bool {
             check("4 MB setting accepted", set(&mut c, &[("radiant.big".into(), Some(big[1..].to_string()))]).is_ok(), String::new());
             let partial = set(&mut c, &[("radiant.ok".into(), Some("1".into())), ("bad".into(), Some("1".into()))]);
             check("a batch with one bad key writes nothing", partial.is_err() && load(&c, origin).is_ok_and(|l| !l.settings.contains_key("radiant.ok")), String::new());
-            check("NaN time refused", snapshot_put(&c, &row("n", f64::NAN, "{}")).is_err(), String::new());
-            check("infinite time refused", snapshot_put(&c, &row("n", f64::INFINITY, "{}")).is_err(), String::new());
+            check("NaN time refused", snapshot_put(&mut c, &row("n", f64::NAN, "{}"), None).is_err(), String::new());
+            check("infinite time refused", snapshot_put(&mut c, &row("n", f64::INFINITY, "{}"), None).is_err(), String::new());
             let huge = row("h", 1.0, &"x".repeat(MAX_SNAPSHOT_BYTES + 1));
-            check("snapshot over 256 MB refused", snapshot_put(&c, &huge).is_err(), String::new());
+            check("snapshot over 256 MB refused", snapshot_put(&mut c, &huge, None).is_err(), String::new());
             drop(huge);
             check("import with an invalid row writes nothing",
                   import(&mut c, origin, &HashMap::from([("radiant.new".to_string(), "1".to_string())]), &[row("n", f64::NAN, "{}")]).is_err()
                   && load(&c, origin).is_ok_and(|l| !l.settings.contains_key("radiant.new")), String::new());
         }
         Err(error) => check("reopen state file", false, error),
+    }
+
+    // put with keepAutomatic: prunes only that document's automatic rows, in the same transaction
+    match open(&base.join("prune.sqlite")) {
+        Ok(mut c) => {
+            let snap = |id: &str, doc: &str, at: f64, automatic: bool| SnapshotInput {
+                id: id.into(), doc_id: doc.into(), name: id.into(), at, json: format!("{{\"id\":\"{id}\"}}"), automatic, change: None,
+            };
+            let mut steps = vec![
+                snapshot_put(&mut c, &snap("manual-old", "doc-p", 1.0, false), None),
+                snapshot_put(&mut c, &snap("other-auto", "doc-q", 2.0, true), None),
+            ];
+            for (i, at) in [10.0, 20.0, 30.0, 40.0].into_iter().enumerate() {
+                steps.push(snapshot_put(&mut c, &snap(&format!("auto-{i}"), "doc-p", at, true), Some(2)));
+            }
+            steps.push(snapshot_put(&mut c, &snap("manual-new", "doc-p", 50.0, false), Some(1)));
+            check("puts with keepAutomatic succeed", steps.iter().all(Result::is_ok), format!("{steps:?}"));
+            let ids: Vec<String> = snapshot_list(&c, "doc-p").unwrap_or_default().into_iter().map(|r| r.id).collect();
+            check("keeps the newest automatic rows and every manual one", ids == ["manual-new", "auto-3", "auto-2", "manual-old"], format!("{ids:?}"));
+            let other: Vec<String> = snapshot_list(&c, "doc-q").unwrap_or_default().into_iter().map(|r| r.id).collect();
+            check("other documents are not pruned", other == ["other-auto"], format!("{other:?}"));
+            check("get returns the json", snapshot_get(&c, "auto-3").ok().flatten().is_some_and(|r| r.json == "{\"id\":\"auto-3\"}"), String::new());
+            check("keepAutomatic out of range refused", snapshot_put(&mut c, &snap("auto-x", "doc-p", 60.0, true), Some(0)).is_err()
+                && snapshot_put(&mut c, &snap("auto-y", "doc-p", 60.0, true), Some(101)).is_err()
+                && snapshot_get(&c, "auto-x").is_ok_and(|r| r.is_none()), String::new());
+        }
+        Err(error) => check("open prune test file", false, error),
     }
 
     // migration marker: a version-0 file made by an older build is upgraded in place, keeping its rows

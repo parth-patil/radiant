@@ -1,5 +1,5 @@
 /** Persistent browser-side data, partitioned by WebView origin. */
-import type { SettingEntry, StoredSnapshot, Unlisten } from './types';
+import type { SettingEntry, SnapshotInfo, StoredSnapshot, Unlisten } from './types';
 
 /** localStorage keys the browser preview's MockHost uses for its own documents (never settings). */
 export const MOCK_DOCUMENT_PREFIXES = ['radiant.doc:', 'radiant.text:', 'radiant.autosave:'] as const;
@@ -66,15 +66,20 @@ export async function webViewSnapshotBatches(maxChars: number, receive: (rows: u
 
 /** The browser preview's History snapshots, in IndexedDB as before. */
 export const webViewSnapshots = {
-  async list(docId: string): Promise<StoredSnapshot[]> {
+  /** Newest first, without the map JSON (the same shape the desktop host returns). */
+  async list(docId: string): Promise<SnapshotInfo[]> {
     const rows: StoredSnapshot[] = await localData('snapshots', 'readonly', (store) => store.index('document').getAll(docId));
-    return rows.sort((a, b) => b.at - a.at);
+    return rows.sort((a, b) => b.at - a.at).map(({ json: _json, ...info }) => info);
   },
   async get(id: string): Promise<StoredSnapshot | null> {
     return (await localData<StoredSnapshot | undefined>('snapshots', 'readonly', (store) => store.get(id))) ?? null;
   },
-  async put(row: StoredSnapshot): Promise<void> {
+  async put(row: StoredSnapshot, keepAutomatic?: number): Promise<void> {
     await localData('snapshots', 'readwrite', (store) => store.put(row));
+    if (!row.automatic || keepAutomatic === undefined) return;
+    if (!Number.isInteger(keepAutomatic) || keepAutomatic < 1 || keepAutomatic > 100) throw new Error('The number of automatic snapshots to keep must be 1 to 100.');
+    const expired = (await this.list(row.docId)).filter((entry) => entry.automatic).slice(keepAutomatic);
+    for (const entry of expired) await this.delete(entry.id);
   },
   async delete(id: string): Promise<void> {
     await localData('snapshots', 'readwrite', (store) => store.delete(id));

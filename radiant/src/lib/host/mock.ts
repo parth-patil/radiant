@@ -106,7 +106,7 @@ export class MockHost extends ReplayProvider implements Host {
     onChanged: async (handler) => onWebViewSettingChange(handler),
     snapshotList: (docId) => webViewSnapshots.list(docId),
     snapshotGet: (id) => webViewSnapshots.get(id),
-    snapshotPut: (row) => webViewSnapshots.put(row),
+    snapshotPut: (row, keepAutomatic) => webViewSnapshots.put(row, keepAutomatic),
     snapshotDelete: (id) => webViewSnapshots.delete(id),
     importBatch: async () => ({ settings: 0, snapshots: 0 }),
     importDone: async () => {}

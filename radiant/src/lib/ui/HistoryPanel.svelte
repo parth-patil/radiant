@@ -2,11 +2,11 @@
   import { onMount } from 'svelte';
   import type { ChangeSummary } from '../core/model/editor';
   import type { AppController } from './controller.svelte';
-  import { addSnapshot, automaticSnapshotLimit, historySource, listSnapshots, pruneAutomaticSnapshots, setAutomaticSnapshotLimit, type Snapshot } from './history';
+  import { addSnapshot, automaticSnapshotLimit, historySource, listSnapshots, pruneAutomaticSnapshots, setAutomaticSnapshotLimit, type SnapshotInfo } from './history';
 
   let { c }: { c: AppController } = $props();
   let name = $state('');
-  let entries = $state.raw<Snapshot[]>([]);
+  let entries = $state.raw<SnapshotInfo[]>([]);
   let open = $state(false);
   let update = $state(0);
   let message = $state('');

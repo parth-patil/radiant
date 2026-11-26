@@ -25,7 +25,7 @@ import { confirmArtIslands } from './art-nesting';
 import { AiChanges, type AiChangeSummary } from './ai-change-summary';
 import type { Representation } from '../core/types';
 import { chord, commands as shortcutCommands, preset, type Shortcuts } from './keymap';
-import { addSnapshot, latestSnapshotForPath, readRecent, rememberRecent, storeSnapshot, type Snapshot } from './history';
+import { addSnapshot, latestSnapshotForPath, loadSnapshot, readRecent, rememberRecent, storeSnapshot, type Snapshot, type SnapshotInfo } from './history';
 import { discardRecoveryUndo, loadUndo, saveUndo, STORED_UNDO_LIMIT } from './undo-storage';
 import { learnedMap, linkReviewMapPath } from './reviewStore';
 import { createStudyBlanks } from '../core/ai/refine-study';
@@ -3134,13 +3134,16 @@ export class AppController {
     this.camera.set({ cx: 0, cy: 0, zoom: 1 });
   }
 
-  async restoreSnapshot(snapshot: Snapshot, copy: boolean): Promise<void> {
-    if ((!copy && this.doc.id !== snapshot.docId) || !(await this.confirmDiscard('restore a snapshot'))) return;
+  async restoreSnapshot(entry: SnapshotInfo | Snapshot, copy: boolean): Promise<void> {
+    if ((!copy && this.doc.id !== entry.docId) || !(await this.confirmDiscard('restore a snapshot'))) return;
     try {
-      const { doc: restored, repairs } = parseDocReport(snapshot.json);
       const previous = this.doc;
       const revision = this.rev;
-      const history = copy || repairs.length ? undefined : await loadUndo(restored.id, 'saved', snapshot.json);
+      // Lists carry no map JSON; fetch it now.
+      const { json } = await loadSnapshot(entry);
+      if (this.doc !== previous || this.rev !== revision) return;
+      const { doc: restored, repairs } = parseDocReport(json);
+      const history = copy || repairs.length ? undefined : await loadUndo(restored.id, 'saved', json);
       if (this.doc !== previous || this.rev !== revision) return;
       if (copy) { restored.id = newId(); restored.title += ' (copy)'; }
       this.discardCurrentRecovery();
