@@ -785,7 +785,7 @@ pub(super) async fn run(inner: &Inner, engine: Engine, id: &str, job: &Job, req:
             }
             line = lines.next_line() => {
                 let Ok(Some(line)) = line else { break None };
-                let mut failure = None;
+                let (mut failure, mut finished) = (None, false);
                 for step in reader.line(&line) {
                     match step {
                         Step::Started(model) => {
@@ -812,10 +812,14 @@ pub(super) async fn run(inner: &Inner, engine: Engine, id: &str, job: &Job, req:
                         }
                         Step::Warn(message) => inner.emit(json!({"jobId": id, "kind": "warning", "message": message})),
                         Step::Fail(error) => { failure = Some(error); break; }
-                        Step::Finished => trace::wire(&job.trace, "notification", "result"),
+                        Step::Finished => {
+                            trace::wire(&job.trace, "notification", "result");
+                            finished = true;
+                        }
                     }
                 }
-                if failure.is_some() { break failure; }
+                // The result line is the last one; a helper process holding the pipe open must not delay the end.
+                if failure.is_some() || finished { break failure; }
             }
             _ = tokio::time::sleep_until(deadline) => {
                 break Some(AiError::new("timeout", format!("The model did not finish within {} s", hard.as_secs())));
