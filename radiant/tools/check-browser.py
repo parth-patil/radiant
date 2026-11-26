@@ -141,7 +141,16 @@ def edit_save_and_reopen(context, origin):
     assert download.suggested_filename.endswith(".md"), download.suggested_filename
     markdown = download.path().read_text()
     assert all(text in markdown for text in (ROOT_LABEL, CHILD_LABEL, NOTE)), markdown
-    print("PASS keyboard editing, undo/redo, Find, picture upload, save/reopen and Markdown export")
+    # The drawn formats (PNG, SVG, PDF) build the map through a second pipeline; the PDF also needs its page preview.
+    export.get_by_role("combobox", name="Format", exact=True).select_option("pdf")
+    save_pdf = export.get_by_role("button", name="Save PDF…", exact=True)
+    expect(save_pdf).to_be_enabled()
+    with page.expect_download() as event:
+        save_pdf.click()
+    download = event.value
+    assert download.suggested_filename.endswith(".pdf"), download.suggested_filename
+    assert download.path().read_bytes().startswith(b"%PDF-"), "PDF export is not a PDF"
+    print("PASS keyboard editing, undo/redo, Find, picture upload, save/reopen, Markdown and PDF export")
 
 
 def replay_and_worker(context, origin):

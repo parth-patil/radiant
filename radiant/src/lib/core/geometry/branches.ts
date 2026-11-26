@@ -207,8 +207,8 @@ export function buildBranchSpecs(
   // is `dirty` (an edit there or above), either box moved or resized, or the leaves it carries changed. Otherwise it is
   // the previous pass's spec, as long as the spec it continues (its parent's) is too.
   const entries = memo?.specs.entries;
-  const changed = memo && memo.dirty === null ? undefined : new Set<NodeId>();
-  if (!memo || memo.dirty === null) entries?.clear();
+  const changed = !memo || memo.dirty === null ? undefined : new Set<NodeId>();
+  if (memo?.dirty === null) entries?.clear();
   if (lastLimb || changed) {
     for (const [id, box] of boxes) {
       const node = doc.nodes[id];
