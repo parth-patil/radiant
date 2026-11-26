@@ -1,5 +1,5 @@
 import { THUMBNAIL_LEVELS, type ThumbnailLevels } from '../core/image-levels';
-import type { AiQueue, AiQueueJob } from '../core/ai/provider';
+import type { AiEngine, AiEngineInfo, AiQueue, AiQueueJob } from '../core/ai/provider';
 import type { DisplayInfo, PaletteItem, PresenterCommand, PresenterState } from './types';
 import type { QuickCaptureDriver, QuickCaptureOwnerResult, QuickCaptureRequest } from './quick-capture';
 import type { HistoryEntry } from '../core/model/editor';
@@ -164,8 +164,11 @@ export class TauriHost implements Host {
   }
 
   readonly agentAccess = createAgentTransport(invoke, (event, handler) => getCurrentWindow().listen(event, ({ payload }) => handler(payload as never)));
-  aiStatus(refreshLimits = false): Promise<AiStatus> {
-    return invoke<AiStatus>('ai_status', { refreshLimits });
+  aiStatus(refreshLimits = false, engine?: AiEngine): Promise<AiStatus> {
+    return invoke<AiStatus>('ai_status', { refreshLimits, engine: engine ?? null });
+  }
+  aiEngines(): Promise<AiEngineInfo[]> {
+    return invoke<AiEngineInfo[]>('ai_engines');
   }
   aiStartTurn(req: AiTurnRequest): Promise<string> {
     return invoke<string>('ai_start_turn', { req });
