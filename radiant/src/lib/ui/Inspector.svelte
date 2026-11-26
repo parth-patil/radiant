@@ -9,6 +9,7 @@
   import AppInfo from './AppInfo.svelte';
   import ShortcutSettings from './ShortcutSettings.svelte';
   import CanvasInputSettings from './CanvasInputSettings.svelte';
+  import AiEngineSettings from './AiEngineSettings.svelte';
   import HistoryPanel from './HistoryPanel.svelte';
   import BranchLayoutPanel from './BranchLayoutPanel.svelte';
   import TagPanel from './TagPanel.svelte';
@@ -79,6 +80,7 @@
     <AppInfo {c} />
     <ShortcutSettings {c} />
     <CanvasInputSettings {c} />
+    <AiEngineSettings {c} />
     <AgentAccess {c} />
     <ThemeSettings {c} />
     <TagPanel {c} />
