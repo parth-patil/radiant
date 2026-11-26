@@ -28,10 +28,11 @@ const levels = (...efforts: AiEffort[]) => efforts;
 export const SAMPLE_AI_ENGINES: AiEngineInfo[] = [
   {
     engine: 'codex', label: 'Codex', installed: true, version: 'codex-cli 0.170.0', customModels: false,
-    defaultModel: 'gpt-5.5', defaultEffort: 'medium',
+    defaultModel: 'gpt-6-luna', defaultEffort: 'low',
     models: [
-      { id: 'gpt-5.5', label: 'GPT-5.5', efforts: levels('low', 'medium', 'high', 'xhigh') },
-      { id: 'gpt-5.5-mini', label: 'GPT-5.5 mini', efforts: levels('low', 'medium', 'high') }
+      { id: 'gpt-6-luna', label: 'GPT-6 Luna', efforts: levels('low', 'medium', 'high', 'xhigh', 'max') },
+      { id: 'gpt-6.1-terra', label: 'GPT-6.1 Terra', efforts: levels('low', 'medium', 'high', 'xhigh', 'max') },
+      { id: 'gpt-6.1-sol', label: 'GPT-6.1 Sol', efforts: levels('low', 'medium', 'high', 'xhigh', 'max') }
     ]
   },
   {
